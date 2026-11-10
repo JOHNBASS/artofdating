@@ -1,0 +1,146 @@
+---
+import QRCode from 'qrcode';
+import '../../styles/global.css';
+import '../../styles/deck.css';
+import Slide from '../../components/Slide.astro';
+import { sessions } from '../../data/sessions.js';
+import { decks } from '../../data/slides/index.js';
+import { url } from '../../scripts/paths.js';
+
+export function getStaticPaths() {
+  return sessions.map((s) => ({ params: { num: String(s.num) } }));
+}
+
+const num = Number(Astro.params.num);
+const session = sessions.find((s) => s.num === num);
+const next = sessions.find((s) => s.num === num + 1);
+const slides = decks[num];
+
+// QR code 指向這一堂的手機頁面；加上 openExternalBrowser=1，用 LINE 掃描時也會改用手機瀏覽器開啟
+const pageUrl = new URL(url(`sessions/${num}/`), Astro.site).href;
+const qr = {
+  svg: await QRCode.toString(`${pageUrl}?openExternalBrowser=1`, {
+    type: 'svg',
+    margin: 0,
+    errorCorrectionLevel: 'M',
+    color: { dark: '#2b2024', light: '#ffffff' },
+  }),
+  text: pageUrl.replace(/^https?:\/\//, ''),
+};
+const pageTitle = `第 ${num} 堂投影片・${session.title}｜關係練習室`;
+---
+
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={`帶領者用的第 ${num} 堂投影片：${session.title}`} />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{pageTitle}</title>
+  </head>
+  <body class="deck-body">
+    <header class="pv-bar" data-pv>
+      <div class="pv-pos">
+        <strong data-pv-pos>1 / {slides.length}</strong>
+        <span data-pv-label></span>
+      </div>
+      <div class="pv-item"><span class="pv-k">現在</span><strong data-pv-clock>--:--</strong></div>
+      <div class="pv-item pv-pace" data-pv-pace hidden></div>
+      <div class="pv-item">
+        <span class="pv-k">已進行</span><strong data-pv-elapsed>00:00</strong>
+        <button type="button" data-act="elapsed-reset">重設</button>
+      </div>
+      <div class="pv-timer" data-pv-timer>
+        <span class="pv-k">練習計時</span><strong data-pv-timer-display>--:--</strong>
+        <button type="button" data-act="timer" data-pv-timer-btn>開始</button>
+        <button type="button" data-act="minus" aria-label="少一分鐘">−1 分</button>
+        <button type="button" data-act="plus" aria-label="多一分鐘">+1 分</button>
+        <button type="button" data-act="reset">重設</button>
+      </div>
+    </header>
+
+    <main class="stage" data-stage data-num={num}>
+      {
+        slides.map((slide, i) => (
+          <Slide slide={slide} index={i} total={slides.length} session={session} next={next} qr={qr} />
+        ))
+      }
+    </main>
+
+    <aside class="pv-side" data-pv>
+      <div>
+        <p class="pv-label">下一張</p>
+        <div class="pv-next-stage" data-pv-next></div>
+      </div>
+      <div class="pv-notes">
+        <p class="pv-label">講者備註</p>
+        <div class="pv-notes-text" data-pv-notes></div>
+      </div>
+    </aside>
+
+    <footer class="pv-foot" data-pv>
+      <button type="button" class="big" data-act="prev">← 上一張</button>
+      <button type="button" class="big btn-primary" data-act="next">下一張 →</button>
+      <span class="spacer"></span>
+      <button type="button" data-act="overview">總覽</button>
+      <button type="button" data-act="black">黑畫面</button>
+      <button type="button" data-act="theme">深色／淺色</button>
+      <button type="button" data-act="help">快捷鍵</button>
+    </footer>
+
+    <div class="deck-progress" aria-hidden="true"><span data-progress></span></div>
+    <div class="mini-timer" data-mini hidden>
+      <span data-mini-label></span><strong data-mini-time></strong>
+    </div>
+
+    <nav class="deck-controls is-idle" aria-label="投影片控制" data-controls>
+      <button type="button" data-act="prev" aria-label="上一張">←</button>
+      <button type="button" data-act="next" aria-label="下一張">→</button>
+      <button type="button" data-act="overview">總覽</button>
+      <button type="button" data-act="speaker">講者畫面</button>
+      <button type="button" data-act="full" data-full-btn>全螢幕</button>
+      <button type="button" data-act="help">說明</button>
+    </nav>
+
+    <div class="blackout" data-blackout hidden></div>
+    <p class="deck-toast is-hidden" data-toast role="status"></p>
+
+    <div class="deck-help" data-help hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <div class="panel">
+        <h2 id="help-title">投影片怎麼用</h2>
+        <dl>
+          <dt><kbd>→</kbd> <kbd>空白鍵</kbd></dt><dd>下一張（簡報筆的翻頁鍵也可以）</dd>
+          <dt><kbd>←</kbd></dt><dd>上一張</dd>
+          <dt><kbd>F</kbd></dt><dd>全螢幕</dd>
+          <dt><kbd>S</kbd></dt><dd>開啟講者畫面：看得到備註、下一張、時間（另開一個視窗，兩邊同步）</dd>
+          <dt><kbd>T</kbd></dt><dd>練習倒數：開始／暫停</dd>
+          <dt><kbd>+</kbd> <kbd>−</kbd></dt><dd>倒數多一分鐘／少一分鐘</dd>
+          <dt><kbd>R</kbd></dt><dd>倒數重設</dd>
+          <dt><kbd>O</kbd></dt><dd>總覽所有投影片，點一張跳過去</dd>
+          <dt><kbd>B</kbd></dt><dd>黑畫面（再按一次回來）</dd>
+          <dt><kbd>D</kbd></dt><dd>切換深色／淺色（燈光暗的場地用深色比較舒服）</dd>
+          <dt><kbd>Home</kbd> <kbd>End</kbd></dt><dd>第一張／最後一張</dd>
+        </dl>
+        <p class="muted small">
+          接上投影機後：在電腦上按 <kbd>S</kbd> 開講者畫面，把原本的投影片視窗拖到投影機的螢幕，按 <kbd>F</kbd> 全螢幕。之後在講者畫面操作就好。
+        </p>
+        <div class="row">
+          <a href={url('present/')}>← 回到帶領者頁</a>
+          <button type="button" class="btn-primary" data-act="help">知道了</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  import '../../scripts/present.js';
+</script>

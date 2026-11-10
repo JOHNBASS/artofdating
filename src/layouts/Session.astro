@@ -1,5 +1,6 @@
 ---
 import Base from './Base.astro';
+import Callout from '../components/Callout.astro';
 import { sessions, modes } from '../data/sessions.js';
 import { url } from '../scripts/paths.js';
 
@@ -44,6 +45,9 @@ const next = sessions.find((x) => x.num === num + 1);
     </nav>
 
     <article class="wrap content">
+      <Callout title="今晚流程">
+        <ul>{s.agenda.map(([time, label]) => <li>{time} {label}</li>)}</ul>
+      </Callout>
       <slot />
     </article>
 

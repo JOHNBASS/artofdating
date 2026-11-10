@@ -1,0 +1,357 @@
+---
+import { modes, agendaWithMinutes } from '../data/sessions.js';
+import { inline } from '../scripts/inline.js';
+import { fmt } from '../scripts/timer-utils.js';
+
+interface Props {
+  slide: Record<string, any>;
+  index: number;
+  total: number;
+  session: Record<string, any>;
+  next?: Record<string, any>;
+  qr: { svg: string; text: string };
+}
+
+const { slide, index, total, session, next, qr } = Astro.props;
+const { kind } = slide;
+const mode = kind === 'exercise' ? slide.mode : undefined;
+const m = mode ? modes[mode] : undefined;
+const seconds = kind === 'exercise' && slide.minutes ? slide.minutes * 60 : undefined;
+// 講者畫面和總覽用的短標題
+const label =
+  slide.title ||
+  { cover: session.title, qr: '打開手機頁面', agenda: '今晚流程', statement: slide.text, end: '結尾' }[kind] ||
+  kind;
+const labelText = String(label).replace(/\*\*/g, '');
+const lastSession = !next;
+const agenda = agendaWithMinutes(session.agenda);
+// 段落標題：從今晚流程找出這一段的結束時間和長度
+const segment = kind === 'section' ? agenda.find((a) => a.time === slide.time) : undefined;
+---
+
+<section
+  class:list={['slide', `k-${kind}`, mode && `mode-${mode}`]}
+  data-slide
+  data-label={labelText}
+  data-minutes={seconds}
+  data-time={slide.time || slide.until}
+  data-kind={kind}
+  aria-roledescription="投影片"
+  aria-label={`第 ${index + 1} 張，共 ${total} 張：${labelText}`}
+>
+  <div class="frame">
+    <div class="body">
+      {
+        kind === 'cover' && (
+          <>
+            <p class="eyebrow">
+              第 {session.num} 堂 · {session.theme}
+            </p>
+            <h1 class="cover-title">{session.title}</h1>
+            <p class="cover-tag">{session.tagline}</p>
+          </>
+        )
+      }
+
+      {
+        kind === 'qr' && (
+          <div class="qr-grid">
+            <div>
+              <p class="eyebrow">今晚的練習本</p>
+              <h2 class="title">用手機打開第 {session.num} 堂</h2>
+              <p class="lead">今晚的練習都在這一頁。你填寫的內容，只存在自己的手機。</p>
+              <p class="url">{qr.text}</p>
+            </div>
+            <div class="qr-box" set:html={qr.svg} />
+          </div>
+        )
+      }
+
+      {
+        kind === 'agenda' && (
+          <>
+            <h2 class="title">今晚流程</h2>
+            <ol class:list={['agenda', agenda.length > 6 && 'is-long']}>
+              {agenda.map((a) => (
+                <li>
+                  <span class="time">{a.time}</span>
+                  <span>{a.label}</span>
+                  <span class="mins">{a.minutes} 分鐘</span>
+                </li>
+              ))}
+            </ol>
+          </>
+        )
+      }
+
+      {
+        kind === 'break' && (
+          <div class="break">
+            <h2 class="break-title">{slide.title}</h2>
+            {slide.text && <p class="lead">{slide.text}</p>}
+            <p class="break-time">
+              <span class="muted">現在</span> <strong data-clock>--:--</strong>
+              {slide.until && (
+                <>
+                  <span class="dot" aria-hidden="true">
+                    ·
+                  </span>
+                  <span class="muted">{slide.until} 回到座位</span>
+                </>
+              )}
+            </p>
+          </div>
+        )
+      }
+
+      {
+        kind === 'section' && (
+          <div class="section">
+            <span class="section-mark" aria-hidden="true">
+              {slide.mark}
+            </span>
+            <div>
+              <h2 class="section-title">{slide.title}</h2>
+              {segment ? (
+                <p class="section-time">
+                  {segment.time}–{segment.end}
+                  <span class="mins">{segment.minutes} 分鐘</span>
+                </p>
+              ) : (
+                slide.time && <p class="section-time">{slide.time}</p>
+              )}
+            </div>
+          </div>
+        )
+      }
+
+      {
+        kind === 'statement' && (
+          <blockquote class="statement">
+            <p class="statement-text" set:html={inline(slide.text)} />
+            {slide.sub && <p class="lead" set:html={inline(slide.sub)} />}
+            {slide.cite && <cite>— {slide.cite}</cite>}
+          </blockquote>
+        )
+      }
+
+      {
+        kind === 'points' && (
+          <>
+            <h2 class="title">{slide.title}</h2>
+            {slide.flow ? (
+              <ol class="flow">
+                {slide.points.map((p: string) => (
+                  <li set:html={inline(p)} />
+                ))}
+              </ol>
+            ) : slide.ordered ? (
+              <ol class="list numbered">
+                {slide.points.map((p: string) => (
+                  <li set:html={inline(p)} />
+                ))}
+              </ol>
+            ) : (
+              <ul class="list">
+                {slide.points.map((p: string) => (
+                  <li set:html={inline(p)} />
+                ))}
+              </ul>
+            )}
+            {slide.foot && <p class="foot" set:html={inline(slide.foot)} />}
+          </>
+        )
+      }
+
+      {
+        kind === 'compare' && (
+          <>
+            <h2 class="title">{slide.title}</h2>
+            <table class="compare">
+              <thead>
+                <tr>
+                  {slide.cols.map((c: string) => (
+                    <th scope="col">{c}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {slide.rows.map((row: string[]) => (
+                  <tr>
+                    {row.map((cell) => (
+                      <td set:html={inline(cell)} />
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {slide.foot && <p class="foot" set:html={inline(slide.foot)} />}
+          </>
+        )
+      }
+
+      {
+        kind === 'research' && (
+          <div class:list={['research', slide.stat && 'has-stat']}>
+            <div>
+              <p class="eyebrow">研究</p>
+              <h2 class="title">{slide.title}</h2>
+              <p class="lead" set:html={inline(slide.text)} />
+              {slide.source && <p class="source">{slide.source}</p>}
+            </div>
+            {slide.stat && (
+              <div class="stat">
+                <strong>{slide.stat}</strong>
+                {slide.statLabel && <span>{slide.statLabel}</span>}
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      {
+        kind === 'exercise' && (
+          <div class:list={['exercise', seconds && 'has-timer']}>
+            <div>
+              <p class="ex-meta">
+                <span class="badge">
+                  <span aria-hidden="true">{m.icon}</span>
+                  {m.label}
+                </span>
+                {slide.minutes && <span class="mins">{mode === 'self' ? '書寫' : '討論'} {slide.minutes} 分鐘</span>}
+              </p>
+              <h2 class="title">{slide.title}</h2>
+              <ol class="steps">
+                {slide.steps.map((p: string) => (
+                  <li set:html={inline(p)} />
+                ))}
+              </ol>
+              {slide.foot && <p class="foot" set:html={inline(slide.foot)} />}
+              {slide.phone && (
+                <p class="phone">
+                  <span class="phone-tag">手機</span>第 {session.num} 堂頁面 →「{slide.title}」
+                </p>
+              )}
+            </div>
+            {seconds && (
+              <div class="ex-timer" data-timer>
+                <div class="ex-time" data-timer-display>
+                  {fmt(seconds)}
+                </div>
+                <div class="ex-bar" aria-hidden="true">
+                  <span data-timer-bar />
+                </div>
+                <button type="button" class="ex-btn" data-act="timer">
+                  開始計時
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      {
+        kind === 'spectrum' && (
+          <div class="spectrum">
+            {slide.title && <p class="eyebrow">{slide.title}</p>}
+            <div class="spectrum-ends">
+              <div>
+                <span class="end-label">{slide.leftLabel}</span>
+                <p>{slide.left}</p>
+              </div>
+              <div>
+                <span class="end-label">{slide.rightLabel}</span>
+                <p>{slide.right}</p>
+              </div>
+            </div>
+            <div class="spectrum-line" aria-hidden="true" />
+          </div>
+        )
+      }
+
+      {
+        kind === 'care' && (
+          <div class="care">
+            <p class="eyebrow">
+              <span aria-hidden="true">♡</span> 照顧自己
+            </p>
+            <h2 class="title">{slide.title}</h2>
+            {slide.text && <p class="lead" set:html={inline(slide.text)} />}
+            {slide.points && (
+              <ul class="list">
+                {slide.points.map((p: string) => (
+                  <li set:html={inline(p)} />
+                ))}
+              </ul>
+            )}
+          </div>
+        )
+      }
+
+      {
+        kind === 'experiment' && (
+          <>
+            <p class="eyebrow">
+              <span aria-hidden="true">☾</span> 帶回家的約會實驗
+            </p>
+            <h2 class="title">{slide.title}</h2>
+            <ol class="list numbered">
+              {slide.steps.map((p: string) => (
+                <li set:html={inline(p)} />
+              ))}
+            </ol>
+          </>
+        )
+      }
+
+      {
+        kind === 'end' &&
+          (lastSession ? (
+            <div class="end">
+              <h2 class="cover-title">謝謝你們</h2>
+              <p class="cover-tag">聆聽、吵架、選擇、靠近、冒險</p>
+              <p class="lead">五個晚上結束了，練習才剛開始。</p>
+            </div>
+          ) : (
+            <div class="end">
+              <h2 class="cover-title">下次見</h2>
+              <p class="lead">記得在手機頁面下方按「保存我的筆記」。</p>
+              <p class="end-next">
+                <span class="eyebrow">
+                  下一堂 · 第 {next.num} 堂
+                </span>
+                <strong>{next.title}</strong>
+                <span class="muted">{next.tagline}</span>
+              </p>
+            </div>
+          ))
+      }
+    </div>
+
+    {
+      kind !== 'cover' && (
+        <footer class="slide-foot" aria-hidden="true">
+          <span>
+            關係練習室 · 第 {session.num} 堂 {session.title}
+          </span>
+          <span>{index + 1}</span>
+        </footer>
+      )
+    }
+    {
+      kind === 'cover' && (
+        <footer class="cover-brand" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <g fill="none" stroke="currentColor" stroke-width="1.9">
+              <circle cx="8.6" cy="12" r="6.4" />
+              <circle cx="15.4" cy="12" r="6.4" />
+            </g>
+            <path d="M12 6.45A6.4 6.4 0 0 1 12 17.55A6.4 6.4 0 0 1 12 6.45z" fill="currentColor" />
+          </svg>
+          關係練習室
+        </footer>
+      )
+    }
+  </div>
+  {slide.notes && <div class="notes" data-notes hidden set:html={inline(slide.notes)} />}
+</section>

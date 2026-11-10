@@ -35,6 +35,8 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <script>
+  import { fmt, chime, keepAwake } from '../scripts/timer-utils.js';
+
   const root = document.querySelector('[data-timer]');
   const display = root.querySelector('[data-display]');
   const bar = root.querySelector('[data-bar]');
@@ -47,52 +49,12 @@ import Base from '../layouts/Base.astro';
   let remaining = 600;
   let endAt = 0;
   let tick = null;
-  let wakeLock = null;
-
-  const fmt = (s) => {
-    const m = Math.floor(s / 60);
-    const r = s % 60;
-    return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
-  };
 
   function render() {
     display.textContent = fmt(Math.max(0, Math.ceil(remaining)));
     display.classList.toggle('warn', remaining <= 60 && remaining > 0);
     display.classList.toggle('done', remaining <= 0);
     bar.style.width = `${(1 - remaining / total) * 100}%`;
-  }
-
-  function chime() {
-    if (!sound.checked) return;
-    try {
-      const ctx = new AudioContext();
-      [0, 0.45, 0.9].forEach((t, i) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = 'sine';
-        o.frequency.value = [660, 880, 990][i];
-        g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
-        g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + t + 0.03);
-        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 1.2);
-        o.connect(g).connect(ctx.destination);
-        o.start(ctx.currentTime + t);
-        o.stop(ctx.currentTime + t + 1.3);
-      });
-    } catch {
-      /* 不支援音效時略過 */
-    }
-  }
-
-  async function keepAwake(on) {
-    try {
-      if (on && 'wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
-      else if (!on && wakeLock) {
-        await wakeLock.release();
-        wakeLock = null;
-      }
-    } catch {
-      /* ignore */
-    }
   }
 
   function stop() {
@@ -114,7 +76,7 @@ import Base from '../layouts/Base.astro';
         render();
         stop();
         toggle.textContent = '開始';
-        chime();
+        if (sound.checked) chime();
         return;
       }
       render();

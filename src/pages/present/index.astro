@@ -1,0 +1,255 @@
+---
+import Base from '../../layouts/Base.astro';
+import { sessions, agendaWithMinutes } from '../../data/sessions.js';
+import { decks } from '../../data/slides/index.js';
+import { url } from '../../scripts/paths.js';
+
+const cards = sessions.map((s) => {
+  const deck = decks[s.num];
+  const exercises = deck.filter((x) => x.kind === 'exercise' && x.minutes);
+  return {
+    ...s,
+    count: deck.length,
+    exercises: exercises.length,
+    exerciseMinutes: exercises.reduce((sum, x) => sum + x.minutes, 0),
+    agenda: agendaWithMinutes(s.agenda),
+  };
+});
+---
+
+<Base title="帶領者" description="帶領者用的五堂課投影片：講者備註、練習倒數、今晚流程，接上投影機就能上課。">
+  <section class="wrap-wide leader">
+    <p class="eyebrow">給帶領者</p>
+    <h1>投影片</h1>
+    <p class="lead">
+      每一堂一份投影片，照今晚流程排好：開場、段落、每一個練習的步驟和時間。練習投影片上有倒數計時，講者畫面看得到備註和下一張。
+    </p>
+
+    <ol class="decks">
+      {
+        cards.map((s) => (
+          <li class="deck-card">
+            <p class="n">第 {s.num} 堂 · {s.theme}</p>
+            <h2>{s.title}</h2>
+            <p class="muted">{s.tagline}</p>
+            <p class="meta">
+              {s.count} 張 · {s.exercises} 個練習，共 {s.exerciseMinutes} 分鐘
+            </p>
+            <details>
+              <summary>今晚流程</summary>
+              <ul class="agenda">
+                {s.agenda.map((a) => (
+                  <li>
+                    <span class="t">{a.time}</span>
+                    <span>{a.label}</span>
+                    <span class="m">{a.minutes} 分</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+            <div class="actions">
+              <a class="btn btn-primary" href={url(`present/${s.num}/`)}>
+                開始投影
+              </a>
+              <a class="btn" href={url(`present/${s.num}/?presenter`)}>
+                講者畫面
+              </a>
+              <a class="btn" href={url(`present/${s.num}/?overview`)}>
+                預覽全部
+              </a>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="howto">
+      <section>
+        <h2>接上投影機之後</h2>
+        <ol>
+          <li>按「開始投影」打開這一堂的投影片。</li>
+          <li>按 <kbd>S</kbd> 開啟講者畫面（另一個視窗）。</li>
+          <li>把投影片視窗拖到投影機的螢幕，按 <kbd>F</kbd> 全螢幕。</li>
+          <li>之後都在講者畫面操作：看備註、下一張、現在時間，以及離下一段還有幾分鐘。</li>
+        </ol>
+        <p class="muted small">
+          第二張投影片是 QR code，學員用手機掃描就會打開這一堂的練習頁。只有一個螢幕時，直接在投影片上操作也可以。
+        </p>
+      </section>
+      <section>
+        <h2>快捷鍵</h2>
+        <dl>
+          <dt><kbd>→</kbd> <kbd>空白鍵</kbd></dt><dd>下一張（簡報筆的翻頁鍵也可以）</dd>
+          <dt><kbd>←</kbd></dt><dd>上一張</dd>
+          <dt><kbd>T</kbd></dt><dd>練習倒數開始／暫停</dd>
+          <dt><kbd>+</kbd> <kbd>−</kbd></dt><dd>倒數多一分鐘／少一分鐘</dd>
+          <dt><kbd>O</kbd></dt><dd>總覽，點一張跳過去</dd>
+          <dt><kbd>B</kbd></dt><dd>黑畫面</dd>
+          <dt><kbd>D</kbd></dt><dd>深色／淺色</dd>
+          <dt><kbd>?</kbd></dt><dd>所有快捷鍵</dd>
+        </dl>
+        <p class="muted small">
+          需要備份時，在投影片頁按 <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>P</kbd> 可以另存成 PDF（每張一頁）。
+        </p>
+      </section>
+    </div>
+
+    <p class="other">
+      只需要倒數計時？用<a href={url('timer/')}>帶領者計時器</a>，可以自己輸入題目和分鐘。
+    </p>
+  </section>
+</Base>
+
+<style>
+  .leader {
+    padding-top: 2.2em;
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    margin: 0;
+  }
+  h1 {
+    margin: 0.2em 0 0.3em;
+  }
+  .lead {
+    max-width: 40em;
+    color: var(--ink-soft);
+  }
+  .decks {
+    list-style: none;
+    padding: 0;
+    margin: 2em 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .deck-card {
+    display: flex;
+    flex-direction: column;
+    padding: 18px 18px 16px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+  }
+  .deck-card .n {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .deck-card h2 {
+    margin: 0.25em 0 0.15em;
+    font-size: 1.4rem;
+  }
+  .deck-card .muted {
+    margin: 0;
+  }
+  .meta {
+    margin: 0.7em 0 0.4em;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  details {
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+  }
+  summary {
+    cursor: pointer;
+    color: var(--ink-soft);
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+  }
+  .agenda {
+    list-style: none;
+    padding: 0;
+    margin: 6px 0 0;
+  }
+  .agenda li {
+    display: grid;
+    grid-template-columns: 3.4em 1fr auto;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .agenda .t {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .agenda .m {
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: auto;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 1.1em;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .btn.btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .howto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px 40px;
+    padding: 1.4em 0;
+    border-top: 1px solid var(--line);
+  }
+  .howto h2 {
+    font-size: 1.15rem;
+    margin: 0 0 0.6em;
+  }
+  .howto ol {
+    padding-left: 1.3em;
+    margin: 0 0 0.8em;
+    line-height: 1.8;
+  }
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    margin: 0 0 0.8em;
+  }
+  dt {
+    white-space: nowrap;
+  }
+  dd {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+  kbd {
+    display: inline-block;
+    min-width: 1.7em;
+    padding: 0 0.4em;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    font: inherit;
+    font-size: 0.85em;
+    text-align: center;
+  }
+  .other {
+    color: var(--ink-soft);
+  }
+</style>

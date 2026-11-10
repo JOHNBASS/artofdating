@@ -16,7 +16,7 @@ const path = Astro.url.pathname;
 const nav = [
   { href: url(''), label: '課程介紹', match: (p: string) => p === url('') || p === url('').replace(/\/$/, '') },
   { href: url('sessions/1/'), label: '五堂課', match: (p: string) => p.includes('/sessions/') },
-  { href: url('timer/'), label: '計時器', match: (p: string) => p.includes('/timer') },
+  { href: url('present/'), label: '帶領者', match: (p: string) => p.includes('/present') || p.includes('/timer') },
 ];
 ---
 
