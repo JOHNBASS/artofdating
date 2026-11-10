@@ -51,6 +51,7 @@ const faqs = [
   moments={['word-rotate', 'lines-rise', 'counter-rolls', 'word-highlight', 'pinned-chapters', 'picture-develops']}
 >
   <style is:inline slot="head">
+    .mark[data-mark="rings"] { --mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.9'%3E%3Ccircle cx='8.6' cy='12' r='6.4'/%3E%3Ccircle cx='15.4' cy='12' r='6.4'/%3E%3C/g%3E%3Cpath d='M12 6.45A6.4 6.4 0 0 1 12 17.55A6.4 6.4 0 0 1 12 6.45z'/%3E%3C/svg%3E"); }
     /* 頁面 CSS：只放視覺內部與套件沒有的部分 */
     .frame--square { aspect-ratio: 8 / 9; }
     .frame--land { aspect-ratio: 4 / 3; }
@@ -99,14 +100,14 @@ const faqs = [
 
   <!-- type: service（五晚的關係工作坊，主辦是個人）
        deal: hero photo (data-calm left, 字在色塊裡), nav nav-centre, close close-type, footer footer-columns,
-             rhythm dark-band (#evening), buttons tonal, mark arc, palette brand（課程頁原本的米白與酒紅）, type newsreader + Noto TC
+             rhythm dark-band (#evening), buttons tonal, mark rings（自訂：兩個圓交疊，中間填色）, palette brand（課程頁原本的米白與酒紅）, type newsreader + Noto TC
        moments（應使用者要求加多）: word-rotate (hero h1), counter-rolls (#worries), word-highlight (#statement),
              lines-rise + peek-list (#sessions), pinned-chapters (#evening), picture-develops (#faq)；結尾關鍵字改成靜態標籤（跑馬燈會切到字）
        照片：全部由 AI 生成（Codex 圖像生成），之後可換成課程現場照（見 README） -->
   <header class="nav nav--centre">
     <div class="wrap nav__bar">
       <a class="skip-link" href="#top">跳到主要內容</a>
-      <a class="nav__logo" href="#top"><span class="mark" data-mark="arc" aria-hidden="true"></span>關係練習室</a>
+      <a class="nav__logo" href="#top"><span class="mark" data-mark="rings" aria-hidden="true"></span>關係練習室</a>
       <nav class="nav__links" aria-label="主選單">
         <div class="nav__item"><a class="nav__link" href="#worries">擔心</a></div>
         <div class="nav__item">
@@ -339,7 +340,7 @@ const faqs = [
       <div class="closing__links">
         <div class="grid">
           <div class="span-4 stack-4">
-            <a class="nav__logo" href="#top"><span class="mark" data-mark="arc" aria-hidden="true"></span>關係練習室</a>
+            <a class="nav__logo" href="#top"><span class="mark" data-mark="rings" aria-hidden="true"></span>關係練習室</a>
             <p class="footer__lede">在晚餐桌上練習愛的五堂課</p>
           </div>
           <div class="span-2 footer__col"><h3>擔心</h3><ul><li><a href="#worries">四個擔心</a></li><li><a href={url('sources/')}>資料來源</a></li></ul></div>

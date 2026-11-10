@@ -44,7 +44,7 @@ const nav = [
     <header class="site-header">
       <div class="wrap-wide bar">
         <a class="brand" href={url('')}>
-          <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 21.5V12a9.5 9.5 0 0 1 19 0v9.5h-6V12a3.5 3.5 0 0 0-7 0v9.5z" fill="currentColor"></path></svg>
+          <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="8.6" cy="12" r="6.4"></circle><circle cx="15.4" cy="12" r="6.4"></circle></g><path d="M12 6.45A6.4 6.4 0 0 1 12 17.55A6.4 6.4 0 0 1 12 6.45z" fill="currentColor"></path></svg>
           關係練習室
         </a>
         <nav aria-label="主選單">
@@ -191,9 +191,10 @@ const nav = [
     white-space: nowrap;
   }
   .brand-mark {
-    width: 1em;
-    height: 1em;
-    margin-right: 0.4em;
+    width: 1.25em;
+    height: 1.25em;
+    margin-right: 0.35em;
+    color: var(--accent);
   }
   nav {
     display: flex;
