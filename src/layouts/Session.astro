@@ -32,7 +32,7 @@ const next = sessions.find((x) => x.num === num + 1);
       </div>
     </section>
 
-    <nav class="session-tabs wrap" aria-label="五堂課">
+    <nav class="session-tabs wrap" aria-label="五堂課" data-session-tabs>
       {
         sessions.map((x) => (
           <a href={url(`sessions/${x.num}/`)} aria-current={x.num === num ? 'page' : undefined}>
@@ -48,16 +48,21 @@ const next = sessions.find((x) => x.num === num + 1);
     </article>
 
     <div class="wrap">
-      <div class="toolbar">
-        <div>
-          <strong>我的筆記</strong>
-          <p class="muted small">這一堂填寫的內容只存在這台裝置。可以下載成文字檔留念，或清除重來。</p>
+      <section class="toolbar" id="notes" aria-labelledby="notes-title" data-notes-panel>
+        <div class="intro">
+          <h2 id="notes-title">保存我的筆記</h2>
+          <p class="muted small">
+            你填寫的內容會自動存在這台裝置的瀏覽器裡。但手機瀏覽器可能會清掉太久沒開的網站資料，每堂課結束前，記得另外保存一份。
+          </p>
         </div>
         <div class="actions">
-          <button type="button" data-export>下載我的筆記</button>
-          <button type="button" data-clear>清除這一堂</button>
+          <button type="button" class="btn-primary" data-share hidden>傳給自己保存</button>
+          <button type="button" data-copy>複製全部文字</button>
+          <button type="button" data-export>下載文字檔</button>
+          <button type="button" class="clear" data-clear>清除這一堂</button>
         </div>
-      </div>
+        <p class="muted small tip" data-share-tip>「傳給自己保存」會打開手機的分享選單，可以存到 LINE Keep、備忘錄，或寄 Email 給自己。</p>
+      </section>
 
       <nav class="pager" aria-label="上一堂與下一堂">
         {
@@ -88,6 +93,9 @@ const next = sessions.find((x) => x.num === num + 1);
         }
       </nav>
     </div>
+    <a class="notes-fab" href="#notes" data-notes-fab>
+      <span aria-hidden="true">✎</span> 保存筆記
+    </a>
     <p class="save-status" data-save-status role="status"></p>
   </div>
 </Base>
@@ -190,23 +198,34 @@ const next = sessions.find((x) => x.num === num + 1);
   }
   .toolbar {
     margin-top: 3em;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr auto;
     gap: 12px 20px;
     align-items: center;
-    justify-content: space-between;
-    padding: 16px 18px;
+    padding: 18px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--surface);
   }
+  .toolbar h2 {
+    font-size: 1.15rem;
+    margin: 0;
+  }
   .toolbar p {
     margin: 0.2em 0 0;
+  }
+  .toolbar .tip {
+    grid-column: 1 / -1;
+    margin: 0;
   }
   .actions {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .actions .btn-primary {
+    order: -1;
   }
   .actions :global(.danger) {
     border-color: var(--accent);
@@ -235,20 +254,116 @@ const next = sessions.find((x) => x.num === num + 1);
   .save-status {
     position: fixed;
     left: 50%;
-    bottom: 18px;
-    transform: translate(-50%, 20px);
+    top: 70px;
+    z-index: 6;
+    max-width: calc(100% - 32px);
+    transform: translate(-50%, -10px);
     background: var(--ink);
     color: var(--bg);
     padding: 0.4em 1em;
     border-radius: 999px;
     font-size: 0.85rem;
+    text-align: center;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s, transform 0.2s;
     margin: 0;
   }
   .save-status:global(.on) {
-    opacity: 0.92;
+    opacity: 0.94;
     transform: translate(-50%, 0);
+  }
+  .notes-fab {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding-top: 1.6em;
+    }
+    .tagline {
+      font-size: 1.1rem;
+    }
+    .legend {
+      flex-direction: column;
+      gap: 2px;
+    }
+    .session-tabs {
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: 16px;
+      position: relative;
+      -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+      mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    }
+    .session-tabs a {
+      scroll-snap-align: start;
+      min-height: 40px;
+    }
+    .toolbar {
+      grid-template-columns: 1fr;
+      padding: 16px;
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .actions button {
+      justify-content: center;
+    }
+    .actions .btn-primary {
+      grid-column: 1 / -1;
+      min-height: 50px;
+      font-size: 1rem;
+    }
+    .actions .clear {
+      grid-column: 1 / -1;
+      background: transparent;
+      border-style: dashed;
+    }
+    .pager a {
+      padding: 12px 14px;
+      font-size: 0.95rem;
+    }
+    .notes-fab {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4em;
+      position: fixed;
+      right: max(16px, env(safe-area-inset-right));
+      bottom: calc(16px + env(safe-area-inset-bottom));
+      z-index: 6;
+      min-height: 44px;
+      padding: 0 1.1em;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 500;
+      font-size: 0.95rem;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(43, 32, 36, 0.25);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .notes-fab:global(.on) {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+  }
+  @media (max-width: 640px) and (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .notes-fab {
+      color: #1b1416;
+    }
+  }
+  :global(:root[data-theme='dark']) .notes-fab {
+    color: #1b1416;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .notes-fab,
+    .save-status {
+      transition: none;
+    }
   }
 </style>

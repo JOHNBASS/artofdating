@@ -51,6 +51,12 @@ const mid = Math.ceil(steps / 2);
   .ends span:last-child {
     text-align: right;
   }
+  @media (max-width: 480px) {
+    .ends {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  }
   output {
     color: var(--ink-soft);
     font-size: 0.8rem;
@@ -60,7 +66,7 @@ const mid = Math.ceil(steps / 2);
   input[type='range'] {
     width: 100%;
     accent-color: var(--accent);
-    height: 32px;
+    height: 40px;
     margin: 0;
   }
   .hint {

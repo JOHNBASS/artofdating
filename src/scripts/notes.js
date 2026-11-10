@@ -1,5 +1,6 @@
-// 課程頁的互動：自動儲存、抽卡、標籤上限、匯出與清除筆記
+// 課程頁的互動：自動儲存、抽卡、標籤上限、保存與清除筆記
 // 所有資料只存在使用者自己的瀏覽器（localStorage）
+import { inAppName } from './inapp.js';
 
 const root = document.querySelector('[data-notes-page]');
 const page = root ? root.dataset.notesPage : 'page';
@@ -47,10 +48,13 @@ function updateRange(el) {
   if (out) out.value = el.dataset.touched ? el.value : '—';
 }
 
+let hasNotes = false;
+
 // 載入已儲存的內容
 fields().forEach((el) => {
   const saved = store.get(el.dataset.save);
   if (saved !== null) {
+    if (saved) hasNotes = true;
     writeField(el, saved);
     if (el.type === 'range') el.dataset.touched = '1';
   }
@@ -69,12 +73,57 @@ fields().forEach((el) => {
 // 「已儲存」提示
 const status = document.querySelector('[data-save-status]');
 let statusTimer;
-function flashSaved() {
+function flash(message, ms = 2200) {
   if (!status) return;
-  status.textContent = '已自動儲存在這台裝置';
+  status.textContent = message;
   status.classList.add('on');
   clearTimeout(statusTimer);
-  statusTimer = setTimeout(() => status.classList.remove('on'), 1600);
+  statusTimer = setTimeout(() => status.classList.remove('on'), ms);
+}
+function flashSaved() {
+  flash('已自動儲存在這台裝置', 1600);
+  hasNotes = true;
+  syncFab();
+  askPersist();
+}
+
+// 請瀏覽器盡量不要自動清掉這個網站的資料（不支援或被拒絕都沒關係）
+let persistAsked = false;
+function askPersist() {
+  if (persistAsked) return;
+  persistAsked = true;
+  navigator.storage?.persist?.().catch(() => {});
+}
+
+// 手機上的「保存筆記」浮動按鈕：有內容、還沒看到頁尾的保存區、也不在打字時才出現
+const fab = document.querySelector('[data-notes-fab]');
+const panel = document.querySelector('[data-notes-panel]');
+let panelVisible = false;
+let typing = false;
+function syncFab() {
+  if (fab) fab.classList.toggle('on', hasNotes && !panelVisible && !typing);
+}
+if (panel && 'IntersectionObserver' in window) {
+  new IntersectionObserver(([entry]) => {
+    panelVisible = entry.isIntersecting;
+    syncFab();
+  }).observe(panel);
+}
+document.addEventListener('focusin', (e) => {
+  typing = e.target.matches?.('textarea, input[type="text"]') ?? false;
+  syncFab();
+});
+document.addEventListener('focusout', () => {
+  typing = false;
+  syncFab();
+});
+syncFab();
+
+// 課程標籤列：把目前這一堂捲到看得見的位置
+const tabs = document.querySelector('[data-session-tabs]');
+const current = tabs?.querySelector('[aria-current="page"]');
+if (tabs && current && tabs.scrollWidth > tabs.clientWidth) {
+  tabs.scrollLeft = current.offsetLeft - (tabs.clientWidth - current.offsetWidth) / 2;
 }
 
 // 標籤選擇：限制最多可選數量
@@ -122,15 +171,16 @@ document.querySelectorAll('[data-cards]').forEach((box) => {
   });
 });
 
-// 匯出筆記為文字檔
+// 把這一堂的筆記整理成純文字
 function dots(value, steps) {
   const v = Number(value);
   return Array.from({ length: steps }, (_, i) => (i + 1 === v ? '●' : '○')).join('');
 }
 
-function exportNotes() {
+function buildNotes() {
   const title = document.querySelector('[data-session-title]')?.textContent?.trim() || document.title;
-  const lines = [`約會的藝術｜${title}`, `匯出時間：${new Date().toLocaleString('zh-TW')}`, ''];
+  const lines = [`關係練習室｜${title}`, `保存時間：${new Date().toLocaleString('zh-TW')}`, ''];
+  let count = 0;
   document.querySelectorAll('[data-exercise]').forEach((ex) => {
     const entries = [];
     ex.querySelectorAll('[data-save]').forEach((el) => {
@@ -147,21 +197,96 @@ function exportNotes() {
       }
     });
     if (entries.length) {
+      count += entries.length;
       lines.push(`【${ex.dataset.exercise}】`, ...entries, '');
     }
   });
-  if (lines.length <= 3) lines.push('（這一堂還沒有填寫內容）');
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  return { title, text: lines.join('\n'), empty: count === 0 };
+}
+
+// 保存方式：手機用分享選單或複製，電腦用下載
+function notesOrWarn(btn) {
+  const notes = buildNotes();
+  if (notes.empty) {
+    flash('這一堂還沒有填寫內容');
+    btn.blur();
+    return null;
+  }
+  return notes;
+}
+
+function download({ title, text }) {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `約會的藝術-${title}-我的筆記.txt`;
+  a.download = `關係練習室-${title}-我的筆記.txt`;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-document.querySelectorAll('[data-export]').forEach((b) => b.addEventListener('click', exportNotes));
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // 舊瀏覽器或內建瀏覽器不支援 clipboard API 時的備援
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch {
+      ok = false;
+    }
+    ta.remove();
+    return ok;
+  }
+}
+
+const touch = matchMedia('(pointer: coarse)').matches;
+const canShare = touch && typeof navigator.share === 'function';
+const inApp = Boolean(inAppName());
+
+document.querySelectorAll('[data-share-tip]').forEach((t) => (t.hidden = !canShare));
+document.querySelectorAll('[data-share]').forEach((b) => {
+  b.hidden = !canShare;
+  b.addEventListener('click', async () => {
+    const notes = notesOrWarn(b);
+    if (!notes) return;
+    try {
+      await navigator.share({ title: `關係練習室｜${notes.title}`, text: notes.text });
+    } catch (e) {
+      if (e?.name === 'AbortError') return;
+      if (await copyText(notes.text)) flash('無法開啟分享，已改為複製全部文字');
+    }
+  });
+});
+
+document.querySelectorAll('[data-copy]').forEach((b) => {
+  if (!canShare && inApp) b.classList.add('btn-primary');
+  b.addEventListener('click', async () => {
+    const notes = notesOrWarn(b);
+    if (!notes) return;
+    flash((await copyText(notes.text)) ? '已複製，可以貼到 LINE、備忘錄或 Email' : '複製失敗，請改用下載');
+  });
+});
+
+document.querySelectorAll('[data-export]').forEach((b) => {
+  // 手機上分享比下載好找；LINE、Facebook 等內建瀏覽器通常無法下載
+  b.hidden = inApp;
+  if (!canShare) b.classList.add('btn-primary');
+  b.addEventListener('click', () => {
+    const notes = notesOrWarn(b);
+    if (notes) download(notes);
+  });
+});
 
 // 清除：按兩次才清除，避免誤觸
 document.querySelectorAll('[data-clear]').forEach((btn) => {
@@ -195,6 +320,8 @@ document.querySelectorAll('[data-clear]').forEach((btn) => {
       const max = c.closest('[data-chips]')?.dataset.max;
       c.textContent = max ? `0 / ${max}` : '0';
     });
+    hasNotes = false;
+    syncFab();
     armed = false;
     btn.textContent = '已清除';
     btn.classList.remove('danger');

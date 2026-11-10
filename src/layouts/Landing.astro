@@ -1,0 +1,71 @@
+---
+// 首頁專用的外框：使用 tasteskill 的版型系統（public/assets），課程頁仍用 Base.astro
+import { url } from '../scripts/paths.js';
+
+interface Props {
+  title: string;
+  description: string;
+  moments?: string[];
+}
+
+const { title, description, moments = [] } = Astro.props;
+const a = (p: string) => url(`assets/${p}`);
+---
+
+<!doctype html>
+<html lang="zh-Hant-TW" data-type="service" data-radius="soft" data-buttons="tonal" data-motion>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={url('share.jpg')} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href={url('favicon.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content="#fbf7f2" />
+    <!-- <link rel="canonical" href="https://[自訂網域]/"> 有自己的網域後再加 -->
+    <meta name="site-kind" content="other" />
+    <meta name="page-type" content="service" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..700&family=Hanken+Grotesk:wght@400..600&family=Noto+Serif+TC:wght@400;500&family=Noto+Sans+TC:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href={a('system.css')} />
+    <link rel="stylesheet" href={a('ui/cards.css')} />
+    <link rel="stylesheet" href={a('motion/motion.css')} />
+    <link rel="stylesheet" href={a('layout/layout.css')} />
+    <link rel="stylesheet" href={a('icons/icon.css')} />
+    <!-- start.mjs brand：用課程頁原本的米白與酒紅；中文字落在 Noto Serif TC／Noto Sans TC -->
+    <style is:inline>
+      :root {
+        --p-bg: #fbf7f2; --p-surface: #f3ebe4; --p-ink: #2b2024; --p-muted: #6d6365;
+        --p-accent: #8e3b46; --p-accent-ink: #fbf7f2; --p-action: #8e3b46; --p-action-ink: #fbf7f2;
+        --p-inv-bg: #2b2024; --p-inv-surface: #372c30; --p-inv-ink: #fbf7f2; --p-inv-muted: #a59e9d;
+        --p-inv-accent: #fbf7f2; --p-inv-accent-ink: #2b2024; --p-inv-action: #fbf7f2; --p-inv-action-ink: #2b2024;
+        --font-display: "Newsreader", "Noto Serif TC", Georgia, serif;
+        --font-text: "Hanken Grotesk", "Noto Sans TC", system-ui, sans-serif;
+        --display-weight: 400;
+        --display-tracking: -0.018em;
+        --display-tracking-xl: -0.025em;
+        --ly-scale: 1.06;
+      }
+    </style>
+    <script is:inline>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+    <script is:inline>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
+    <link rel="modulepreload" href={a('moments/moments.js')} />
+    <link rel="modulepreload" href={a('moments/lib.js')} />
+    {moments.map((m) => <link rel="modulepreload" href={a(`moments/${m}/moment.js`)} />)}
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+    <script is:inline type="module" src={a('system.js')}></script>
+    <script is:inline type="module" src={a('motion/motion.js')}></script>
+    <script is:inline type="module" src={a('layout/layout.js')}></script>
+  </body>
+</html>

@@ -1,0 +1,61 @@
+---
+import Base from '../layouts/Base.astro';
+import { notes } from '../data/worries.js';
+import { url } from '../scripts/paths.js';
+---
+
+<Base title="資料來源" description="首頁「關於愛情的四個擔心」引用的統計與研究，附原始連結。">
+  <section class="wrap sources">
+    <p class="eyebrow">關於愛情的四個擔心</p>
+    <h1>資料來源</h1>
+    <p class="muted">
+      首頁四張卡片的數字與研究出處如下，查核日期是 2026 年 11 月 10 日。台灣的數字取自內政部戶政司的原始統計表；國外研究盡量連到期刊原文。
+    </p>
+
+    <ol class="notes">
+      {
+        notes.map((n) => (
+          <li>
+            {n.text} <a href={n.href}>{n.source}</a>
+          </li>
+        ))
+      }
+    </ol>
+
+    <h2>讀數字時要注意</h2>
+    <ul>
+      <li>
+        「每 2 對結婚就有 1 對離婚」是把同一年的離婚對數除以結婚對數。2025 年結婚 104,376 對、離婚 52,101 對，相除約等於 2；但今年離婚的人大多是好幾年前結婚的，結婚數一變少，這個比值就會看起來變糟。
+      </li>
+      <li>比較合理的是「有偶人口離婚率」：2025 年男性 10.14‰、女性 10.41‰，也就是每年約 1% 的已婚者離婚。</li>
+      <li>2025 年離婚的人當中，婚齡未滿 5 年的占 33.4%，婚齡 10 年以上的占 43.7%。</li>
+      <li>30 到 34 歲的未婚率是依戶政司 2025 年底「現住人口按性別、年齡、婚姻狀況」計算：男性 67.8%、女性 56.0%，合計 62.1%。十年前（2015 年底）是 50.2%。</li>
+      <li>出軌比例來自美國綜合社會調查（GSS）的二手分析，發表單位是倡議婚姻的智庫；台灣目前沒有找到可以查證的學術百分比，所以沒有引用。</li>
+      <li>「婚姻是愛情的墳墓」常被說是歌德的話，但查不到出處。</li>
+    </ul>
+
+    <p><a href={url('')}>← 回到首頁</a></p>
+  </section>
+</Base>
+
+<style>
+  .sources {
+    padding-top: 2.5em;
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin: 0;
+  }
+  h1 {
+    margin-top: 0.2em;
+  }
+  .notes li {
+    margin: 0.6em 0;
+  }
+  .notes a,
+  ul a {
+    overflow-wrap: anywhere;
+  }
+</style>

@@ -28,7 +28,9 @@ import Base from '../layouts/Base.astro';
       <button type="button" data-full>全螢幕</button>
       <label class="sound"><input type="checkbox" checked data-sound /> 結束時輕響提示</label>
     </div>
-    <p class="muted small help">快捷鍵：空白鍵開始或暫停，R 重設，F 全螢幕。剩下一分鐘時數字會變色。</p>
+    <p class="muted small help">
+      <span class="keys">快捷鍵：空白鍵開始或暫停，R 重設，F 全螢幕。</span>剩下一分鐘時數字會變色。
+    </p>
   </section>
 </Base>
 
@@ -141,7 +143,9 @@ import Base from '../layouts/Base.astro';
     if (document.fullscreenElement) document.exitFullscreen?.();
     else root.requestFullscreen?.();
   }
-  root.querySelector('[data-full]').addEventListener('click', fullscreen);
+  const fullBtn = root.querySelector('[data-full]');
+  fullBtn.hidden = !document.fullscreenEnabled;
+  fullBtn.addEventListener('click', fullscreen);
 
   document.addEventListener('keydown', (e) => {
     if (e.target === prompt || e.target === custom) return;
@@ -257,5 +261,10 @@ import Base from '../layouts/Base.astro';
   }
   .help {
     margin-top: 1em;
+  }
+  @media (hover: none) {
+    .keys {
+      display: none;
+    }
   }
 </style>

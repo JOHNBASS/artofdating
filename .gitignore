@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# tasteskill 的檢查暫存（截圖、Chrome 設定檔、建置紀錄）
+.taste-skill/

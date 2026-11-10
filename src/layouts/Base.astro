@@ -9,9 +9,9 @@ interface Props {
 
 const {
   title,
-  description = '約會的藝術：給單身與交往中的人的五堂關係課。在五個晚上，練習聆聽、吵架、選擇、靠近與冒險。',
+  description = '關係練習室：給單身者的五晚關係課。五個晚上，練習聆聽、吵架、選擇、靠近與冒險。',
 } = Astro.props;
-const pageTitle = title ? `${title}｜約會的藝術` : '約會的藝術';
+const pageTitle = title ? `${title}｜關係練習室` : '關係練習室';
 const path = Astro.url.pathname;
 const nav = [
   { href: url(''), label: '課程介紹', match: (p: string) => p === url('') || p === url('').replace(/\/$/, '') },
@@ -26,7 +26,8 @@ const nav = [
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#8e3b46" />
+    <meta name="theme-color" content="#fbf7f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1b1416" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -43,8 +44,8 @@ const nav = [
     <header class="site-header">
       <div class="wrap-wide bar">
         <a class="brand" href={url('')}>
-          <span class="brand-mark" aria-hidden="true">✦</span>
-          約會的藝術
+          <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 21.5V12a9.5 9.5 0 0 1 19 0v9.5h-6V12a3.5 3.5 0 0 0-7 0v9.5z" fill="currentColor"></path></svg>
+          關係練習室
         </a>
         <nav aria-label="主選單">
           {
@@ -57,13 +58,24 @@ const nav = [
         </nav>
       </div>
     </header>
+    <div class="inapp" data-inapp hidden>
+      <div class="wrap-wide inapp-bar">
+        <p>
+          <strong>你正在 <span data-inapp-name></span> 裡瀏覽。</strong>
+          這裡寫的筆記可能在關掉後不見，也無法下載。
+          <a href="" data-inapp-open hidden>改用手機瀏覽器開啟</a>
+          <span data-inapp-howto>建議點右上角的「⋯」，選「用瀏覽器開啟」。</span>
+        </p>
+        <button type="button" class="inapp-close" aria-label="關閉提示" data-inapp-close>✕</button>
+      </div>
+    </div>
     <main id="main">
       <slot />
     </main>
     <footer class="site-footer">
       <div class="wrap-wide">
         <p>
-          約會的藝術 · 五堂關係課
+          關係練習室 · 給單身者的五晚關係課
           <br />
           <span class="muted small">你在本站填寫的內容只儲存在你自己的瀏覽器裡，不會上傳到任何地方。</span>
         </p>
@@ -72,7 +84,72 @@ const nav = [
   </body>
 </html>
 
+<script>
+  import { inAppName } from '../scripts/inapp.js';
+
+  const box = document.querySelector('[data-inapp]');
+  const name = inAppName();
+  let dismissed = false;
+  try {
+    dismissed = sessionStorage.getItem('aod:inapp-closed') === '1';
+  } catch {
+    /* ignore */
+  }
+  if (box && name && !dismissed) {
+    box.querySelector('[data-inapp-name]').textContent = name;
+    if (name === 'LINE') {
+      // LINE 支援這個參數：用手機的預設瀏覽器打開同一頁
+      const u = new URL(location.href);
+      u.searchParams.set('openExternalBrowser', '1');
+      const open = box.querySelector('[data-inapp-open]');
+      open.href = u.href;
+      open.hidden = false;
+      box.querySelector('[data-inapp-howto]').hidden = true;
+    }
+    box.hidden = false;
+    box.querySelector('[data-inapp-close]').addEventListener('click', () => {
+      box.hidden = true;
+      try {
+        sessionStorage.setItem('aod:inapp-closed', '1');
+      } catch {
+        /* ignore */
+      }
+    });
+  }
+</script>
+
 <style>
+  .inapp {
+    background: var(--gold-soft);
+    border-bottom: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .inapp-bar {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .inapp p {
+    margin: 0;
+    flex: 1;
+  }
+  .inapp a {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .inapp-close {
+    flex: none;
+    min-height: 36px;
+    min-width: 36px;
+    padding: 0;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+  }
   .skip {
     position: absolute;
     left: -999px;
@@ -103,6 +180,9 @@ const nav = [
     min-height: 58px;
   }
   .brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
     font-family: var(--serif);
     font-weight: 700;
     font-size: 1.1rem;
@@ -111,14 +191,18 @@ const nav = [
     white-space: nowrap;
   }
   .brand-mark {
-    color: var(--gold);
-    margin-right: 0.25em;
+    width: 1em;
+    height: 1em;
+    margin-right: 0.4em;
   }
   nav {
     display: flex;
     gap: 2px;
   }
   nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
     color: var(--ink-soft);
     text-decoration: none;
     font-size: 0.92rem;
@@ -139,13 +223,29 @@ const nav = [
     border-top: 1px solid var(--line);
     font-size: 0.95rem;
   }
+  @media (max-width: 640px) {
+    .site-footer {
+      padding-bottom: calc(5em + env(safe-area-inset-bottom));
+    }
+  }
   @media (max-width: 420px) {
+    .bar {
+      gap: 6px;
+    }
     .brand {
       font-size: 1rem;
     }
     nav a {
       padding: 0.4em 0.5em;
       font-size: 0.86rem;
+    }
+  }
+  @media (max-width: 350px) {
+    .brand-mark {
+      display: none;
+    }
+    nav a {
+      padding: 0.4em 0.4em;
     }
   }
 </style>
