@@ -7,6 +7,7 @@ import { url } from '../scripts/paths.js';
 
 const img = (f: string) => url(`assets/img/${f}`);
 const mainAction = '看五堂課';
+const srcset = (name: string, ws: number[]) => ws.map((w) => `${img(`${name}-${w}.jpg`)} ${w}w`).join(', ');
 
 // word-highlight 以空白切字；中文沒有空白，所以先把句子切成詞組，每組一個 span
 const statement: (string | { strong: string })[] = [
@@ -14,13 +15,24 @@ const statement: (string | { strong: string })[] = [
   '好好聆聽、', '好好吵架、', '好好做決定，', '這些', '都', { strong: '學得會' }, '。',
 ];
 
+// 每晚流程：pinned-chapters 三段，捲動時依序展開，右邊照片跟著換
 const evening = [
-  { time: '18:45', title: '入場與破冰', desc: '找到你的桌組，從一個輕鬆的小遊戲開始。' },
-  { time: '19:00', title: '一起晚餐', desc: '同桌 4 到 6 人，五週都坐同一桌。' },
-  { time: '19:30', title: '三段主題', desc: '每段一個短講，接著一個練習。' },
-  { time: '21:00', title: '本週約會實驗', desc: '帶一個小任務回家，在生活裡試試看。' },
-  { time: '21:15', title: '結束', desc: '想多聊可以留下，想早點回家也沒問題。' },
+  { time: '18:45', title: '18:45　入場、破冰，一起吃晚餐', desc: '找到你的桌組，從輕鬆的小遊戲開始。同桌 4 到 6 人，五週都坐同一桌。', img: 'ai-e1-dinner', alt: '燭光長桌上，大家正把台菜一盤盤傳過去' },
+  { time: '19:30', title: '19:30　三段主題：短講加練習', desc: '每段一個短講，接著自己寫、兩人聊或同桌聊。任何問題，你都可以說 pass。', img: 'ai-e2-practice', alt: '兩個人在燭光小桌兩側對坐，一人拿著一張題目卡' },
+  { time: '21:00', title: '21:00　帶一個約會實驗回家', desc: '每週一個小任務，在生活裡試試看。想多聊可以留下，想早點回家也沒問題。', img: 'ai-e3-home', alt: '夜裡在家門口，一隻手把摺好的小卡片放進大衣口袋' },
 ];
+
+// 五堂課：滑過或點一堂，右邊換成那一堂的照片（peek-list）
+const sessionImgs = {
+  1: { img: 'ai-s1-listen', alt: '咖啡館小桌兩側，一人雙手捧著杯子，另一人傾身傾聽' },
+  2: { img: 'ai-s2-repair', alt: '吵完架的餐桌上，一隻手輕輕伸向對方攤開的手' },
+  3: { img: 'ai-s3-choose', alt: '一隻手把一把黃銅鑰匙放進另一個人的掌心' },
+  4: { img: 'ai-s4-share', alt: '晚餐桌上，好幾雙手把菜傳給彼此' },
+  5: { img: 'ai-s5-journey', alt: '兩個人並肩站在山徑上，看著黃昏的台北' },
+};
+
+// 關鍵字跑馬燈
+const keywords = ['聆聽', '好奇心約會', '吵架', '暫停暗號', '選擇', '我的清單', '靠近', '愛的語言', '冒險', '給三個月後的自己'];
 
 // 桌機每題答案一行；more 是手機上多顯示的一句，讓常見問題剛好兩屏
 const faqs = [
@@ -37,16 +49,13 @@ const faqs = [
 <Landing
   title="關係練習室：給單身者的五晚關係課"
   description="五個晚上，一起吃晚餐，用關係研究和練習學會聆聽、吵架、做選擇和靠近。以單身者為主，情侶也歡迎。"
-  moments={['word-highlight', 'picture-develops']}
+  moments={['word-rotate', 'lines-rise', 'counter-rolls', 'word-highlight', 'marquee-row', 'pinned-chapters', 'picture-develops']}
 >
   <style is:inline slot="head">
     /* 頁面 CSS：只放視覺內部與套件沒有的部分 */
     .frame--square { aspect-ratio: 8 / 9; }
     .frame--land { aspect-ratio: 4 / 3; }
     .frame--square > img, .frame--land > img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .develop { margin: 0; border-radius: var(--r-lg); overflow: hidden; height: min(708px, var(--ly-fit, 708px)); }
-    .develop > img { display: block; width: 100%; height: 100%; object-fit: cover; }
-    @media (max-width: 1023px) { .develop { height: auto; aspect-ratio: 4 / 3; margin-top: var(--s-7); } }
     #worries .section-head { align-self: start; }
     .worry { display: flex; flex-direction: column; gap: var(--s-2); }
     .worry h3 { margin: 0; }
@@ -60,24 +69,35 @@ const faqs = [
     .wchart .line { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
     .wchart .mark { fill: var(--accent); }
     .wchart .dot, .wchart .track { fill: rgba(43, 32, 36, .12); }
+    /* 小圖進場：曲線畫出來、點一顆顆亮起、長條伸長（只在捲到時跑一次；減少動態時直接顯示完成） */
+    .wchart .line { stroke-dasharray: 420; stroke-dashoffset: 0; transition: stroke-dashoffset 1.4s cubic-bezier(.22, 1, .36, 1); }
+    .wchart circle.mark, .wchart rect.mark { transform-box: fill-box; transform-origin: left center; transition: opacity .35s ease, transform .9s cubic-bezier(.22, 1, .36, 1); transition-delay: calc(var(--i, 0) * 16ms); }
+    .wchart.wc-wait .line { stroke-dashoffset: 420; }
+    .wchart.wc-wait circle.mark { opacity: 0; transform: scale(.3); }
+    .wchart.wc-wait rect.mark { transform: scaleX(0); }
+    .wchart circle.peak { transform-origin: center; transition-delay: 1.1s; }
     /* 1024 以上四張並排；平板兩欄（照片收起來）；手機一欄 */
     @media (min-width: 1024px) and (max-width: 1279px) { .worry .src { display: none; } }
-    @media (min-width: 640px) and (max-width: 1023px) { .worries > .span-3 { grid-column: span 6; } #worries .frame, .worry .src { display: none; } .develop { aspect-ratio: 1 / 1; } }
+    @media (min-width: 640px) and (max-width: 1023px) { .worries > .span-3 { grid-column: span 6; } #worries .frame, .worry .src { display: none; } }
     /* 手機：四張卡片要在兩屏內，照片和出處收起來（出處在資料來源頁），小圖壓低 */
-    @media (max-width: 639px) { .worries > .span-3 { grid-column: 1 / -1; } #worries .frame, .worry .src { display: none; } .wchart { height: 80px; } .wchart text { display: none; } #worries .t-lead { display: none; } #faq .frame { aspect-ratio: 16 / 25; } #faq .frame img { object-position: 35% 55%; } }
+    @media (max-width: 639px) { .worries > .span-3 { grid-column: 1 / -1; } #worries .frame, .worry .src { display: none; } .wchart { height: 80px; } .wchart text { display: none; } #worries .t-lead { display: none; } #faq .frame { aspect-ratio: 16 / 25; } #faq .frame img { object-position: 46% 55%; } }
     @media (min-width: 640px) { #faq .phone-only { display: none; } }
     .rows__name small { display: block; font-weight: 400; color: var(--muted); font-size: var(--t-small); }
+    /* 關鍵字跑馬燈在結尾大標題上方 */
+    .closing__cta { min-width: 0; }
+    .closing .keywords { min-width: 0; max-width: 100%; overflow: hidden; }
     /* 中文標題只在詞組之間換行（<wbr>），不會斷在詞的中間 */
     #hero-h, #close-h { word-break: keep-all; }
-    /* 平板直立時，課程列表和流程疊成一欄，各給兩個螢幕高 */
-    @media (min-width: 640px) and (max-width: 1023px) { #sessions, #evening, #faq { --h: 2 } }
+    /* 平板直立時，課程列表和常見問題疊成一欄，各給兩個螢幕高 */
+    @media (min-width: 640px) and (max-width: 1023px) { #sessions, #faq { --h: 2 } }
   </style>
 
   <!-- type: service（五晚的關係工作坊，主辦是個人）
        deal: hero photo (data-calm left, 字在色塊裡), nav nav-centre, close close-type, footer footer-columns,
              rhythm dark-band (#evening), buttons tonal, mark arc, palette brand（課程頁原本的米白與酒紅）, type newsreader + Noto TC
-       moments: word-highlight in #statement, picture-develops in #evening
-       照片：全部是 Wikimedia Commons 的替代照片，之後換成課程現場照（見 README） -->
+       moments（應使用者要求加多）: word-rotate (hero h1), counter-rolls (#worries), word-highlight (#statement),
+             lines-rise + peek-list (#sessions), pinned-chapters (#evening), picture-develops (#faq), marquee-row (closing)
+       照片：全部由 AI 生成（Codex 圖像生成），之後可換成課程現場照（見 README） -->
   <header class="nav nav--centre">
     <div class="wrap nav__bar">
       <a class="skip-link" href="#top">跳到主要內容</a>
@@ -119,21 +139,21 @@ const faqs = [
     <section class="hero hero--photo" data-enter data-calm="left" aria-labelledby="hero-h">
       <img
         class="hero__bg"
-        src={img('photo-f22545674-1280.jpg')}
-        srcset={`${img('photo-f22545674-960.jpg')} 960w, ${img('photo-f22545674-1280.jpg')} 1280w, ${img('photo-f22545674-1920.jpg')} 1920w`}
+        src={img('ai-hero-1280.jpg')}
+        srcset={srcset('ai-hero', [960, 1280, 1672])}
         sizes="(max-width: 639px) 189vw, 100vw"
-        width="1920"
-        height="1270"
-        alt="燭光下鋪好白桌巾的長餐桌，杯盤已經擺好"
-        style="--ly-pos: 62% 70%; --ly-pos-phone: 46% 72%"
+        width="1672"
+        height="941"
+        alt="傍晚的台北，燭光長桌已經擺好餐盤，窗外看得到台北 101"
+        style="--ly-pos: 60% 60%; --ly-pos-phone: 64% 62%"
         fetchpriority="high"
         decoding="async"
-        data-source="stand-in"
-        data-subject="stand-in"
+        data-source="client"
+        data-subject="scene"
       />
       <div class="wrap"><div class="hero-text">
         <div class="hero__text">
-          <h1 id="hero-h">給單身的<wbr />五晚<wbr />關係課</h1>
+          <h1 id="hero-h">給<span data-moment="word-rotate" data-moment-opts='{"words": ["單身", "情侶"], "every": 2400}'>單身</span>的<wbr />五晚<wbr />關係課</h1>
           <p class="hero__lead">五個晚上，每晚 18:45 到 21:15。先一起吃晚餐，再用練習學會聆聽、吵架、做選擇和靠近。內容以關係研究為基礎，單身來就好，情侶也歡迎。</p>
           <div class="btn-row">
             <a class="btn btn--primary" href="#sessions">{mainAction}<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"></path><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"></path></svg></a>
@@ -155,27 +175,27 @@ const faqs = [
             <div class="frame frame--photo frame--land span-6 start-7">
               <img
                 class="frame__img"
-                src={img('photo-d183.jpg')}
-                srcset={`${img('photo-d183-500.jpg')} 500w, ${img('photo-d183-960.jpg')} 960w, ${img('photo-d183.jpg')} 1280w`}
+                src={img('ai-worries-1280.jpg')}
+                srcset={srcset('ai-worries', [640, 1280])}
                 sizes="(max-width: 1023px) 100vw, 50vw"
                 width="1280"
-                height="853"
-                alt="深色木桌上一本打開的空白筆記本，一支鉛筆橫放在頁面上"
+                height="720"
+                alt="檯燈下的木桌上，一本攤開的筆記本、一支筆和一杯茶"
                 loading="lazy"
                 decoding="async"
-                data-source="library"
-                data-subject="stand-in"
+                data-source="client"
+                data-subject="scene"
               />
             </div>
           </div>
         </div>
-        <div class="grid worries">
+        <div class="grid worries" data-moment="counter-rolls">
           {
             worries.map((w) => (
               <article class="card worry m-nolift span-3">
                 <h3>{w.q}</h3>
                 <WorryChart chart={w.chart} />
-                <p class="stat"><span class="t-stat">{w.stat}</span> <span class="t-small muted">{w.statLabel}</span></p>
+                <p class="stat"><span class="t-stat">{w.stat}</span> <span class="t-small">{w.statLabel}</span></p>
                 <p>{w.a}</p>
                 <p class="t-small muted src">資料：{w.src}</p>
               </article>
@@ -194,18 +214,18 @@ const faqs = [
       </div>
     </section>
 
-    <section class="section" id="sessions" aria-labelledby="sessions-h">
+    <section class="section" id="sessions" data-moment="lines-rise" aria-labelledby="sessions-h">
       <div class="wrap">
-        <div class="grid">
+        <div class="grid" data-peek>
           <div class="span-5 stack-5">
             <div class="section-head">
               <h2 id="sessions-h">五個晚上的五堂課</h2>
-              <p>每堂有短講、練習，和一個帶回家的約會實驗。點進去就是當晚的上課內容和互動練習。</p>
+              <p>每堂有短講、練習，和一個帶回家的約會實驗。滑過或點一堂看看，點標題就是當晚的上課內容。</p>
             </div>
             <ul class="rows">
               {
                 sessions.map((s) => (
-                  <li>
+                  <li data-peek-to={`s${s.num}`} tabindex="0">
                     <span class="rows__name">
                       <a class="link" href={url(`sessions/${s.num}/`)}>第 {s.num} 堂・{s.title}</a>
                       <small>{s.tagline}</small>
@@ -216,62 +236,49 @@ const faqs = [
               }
             </ul>
           </div>
-          <div class="frame frame--photo frame--square span-6 start-7">
-            <img
-              class="frame__img"
-              src={img('photo-f187328837-1000.jpg')}
-              srcset={`${img('photo-f187328837-500.jpg')} 500w, ${img('photo-f187328837-1000.jpg')} 1000w`}
-              sizes="(max-width: 1023px) 100vw, 50vw"
-              width="1000"
-              height="1493"
-              alt="木頭長桌上，一個人把咖啡倒進兩個小杯子"
-              loading="lazy"
-              decoding="async"
-              data-source="stand-in"
-              data-subject="stand-in"
-            />
+          <div class="frame frame--photo frame--square span-6 start-7 mo-lr__follow">
+            {
+              sessions.map((s, i) => (
+                <img
+                  class="frame__img"
+                  data-peek-for={`s${s.num}`}
+                  src={img(`${sessionImgs[s.num].img}-1024.jpg`)}
+                  srcset={srcset(sessionImgs[s.num].img, [600, 1024])}
+                  sizes="(max-width: 1023px) 100vw, 50vw"
+                  width="1024"
+                  height="1536"
+                  alt={sessionImgs[s.num].alt}
+                  hidden={i > 0}
+                  decoding="async"
+                  data-source="client"
+                  data-subject="scene"
+                />
+              ))
+            }
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section ground-inverse" id="evening" aria-labelledby="evening-h">
-      <div class="wrap">
-        <div class="grid">
-          <div class="span-5 stack-5">
-            <div class="section-head">
-              <h2 id="evening-h">每個晚上的流程</h2>
-              <p>每個練習都標明是自己寫、兩人聊，還是同桌一起聊。任何問題，你都可以說 pass。</p>
-            </div>
-            <ul class="rows">
-              {
-                evening.map((e) => (
-                  <li>
-                    <span class="rows__name">
-                      {e.title}
-                      <small>{e.desc}</small>
-                    </span>
-                    <span class="rows__value">{e.time}</span>
-                  </li>
-                ))
-              }
-            </ul>
-          </div>
-          <figure class="develop span-6 start-7" data-moment="picture-develops">
-            <img
-              src={img('photo-f28663652-1000.jpg')}
-              srcset={`${img('photo-f28663652-500.jpg')} 500w, ${img('photo-f28663652-1000.jpg')} 1000w`}
-              sizes="(max-width: 1023px) 100vw, 50vw"
-              width="1000"
-              height="1520"
-              alt="燭台下擺好的餐盤、餐巾和酒杯"
-              loading="lazy"
-              decoding="async"
-              data-source="stand-in"
-              data-subject="stand-in"
-            />
-          </figure>
+    <section class="section ground-inverse" id="evening" style="--h: 2" data-moment="pinned-chapters" aria-labelledby="evening-h">
+      <div class="wrap mo-pc__grid">
+        <div class="mo-pc__text">
+          <h2 id="evening-h">每個晚上的流程</h2>
+          <ol class="mo-pc__steps">
+            {
+              evening.map((e) => (
+                <li class="mo-pc__step">
+                  <h3>{e.title}</h3>
+                  <p>{e.desc}</p>
+                  <figure class="mo-pc__visual">
+                    <img src={img(`${e.img}-1536.jpg`)} srcset={srcset(e.img, [768, 1536])} sizes="(max-width: 1023px) 100vw, 50vw" alt={e.alt} width="1536" height="1024" decoding="async" data-source="client" data-subject="scene" />
+                  </figure>
+                </li>
+              ))
+            }
+          </ol>
         </div>
+        <div class="mo-pc__visuals frame"></div>
       </div>
     </section>
 
@@ -283,21 +290,21 @@ const faqs = [
               <h2 id="faq-h">常見問題</h2>
               <p class="muted">還有其他問題，課堂上或課後都可以直接問帶領者。</p>
             </div>
-            <div class="frame frame--photo frame--land">
+            <figure class="frame frame--photo frame--land" data-moment="picture-develops">
               <img
                 class="frame__img"
-                src={img('photo-c141.jpg')}
-                srcset={`${img('photo-c141-500.jpg')} 500w, ${img('photo-c141-960.jpg')} 960w, ${img('photo-c141.jpg')} 1280w`}
-                sizes="(max-width: 639px) 200vw, (max-width: 1023px) 100vw, 40vw"
-                width="1280"
-                height="853"
-                alt="雙手捧著一杯熱拿鐵，牛奶正從小鋼杯倒進杯裡"
+                src={img('ai-faq-1280.jpg')}
+                srcset={srcset('ai-faq', [1280, 1774])}
+                sizes="(max-width: 639px) 1068px, (max-width: 1023px) 100vw, 780px"
+                width="1774"
+                height="887"
+                alt="雙手捧著一杯熱茶，窗外是黃昏的台北"
                 loading="lazy"
                 decoding="async"
-                data-source="library"
-                data-subject="stand-in"
+                data-source="client"
+                data-subject="scene"
               />
-            </div>
+            </figure>
           </div>
           <div class="faq span-6 start-7">
             {
@@ -317,11 +324,16 @@ const faqs = [
   <footer class="footer closing" id="contact" aria-labelledby="close-h">
     <div class="wrap">
       <div class="closing__cta close--type">
+        <div class="keywords" aria-label="五堂課會練習的事">
+          <div data-moment="marquee-row" data-moment-opts='{"speed": 30}'>
+            <ul class="mo-mq__track">{keywords.map((k) => <li>{k}</li>)}</ul>
+          </div>
+        </div>
         <div class="section-head">
           <h2 id="close-h">一個人也很好，<wbr />兩個人可以更好。</h2>
           <p class="t-small muted">五個晚上，每晚 18:45 到 21:15，含晚餐。</p>
         </div>
-        <a class="btn btn--primary btn--xl" href="#sessions">{mainAction}<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"></path><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"></path></svg></a>
+        <a class="btn btn--primary btn--xl btn--wide" href="#sessions">{mainAction}<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"></path><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"></path></svg></a>
       </div>
       <div class="closing__links">
         <div class="grid">
@@ -337,9 +349,25 @@ const faqs = [
         <div class="footer__legal">
           <span>&copy; 2026 關係練習室</span>
           <div class="socials"></div>
-          <a class="credits" href={url('credits.html')}>Photographs via Wikimedia Commons</a>
+          <span class="credits">照片皆為 AI 生成的示意圖</span>
         </div>
       </div>
     </div>
   </footer>
+
+  <script is:inline type="module">
+    // 「四個擔心」的小圖：捲到時畫一次；減少動態效果、或瀏覽器不支援時直接顯示完成圖
+    const charts = document.querySelectorAll('.wchart');
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+      charts.forEach((c) => c.classList.add('wc-wait'));
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          e.target.classList.remove('wc-wait');
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.4 });
+      charts.forEach((c) => io.observe(c));
+    }
+  </script>
 </Landing>

@@ -1,5 +1,5 @@
 ---
-// 首頁「四個擔心」卡片上的靜態小圖：滿意度曲線、100 點圖、長條圖。不會動。
+// 首頁「四個擔心」卡片上的小圖：滿意度曲線、100 點圖、長條圖。捲到時由 index.astro 加上進場動畫，沒有腳本時就是完成圖。
 interface Props {
   chart:
     | { type: 'curve' }
@@ -17,7 +17,7 @@ const H = 120;
     <svg class="wchart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="關係滿意度隨交往年數的變化：前 10 年下滑，第 10 年最低，之後回升到第 20 年左右">
       <line class="axis" x1="16" y1="96" x2="264" y2="96" />
       <path class="line" d="M16 22 C 60 40, 92 74, 140 78 S 206 44, 232 46 S 256 54, 264 58" />
-      <circle class="mark" cx="140" cy="78" r="6" />
+      <circle class="mark peak" cx="140" cy="78" r="6" />
       <text x="16" y="116">開始</text>
       <text x="140" y="116" text-anchor="middle">第 10 年</text>
       <text x="264" y="116" text-anchor="end">第 20 年</text>
@@ -30,7 +30,8 @@ const H = 120;
       {Array.from({ length: 100 }, (_, i) => {
         const col = i % 20;
         const row = Math.floor(i / 20);
-        return <circle class={i < chart.value ? 'mark' : 'dot'} cx={18 + col * 13} cy={16 + row * 22} r="5" />;
+        const on = i < chart.value;
+        return <circle class={on ? 'mark' : 'dot'} style={on ? `--i:${i}` : undefined} cx={18 + col * 13} cy={16 + row * 22} r="5" />;
       })}
     </svg>
   )
@@ -42,7 +43,7 @@ const H = 120;
         <g>
           <text x="16" y={34 + i * 44}>{b.name}</text>
           <rect class="track" x="64" y={22 + i * 44} width="200" height="16" rx="8" />
-          <rect class="mark" x="64" y={22 + i * 44} width={b.value * 2} height="16" rx="8" />
+          <rect class="mark" style={`--i:${i * 12}`} x="64" y={22 + i * 44} width={b.value * 2} height="16" rx="8" />
           <text x={72 + b.value * 2} y={35 + i * 44}>{b.value}%</text>
         </g>
       ))}
