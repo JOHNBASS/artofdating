@@ -31,25 +31,24 @@ const sessionImgs = {
   5: { img: 'ai-s5-journey', alt: '兩個人並肩站在山徑上，看著黃昏的台北' },
 };
 
-// 關鍵字跑馬燈
+// 結尾的關鍵字標籤
 const keywords = ['聆聽', '好奇心約會', '吵架', '暫停暗號', '選擇', '我的清單', '靠近', '愛的語言', '冒險', '給三個月後的自己'];
 
-// 桌機每題答案一行；more 是手機上多顯示的一句，讓常見問題剛好兩屏
 const faqs = [
-  { q: '我是單身，會不會很尷尬？', a: '不會。課程以單身者為主，練習可以自己做，或和當晚的夥伴一起做。', more: '不需要帶伴侶來。' },
+  { q: '我是單身，會不會很尷尬？', a: '不會。課程以單身者為主，練習可以自己做，或和當晚的夥伴一起做，不需要帶伴侶來。' },
   { q: '這是聯誼嗎？', a: '不是。我們不配對，也不安排約會；但你會認識一群認真看待關係的人。' },
-  { q: '一定要分享自己的隱私嗎？', a: '不用。私密的題目只自己寫，任何問題都可以說 pass。', more: '每個練習都標明是自己寫、兩人聊，還是同桌聊。' },
-  { q: '這是宗教課程嗎？', a: '不是。創辦人是基督徒，想聊信仰可以私下聊；課程以關係研究為基礎，不傳教。', more: '不需要任何信仰背景。' },
+  { q: '一定要分享自己的隱私嗎？', a: '不用。每個練習都標明是自己寫、兩人聊，還是同桌聊；私密的題目只自己寫，任何問題都可以說 pass。' },
+  { q: '這是宗教課程嗎？', a: '不是。創辦人是基督徒，想聊信仰可以私下聊；課程以關係研究為基礎，不傳教，也不需要任何信仰背景。' },
   { q: '我已經在交往了，可以兩人一起來嗎？', a: '歡迎。兩人一起來時，「兩人」的練習就由你們彼此一組。' },
-  { q: '我在網站上寫的內容，別人看得到嗎？', a: '看不到。內容只存在你自己的瀏覽器裡，不會上傳，也可以隨時清除。', more: '想留著的話，可以傳給自己保存。' },
-  { q: '需要準備什麼？', a: '一支手機，用來打開這個網站做練習；或帶一支筆也可以。', phone: true },
+  { q: '我在網站上寫的內容，別人看得到嗎？', a: '看不到。內容只存在你自己的瀏覽器裡，不會上傳；可以傳給自己保存，也可以隨時清除。' },
+  { q: '需要準備什麼？', a: '一支手機，用來打開這個網站做練習；或帶一支筆也可以。' },
 ];
 ---
 
 <Landing
   title="關係練習室：給單身者的五晚關係課"
   description="五個晚上，一起吃晚餐，用關係研究和練習學會聆聽、吵架、做選擇和靠近。以單身者為主，情侶也歡迎。"
-  moments={['word-rotate', 'lines-rise', 'counter-rolls', 'word-highlight', 'marquee-row', 'pinned-chapters', 'picture-develops']}
+  moments={['word-rotate', 'lines-rise', 'counter-rolls', 'word-highlight', 'pinned-chapters', 'picture-develops']}
 >
   <style is:inline slot="head">
     /* 頁面 CSS：只放視覺內部與套件沒有的部分 */
@@ -76,27 +75,30 @@ const faqs = [
     .wchart.wc-wait circle.mark { opacity: 0; transform: scale(.3); }
     .wchart.wc-wait rect.mark { transform: scaleX(0); }
     .wchart circle.peak { transform-origin: center; transition-delay: 1.1s; }
-    /* 1024 以上四張並排；平板兩欄（照片收起來）；手機一欄 */
-    @media (min-width: 1024px) and (max-width: 1279px) { .worry .src { display: none; } }
-    @media (min-width: 640px) and (max-width: 1023px) { .worries > .span-3 { grid-column: span 6; } #worries .frame, .worry .src { display: none; } }
-    /* 手機：四張卡片要在兩屏內，照片和出處收起來（出處在資料來源頁），小圖壓低 */
-    @media (max-width: 639px) { .worries > .span-3 { grid-column: 1 / -1; } #worries .frame, .worry .src { display: none; } .wchart { height: 80px; } .wchart text { display: none; } #worries .t-lead { display: none; } #faq .frame { aspect-ratio: 16 / 25; } #faq .frame img { object-position: 46% 55%; } }
-    @media (min-width: 640px) { #faq .phone-only { display: none; } }
+    /* 1024 以上四張並排；平板兩欄；手機一欄 */
+    @media (min-width: 640px) and (max-width: 1023px) { .worries > .span-3 { grid-column: span 6; } #worries .frame--land { aspect-ratio: 16 / 9; } }
+    @media (max-width: 639px) { .worries > .span-3 { grid-column: 1 / -1; } }
     .rows__name small { display: block; font-weight: 400; color: var(--muted); font-size: var(--t-small); }
-    /* 關鍵字跑馬燈在結尾大標題上方 */
-    .closing__cta { min-width: 0; }
-    .closing .keywords { min-width: 0; max-width: 100%; overflow: hidden; }
+    /* 結尾大標題上方的關鍵字標籤 */
+    footer.closing ul.keywords { list-style: none; margin: 0 0 var(--s-6); padding: 0; display: flex; flex-flow: row wrap; gap: var(--s-2); width: auto; }
+    footer.closing ul.keywords > li { flex: none; width: auto; margin: 0; padding: 6px 14px; border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); border-radius: 999px; font-size: var(--t-small); color: var(--ink); transition: background-color .15s, border-color .15s, color .15s; }
+    footer.closing ul.keywords > li:hover { background: var(--accent); border-color: var(--accent); color: var(--p-accent-ink); }
     /* 中文標題只在詞組之間換行（<wbr>），不會斷在詞的中間 */
     #hero-h, #close-h { word-break: keep-all; }
-    /* 平板直立時，課程列表和常見問題疊成一欄，各給兩個螢幕高 */
-    @media (min-width: 640px) and (max-width: 1023px) { #sessions, #faq { --h: 2 } }
+    /* 區塊高度依內容決定，不再固定成一屏或兩屏：矮的螢幕不會切字，高的螢幕不會留大片空白。
+       英雄區至少一屏、放不下時自己長高；捲動定格的流程區由它自己的特效決定高度 */
+    main > section.section:not([data-moment="pinned-chapters"]), footer.footer.closing { height: auto !important; min-height: 0 !important; }
+    main > section.section.g2 > .wrap, footer.footer.closing > .wrap { display: flex !important; flex-direction: column; row-gap: var(--s-8) !important; }
+    main > section.section.g2 > .wrap > *, footer.footer.closing > .wrap > * { margin-block: 0 !important; }
+    main > section.hero { height: auto !important; min-height: 100svh; }
+    @media (min-width: 640px) and (max-width: 1023px) { main > section.hero { min-height: 0; } }
   </style>
 
   <!-- type: service（五晚的關係工作坊，主辦是個人）
        deal: hero photo (data-calm left, 字在色塊裡), nav nav-centre, close close-type, footer footer-columns,
              rhythm dark-band (#evening), buttons tonal, mark arc, palette brand（課程頁原本的米白與酒紅）, type newsreader + Noto TC
        moments（應使用者要求加多）: word-rotate (hero h1), counter-rolls (#worries), word-highlight (#statement),
-             lines-rise + peek-list (#sessions), pinned-chapters (#evening), picture-develops (#faq), marquee-row (closing)
+             lines-rise + peek-list (#sessions), pinned-chapters (#evening), picture-develops (#faq)；結尾關鍵字改成靜態標籤（跑馬燈會切到字）
        照片：全部由 AI 生成（Codex 圖像生成），之後可換成課程現場照（見 README） -->
   <header class="nav nav--centre">
     <div class="wrap nav__bar">
@@ -282,7 +284,7 @@ const faqs = [
       </div>
     </section>
 
-    <section class="section" id="faq" style="--hm: 2" aria-labelledby="faq-h">
+    <section class="section" id="faq" aria-labelledby="faq-h">
       <div class="wrap">
         <div class="grid">
           <div class="span-5 stack-5">
@@ -309,9 +311,9 @@ const faqs = [
           <div class="faq span-6 start-7">
             {
               faqs.map((f) => (
-                <div class={f.phone ? 'faq__item phone-only' : 'faq__item'}>
+                <div class="faq__item">
                   <h3>{f.q}</h3>
-                  <p>{f.a}{f.more && <span class="phone-only"> {f.more}</span>}</p>
+                  <p>{f.a}</p>
                 </div>
               ))
             }
@@ -324,11 +326,7 @@ const faqs = [
   <footer class="footer closing" id="contact" aria-labelledby="close-h">
     <div class="wrap">
       <div class="closing__cta close--type">
-        <div class="keywords" aria-label="五堂課會練習的事">
-          <div data-moment="marquee-row" data-moment-opts='{"speed": 30}'>
-            <ul class="mo-mq__track">{keywords.map((k) => <li>{k}</li>)}</ul>
-          </div>
-        </div>
+        <ul class="keywords" aria-label="五堂課會練習的事">{keywords.map((k) => <li>{k}</li>)}</ul>
         <div class="section-head">
           <h2 id="close-h">一個人也很好，<wbr />兩個人可以更好。</h2>
           <p class="t-small muted">五個晚上，每晚 18:45 到 21:15，含晚餐。</p>
