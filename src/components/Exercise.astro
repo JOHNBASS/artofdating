@@ -1,0 +1,70 @@
+---
+import { modes } from '../data/sessions.js';
+
+interface Props {
+  title: string;
+  mode: 'self' | 'pair' | 'table';
+  minutes?: number;
+}
+
+const { title, mode, minutes } = Astro.props;
+const m = modes[mode];
+---
+
+<section class={`exercise mode-${mode}`} data-exercise={title}>
+  <header>
+    <span class="badge" title={m.desc}><span aria-hidden="true">{m.icon}</span>{m.label}</span>
+    {minutes && <span class="minutes">{minutes} 分鐘</span>}
+  </header>
+  <h3>{title}</h3>
+  <div class="body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .exercise {
+    --mode: var(--self);
+    --mode-soft: var(--self-soft);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--mode);
+    border-radius: var(--radius);
+    padding: 18px 18px 8px;
+    margin: 1.8em 0;
+    box-shadow: var(--shadow);
+  }
+  .mode-pair {
+    --mode: var(--pair);
+    --mode-soft: var(--pair-soft);
+  }
+  .mode-table {
+    --mode: var(--table);
+    --mode-soft: var(--table-soft);
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+  }
+  .badge {
+    display: inline-flex;
+    gap: 0.35em;
+    align-items: center;
+    background: var(--mode-soft);
+    color: var(--mode);
+    font-weight: 700;
+    padding: 0.15em 0.75em;
+    border-radius: 999px;
+  }
+  .minutes {
+    color: var(--ink-soft);
+  }
+  h3 {
+    margin: 0.5em 0 0.6em;
+  }
+  .body :global(p:last-child) {
+    margin-bottom: 0.8em;
+  }
+</style>

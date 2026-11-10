@@ -1,0 +1,261 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="帶領者計時器" description="投影用的對話倒數計時器，適合課堂中的兩人或桌組練習。">
+  <section class="timer-page wrap-wide" data-timer>
+    <input
+      class="prompt"
+      type="text"
+      placeholder="輸入現在的練習題目（例如：猜猜我是哪一邊）"
+      aria-label="練習題目"
+      data-prompt
+    />
+    <div class="display" data-display aria-live="off">10:00</div>
+    <div class="progress" aria-hidden="true"><span data-bar></span></div>
+
+    <div class="presets" role="group" aria-label="預設時間">
+      {[3, 5, 8, 10, 12, 15].map((m) => <button type="button" data-min={m}>{m} 分</button>)}
+      <label class="custom">
+        <input type="number" min="1" max="90" value="10" aria-label="自訂分鐘" data-custom />
+        <span>分</span>
+      </label>
+    </div>
+
+    <div class="controls">
+      <button type="button" class="btn-primary big" data-toggle>開始</button>
+      <button type="button" data-reset>重設</button>
+      <button type="button" data-full>全螢幕</button>
+      <label class="sound"><input type="checkbox" checked data-sound /> 結束時輕響提示</label>
+    </div>
+    <p class="muted small help">快捷鍵：空白鍵開始或暫停，R 重設，F 全螢幕。剩下一分鐘時數字會變色。</p>
+  </section>
+</Base>
+
+<script>
+  const root = document.querySelector('[data-timer]');
+  const display = root.querySelector('[data-display]');
+  const bar = root.querySelector('[data-bar]');
+  const toggle = root.querySelector('[data-toggle]');
+  const custom = root.querySelector('[data-custom]');
+  const sound = root.querySelector('[data-sound]');
+  const prompt = root.querySelector('[data-prompt]');
+
+  let total = 600;
+  let remaining = 600;
+  let endAt = 0;
+  let tick = null;
+  let wakeLock = null;
+
+  const fmt = (s) => {
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+  };
+
+  function render() {
+    display.textContent = fmt(Math.max(0, Math.ceil(remaining)));
+    display.classList.toggle('warn', remaining <= 60 && remaining > 0);
+    display.classList.toggle('done', remaining <= 0);
+    bar.style.width = `${(1 - remaining / total) * 100}%`;
+  }
+
+  function chime() {
+    if (!sound.checked) return;
+    try {
+      const ctx = new AudioContext();
+      [0, 0.45, 0.9].forEach((t, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = [660, 880, 990][i];
+        g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + t + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 1.2);
+        o.connect(g).connect(ctx.destination);
+        o.start(ctx.currentTime + t);
+        o.stop(ctx.currentTime + t + 1.3);
+      });
+    } catch {
+      /* 不支援音效時略過 */
+    }
+  }
+
+  async function keepAwake(on) {
+    try {
+      if (on && 'wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+      else if (!on && wakeLock) {
+        await wakeLock.release();
+        wakeLock = null;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function stop() {
+    clearInterval(tick);
+    tick = null;
+    toggle.textContent = remaining > 0 ? '繼續' : '開始';
+    keepAwake(false);
+  }
+
+  function start() {
+    if (remaining <= 0) remaining = total;
+    endAt = Date.now() + remaining * 1000;
+    toggle.textContent = '暫停';
+    keepAwake(true);
+    tick = setInterval(() => {
+      remaining = (endAt - Date.now()) / 1000;
+      if (remaining <= 0) {
+        remaining = 0;
+        render();
+        stop();
+        toggle.textContent = '開始';
+        chime();
+        return;
+      }
+      render();
+    }, 200);
+  }
+
+  function setMinutes(m) {
+    stop();
+    total = Math.max(1, Math.min(90, Number(m) || 10)) * 60;
+    remaining = total;
+    toggle.textContent = '開始';
+    render();
+  }
+
+  root.querySelectorAll('[data-min]').forEach((b) =>
+    b.addEventListener('click', () => {
+      custom.value = b.dataset.min;
+      setMinutes(b.dataset.min);
+    }),
+  );
+  custom.addEventListener('change', () => setMinutes(custom.value));
+  toggle.addEventListener('click', () => (tick ? stop() : start()));
+  root.querySelector('[data-reset]').addEventListener('click', () => setMinutes(total / 60));
+
+  function fullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else root.requestFullscreen?.();
+  }
+  root.querySelector('[data-full]').addEventListener('click', fullscreen);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target === prompt || e.target === custom) return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      tick ? stop() : start();
+    } else if (e.key === 'r' || e.key === 'R') setMinutes(total / 60);
+    else if (e.key === 'f' || e.key === 'F') fullscreen();
+  });
+
+  render();
+</script>
+
+<style>
+  .timer-page {
+    padding-top: 2em;
+    text-align: center;
+    background: var(--bg);
+    min-height: 70vh;
+  }
+  .timer-page:fullscreen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4vh 4vw;
+    max-width: none;
+  }
+  .prompt {
+    text-align: center;
+    font-family: var(--serif);
+    font-size: clamp(1.1rem, 3.5vw, 2rem);
+    border: none;
+    background: transparent;
+    border-bottom: 1px dashed var(--line);
+    border-radius: 0;
+  }
+  .display {
+    font-family: var(--serif);
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(5rem, 24vw, 16rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0.15em 0 0.1em;
+    transition: color 0.3s;
+  }
+  .display:global(.warn) {
+    color: var(--gold);
+  }
+  .display:global(.done) {
+    color: var(--accent);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    50% {
+      opacity: 0.45;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .display:global(.done) {
+      animation: none;
+    }
+  }
+  .progress {
+    height: 6px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    max-width: 720px;
+    margin: 0 auto 2em;
+  }
+  .progress span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--gold), var(--accent));
+    transition: width 0.2s linear;
+  }
+  .presets,
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .custom input {
+    width: 4.5em;
+    font: inherit;
+    padding: 0.45em 0.5em;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--ink);
+    text-align: center;
+  }
+  .big {
+    min-width: 8em;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+  .sound {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .help {
+    margin-top: 1em;
+  }
+</style>

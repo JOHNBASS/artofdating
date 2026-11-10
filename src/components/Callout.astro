@@ -1,0 +1,52 @@
+---
+interface Props {
+  type?: 'note' | 'care' | 'research' | 'experiment';
+  title?: string;
+}
+
+const { type = 'note', title } = Astro.props;
+const icons = { note: '✦', care: '♡', research: '❋', experiment: '☾' };
+---
+
+<aside class={`callout ${type}`}>
+  {
+    title && (
+      <p class="title">
+        <span aria-hidden="true">{icons[type]}</span> {title}
+      </p>
+    )
+  }
+  <slot />
+</aside>
+
+<style>
+  .callout {
+    border-radius: var(--radius);
+    padding: 14px 18px 4px;
+    margin: 1.6em 0;
+    background: var(--surface-2);
+  }
+  .care {
+    background: var(--accent-soft);
+  }
+  .research {
+    background: var(--self-soft);
+  }
+  .experiment {
+    background: var(--gold-soft);
+    border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  }
+  .title {
+    font-weight: 700;
+    margin-bottom: 0.4em;
+  }
+  .care .title {
+    color: var(--accent);
+  }
+  .research .title {
+    color: var(--self);
+  }
+  .experiment .title {
+    color: var(--gold);
+  }
+</style>

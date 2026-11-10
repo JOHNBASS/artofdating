@@ -1,0 +1,88 @@
+---
+interface Props {
+  decks: { name: string; cards: string[] }[];
+  button?: string;
+  empty?: string;
+}
+
+const { decks, button = '抽一張', empty = '選一副牌，按下「抽一張」' } = Astro.props;
+---
+
+<div class="cards" data-cards={JSON.stringify(decks)}>
+  {
+    decks.length > 1 && (
+      <div class="tabs" role="group" aria-label="選擇牌組">
+        {decks.map((d) => (
+          <button type="button" data-deck aria-pressed="false">
+            {d.name}
+          </button>
+        ))}
+      </div>
+    )
+  }
+  <div class="face" data-card-face aria-live="polite">{empty}</div>
+  <div class="row">
+    <button type="button" class="btn-primary" data-draw>{button}</button>
+    <span class="muted small" data-card-meta></span>
+  </div>
+</div>
+
+<style>
+  .cards {
+    margin: 0 0 1.2em;
+  }
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .tabs button {
+    min-height: 38px;
+    padding: 0.3em 0.9em;
+    font-size: 0.9rem;
+  }
+  .tabs button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .face {
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 20px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--gold-soft));
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    line-height: 1.6;
+  }
+  .face:global(.flip) {
+    animation: flip 0.35s ease;
+  }
+  @keyframes flip {
+    from {
+      transform: rotateX(70deg);
+      opacity: 0.2;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .face:global(.flip) {
+      animation: none;
+    }
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+</style>

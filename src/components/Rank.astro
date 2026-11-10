@@ -1,0 +1,68 @@
+---
+interface Props {
+  id: string;
+  items: { name: string; desc?: string }[];
+  columns: string[];
+}
+
+const { id, items, columns } = Astro.props;
+const options = items.map((_, i) => i + 1);
+---
+
+<div class="rank table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">方式</th>
+        {columns.map((c) => <th scope="col">{c}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {
+        items.map((item, i) => (
+          <tr>
+            <th scope="row">
+              {item.name}
+              {item.desc && <span class="desc">{item.desc}</span>}
+            </th>
+            {columns.map((c, ci) => (
+              <td>
+                <select
+                  aria-label={`${item.name}：${c}`}
+                  data-save={`${id}:${i}:${ci}`}
+                  data-label={`${c}｜${item.name}（第幾名）`}
+                >
+                  <option value="">—</option>
+                  {options.map((n) => (
+                    <option value={String(n)}>{n}</option>
+                  ))}
+                </select>
+              </td>
+            ))}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+  <p class="muted small">1 代表最重要。每一欄裡，每個數字只用一次。</p>
+</div>
+
+<style>
+  .rank {
+    margin: 0 0 1.1em;
+  }
+  th[scope='row'] {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .desc {
+    display: block;
+    color: var(--ink-soft);
+    font-weight: 400;
+    font-size: 0.85rem;
+  }
+  select {
+    min-width: 4.2em;
+    padding: 0.35em 0.4em;
+  }
+</style>

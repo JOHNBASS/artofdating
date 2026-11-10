@@ -1,0 +1,50 @@
+---
+interface Props {
+  id: string;
+  before: string;
+  sample: string;
+}
+
+const { id, before, sample } = Astro.props;
+---
+
+<div class="rewrite">
+  <p class="before"><span class="tag">原句</span>{before}</p>
+  <textarea rows="2" placeholder="試著改寫成⋯⋯" aria-label={`改寫：${before}`} data-save={id} data-label={`改寫「${before}」`}></textarea>
+  <details>
+    <summary>看一種參考寫法</summary>
+    <p>{sample}</p>
+  </details>
+</div>
+
+<style>
+  .rewrite {
+    margin: 0 0 1.2em;
+    padding-bottom: 0.4em;
+    border-bottom: 1px dashed var(--line);
+  }
+  .before {
+    margin-bottom: 0.5em;
+  }
+  .tag {
+    font-size: 0.75rem;
+    background: var(--surface-2);
+    color: var(--ink-soft);
+    padding: 0.1em 0.6em;
+    border-radius: 999px;
+    margin-right: 0.6em;
+    vertical-align: 2px;
+  }
+  details {
+    margin: 0.5em 0;
+    font-size: 0.95rem;
+  }
+  summary {
+    cursor: pointer;
+    color: var(--accent);
+  }
+  details p {
+    margin: 0.4em 0 0;
+    color: var(--ink-soft);
+  }
+</style>

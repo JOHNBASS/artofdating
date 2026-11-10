@@ -1,0 +1,133 @@
+---
+layout: ../../layouts/Session.astro
+num: 3
+---
+import Exercise from '../../components/Exercise.astro';
+import Reflect from '../../components/Reflect.astro';
+import Spectrum from '../../components/Spectrum.astro';
+import Checklist from '../../components/Checklist.astro';
+import Chips from '../../components/Chips.astro';
+import Lists from '../../components/Lists.astro';
+import Callout from '../../components/Callout.astro';
+
+<Callout title="今晚流程">
+- 18:45 入場、上週約會實驗分享
+- 19:00 晚餐
+- 19:30 一、心動，和決定去愛
+- 20:00 二、我真正在找什麼
+- 20:35 三、錢，和家人的期待
+- 21:05 本週約會實驗
+</Callout>
+
+## 開場：上週的暫停暗號
+
+<Exercise title="上週約會實驗分享" mode="table" minutes={10}>
+你們約定了什麼暫停暗號？有沒有派上用場？哪一個暗號最有創意？
+</Exercise>
+
+## 一、心動，和決定去愛
+
+剛開始喜歡一個人的時候，我們會一直想著他，看到的都是優點，覺得對方就是對的人。這種心動很美好，但它通常不會一直維持在高點。很多研究者認為，熱戀的強烈感受大約維持幾個月到兩三年。
+
+心動退去不代表愛結束了，反而是另一種愛的開始。心理學家佛洛姆在《愛的藝術》裡說：愛不只是一種「掉進去」的感覺，更是一種需要學習、需要練習的能力，也是一個選擇。
+
+| 心動 | 成熟的愛 |
+|---|---|
+| 被感覺帶著走 | 感覺之外，還有選擇 |
+| 看到想像中的對方 | 認識真實的對方，包括缺點 |
+| 急著確定 | 願意花時間了解 |
+| 「你讓我好快樂」 | 「我想讓我們都更好」 |
+
+### 決定，還是順著滑過去？
+
+心理學家 Scott Stanley 研究發現，很多關係的重大轉折，例如確認關係、同居、見家長，其實都不是真的「決定」的，而是**順著情況滑過去**：「反正房租到期了，就搬在一起吧。」
+
+順著滑進去的事，往往比較難滑出來。用「決定」的方式走進下一步，兩個人會更清楚自己為什麼在這裡，也更願意為它負責。
+
+<Exercise title="我的關係里程碑" mode="self" minutes={6}>
+下面這些關係里程碑，你希望用「決定」的方式走過哪些？（勾選代表：我想在這一步之前，先和對方好好談過。）
+<Checklist id="milestones" items={[
+  '確認我們是在交往（不再曖昧）',
+  '讓朋友和社群知道我們在一起',
+  '見彼此的家人',
+  '發生親密關係',
+  '一起出遊過夜',
+  '同居',
+  '合併部分財務（例如一起存錢、買東西）',
+  '談論結婚',
+]} />
+<Reflect id="slid" label="回想一個我「順著滑過去」的決定（不一定是感情）。如果重來，我會怎麼做？" rows={3} />
+</Exercise>
+
+## 二、我真正在找什麼
+
+很多人說不出自己想要什麼樣的關係，卻很清楚上一段為什麼失敗。把它寫下來，能讓你在心動的時候，仍然保有清楚的眼光。
+
+<Exercise title="我的三張清單" mode="self" minutes={12}>
+<Lists id="lists" groups={[
+  { title: '必要的', hint: '少了它，我在關係裡會很辛苦', count: 5 },
+  { title: '不可妥協的', hint: '出現就是紅線，我會離開', count: 5 },
+  { title: '可以商量的', hint: '有了很好，沒有也能接受', count: 5 },
+]} />
+<p class="muted small">小提醒：「必要的」最好是品格和價值觀（例如誠實、願意溝通），而不只是條件（身高、收入）。條件常常會變，品格比較不會。</p>
+<Reflect id="lists-origin" label="哪一項的背後有一個故事？它是從哪裡來的？" rows={3} />
+</Exercise>
+
+<Exercise title="說說我的清單" mode="pair" minutes={10}>
+從三張清單裡各挑一項，告訴夥伴（或伴侶）它背後的故事。聽的人用上一堂的「複述、命名、好奇」回應。
+
+情侶可以交換清單比對：有哪些地方很一致？有哪些需要再多聊聊？
+</Exercise>
+
+## 三、錢，和家人的期待
+
+**錢**很少只是錢。對有些人來說，錢代表安全；對有些人來說，錢代表自由，或者愛、權力、焦慮。我們對錢的感覺，大多是從家裡學來的。
+
+<Exercise title="我的金錢故事" mode="self" minutes={7}>
+<Chips id="money-means" label="對我來說，錢最像是⋯⋯（最多選 3 個）" max={3} items={[
+  '安全感', '自由', '成就', '愛與照顧', '壓力', '焦慮', '權力', '享受', '責任', '尊嚴',
+]} />
+<Spectrum id="money" rows={[
+  { left: '喜歡存錢', right: '喜歡花錢' },
+  { left: '會記帳、做預算', right: '大概知道就好' },
+  { left: '約會應該 AA 制', right: '應該由一方請客' },
+  { left: '財務完全分開', right: '財務盡量一起' },
+]} />
+<Reflect id="money-home" label="小時候，家裡怎麼談錢（或不談錢）？" rows={3} />
+</Exercise>
+
+**家人的期待**也是約會中很真實的壓力：被催婚、被問「什麼時候帶回來給我們看」、父母對另一半有條件、家裡希望你住在附近⋯⋯
+
+離開父母不代表不孝順，而是成為一個能自己做決定的大人。這對你未來的伴侶也是一種保護。
+
+<Callout type="note" title="溫柔又清楚的句型">
+「我知道你們是關心我。我現在想⋯⋯。等我準備好了，會主動跟你們說。」
+
+先肯定對方的心意，再清楚說出你的決定，不必辯論、不必解釋太多。
+</Callout>
+
+<Exercise title="家人的期待" mode="table" minutes={12}>
+桌組輪流分享，挑你願意說的部分就好：
+- 我家對我的感情，最常有的期待或壓力是什麼？
+- 我希望未來和伴侶的家人，維持什麼樣的距離？
+- 用上面的句型，練習回應一句你最常聽到的催婚台詞。
+<Reflect id="family-line" label="我最常聽到的一句台詞，和我想怎麼回應" rows={3} />
+</Exercise>
+
+## 本週約會實驗：我的清單對談
+
+<Exercise title="我的清單對談" mode="self">
+選一位你信任、也了解你的人：好朋友、家人、交往對象，或練習夥伴。給他看你的三張清單，問他：
+
+1. 你覺得我的清單裡，有沒有我自己沒發現的盲點？
+2. 你看過我在感情裡最常重複的模式是什麼？
+
+<Reflect id="exp-feedback" label="對方給我的回饋" rows={3} />
+<Reflect id="exp-change" label="聽完之後，我想修改清單上的⋯⋯" rows={2} />
+</Exercise>
+
+## 延伸閱讀
+
+- 佛洛姆，《愛的藝術》
+- Scott Stanley，《The Power of Commitment》，以及他關於「sliding vs. deciding」的研究
+- Logan Ury，《How to Not Die Alone》

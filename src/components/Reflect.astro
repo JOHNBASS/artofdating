@@ -1,0 +1,27 @@
+---
+interface Props {
+  id: string;
+  label: string;
+  placeholder?: string;
+  rows?: number;
+}
+
+const { id, label, placeholder = '寫下你的想法⋯⋯', rows = 4 } = Astro.props;
+const fid = `f-${id}`;
+---
+
+<div class="reflect">
+  <label for={fid}>{label}</label>
+  <textarea id={fid} rows={rows} placeholder={placeholder} data-save={id} data-label={label}></textarea>
+</div>
+
+<style>
+  .reflect {
+    margin: 0 0 1.1em;
+  }
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.35em;
+  }
+</style>

@@ -1,0 +1,47 @@
+---
+interface Props {
+  id: string;
+  items: string[];
+}
+
+const { id, items } = Astro.props;
+---
+
+<ul class="checklist">
+  {
+    items.map((item, i) => (
+      <li>
+        <label>
+          <input type="checkbox" data-save={`${id}:${i}`} data-label={item} />
+          <span>{item}</span>
+        </label>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1em;
+  }
+  li {
+    margin: 0;
+  }
+  label {
+    display: flex;
+    gap: 0.7em;
+    align-items: flex-start;
+    padding: 0.5em 0.2em;
+    border-bottom: 1px dashed var(--line);
+    cursor: pointer;
+  }
+  input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0.3em;
+    accent-color: var(--accent);
+    flex: none;
+  }
+</style>

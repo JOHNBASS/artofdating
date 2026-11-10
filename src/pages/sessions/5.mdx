@@ -1,0 +1,146 @@
+---
+layout: ../../layouts/Session.astro
+num: 5
+---
+import Exercise from '../../components/Exercise.astro';
+import Reflect from '../../components/Reflect.astro';
+import Spectrum from '../../components/Spectrum.astro';
+import Chips from '../../components/Chips.astro';
+import Rewrite from '../../components/Rewrite.astro';
+import Callout from '../../components/Callout.astro';
+
+<Callout title="今晚流程">
+- 18:45 入場、上週約會實驗分享
+- 19:00 晚餐
+- 19:30 一、欣賞的眼光
+- 19:50 二、放下不切實際的劇本
+- 20:10 三、我的地雷地圖
+- 20:30 四、人生的優先次序
+- 20:45 五、風箏與錨
+- 21:00 結業：寫在背上的欣賞
+</Callout>
+
+## 開場：上週的約會實驗
+
+<Exercise title="上週約會實驗分享" mode="table" minutes={10}>
+你用誰的愛的語言愛了他一次？對方的反應有沒有讓你意外？
+</Exercise>
+
+一段關係就像一趟旅程。最後一堂，我們不談技巧，而是談**帶著什麼樣的自己出發**。
+
+## 一、欣賞的眼光
+
+我們的眼睛很容易盯著缺點。有趣的是，當初吸引我們的優點，背面往往就是後來讓我們抓狂的地方：有主見的人，有時很固執；隨和的人，有時好像沒意見；浪漫的人，有時不太實際。
+
+<Callout type="research" title="五比一">
+Gottman 在研究中發現，關係穩定的伴侶即使在爭執時，正面互動（關心、幽默、肯定、感謝）和負面互動（批評、不耐煩）的比例也大約是五比一。欣賞不是錦上添花，它是關係的地基。
+</Callout>
+
+<Exercise title="優點的背面" mode="self" minutes={5}>
+<Reflect id="flip" label="我有哪一個優點，它的背面可能讓別人很頭痛？" rows={2} placeholder="例如：我很有效率 → 背面是我容易催人、沒耐心" />
+<Reflect id="flip-other" label="我身邊的人有哪一個讓我頭痛的特質，換個角度看其實是優點？" rows={2} />
+</Exercise>
+
+<Exercise title="說出你的欣賞" mode="pair" minutes={8}>
+經過五週，你對你的夥伴（或伴侶）一定有些認識了。寫下三個你欣賞他的地方，要具體，最好附上一個你看見的時刻。然後輪流唸給對方聽。
+
+聽的人只需要說「謝謝」，不需要謙虛或反駁。
+<Reflect id="appreciate" label="我欣賞你的三件事" rows={4} placeholder="1. 我欣賞你⋯⋯，因為那次我看到你⋯⋯&#10;2.&#10;3." />
+</Exercise>
+
+## 二、放下不切實際的劇本
+
+我們對愛情的想像，常常來自偶像劇、電影、社群上的完美情侶，或是「對的人就在某處等我」的信念。這些劇本很美，但真實的人永遠演不出來。
+
+帶著劇本的人，常常陷入一個循環：期待對方完美 → 失望 → 怪對方 → 換一個人 → 再次失望。
+
+沒有人能滿足我們所有的需要。好的關係，是兩個不完美的人，願意在真實的日子裡一起練習。
+
+<Exercise title="改寫我的愛情劇本" mode="self" minutes={8}>
+<Chips id="script-from" label="我對愛情的想像主要來自⋯⋯" items={[
+  '偶像劇與電影', '社群上的情侶', '父母的關係', '朋友的經驗', '歌詞', '小說或漫畫', '信仰或價值觀', '過去的戀愛',
+]} />
+試著改寫下面這些常見的劇本：
+<Rewrite id="s1" before="對的人會懂我，不用我說。" sample="再懂我的人，也需要我說出口。願意聽我說的人，就是一個好的開始。" />
+<Rewrite id="s2" before="真愛應該一直有心動的感覺。" sample="心動會起伏。真正的愛，是在平淡的日子裡，仍然選擇彼此。" />
+<Rewrite id="s3" before="如果他真的愛我，就會為我改變。" sample="我能改變的只有我自己。我要找的，是一個我願意接受他現在樣子的人。" />
+<Reflect id="script-mine" label="還有一個我想改寫的劇本⋯⋯" rows={2} />
+</Exercise>
+
+## 三、我的地雷地圖
+
+有時候，我們對一件小事的反應大到連自己都嚇一跳：別人催一下就火大、訊息晚回就焦慮、被開玩笑就受傷。
+
+這些「地雷」通常不是今天才埋下的，而是和過去的經驗連在一起。認出自己的地雷，不是為了怪罪過去，而是讓我們不再被它牽著走，也讓靠近我們的人知道怎麼避開它。
+
+<Exercise title="畫出我的地雷地圖" mode="self" minutes={10}>
+<Reflect id="mine-when" label="當⋯⋯的時候，我的反應常常比事情本身還大。" rows={2} placeholder="例如：別人臨時改計畫的時候" />
+<Reflect id="mine-why" label="這可能和我過去的⋯⋯有關。" rows={3} placeholder="例如：小時候家裡常常說好的事又取消，我學會了不要期待" />
+<Reflect id="mine-help" label="我希望身邊的人可以這樣幫我⋯⋯" rows={2} placeholder="例如：如果要改計畫，盡量早一點告訴我，並說明原因" />
+<Reflect id="mine-self" label="而我自己可以這樣照顧自己⋯⋯" rows={2} />
+</Exercise>
+
+<Callout type="care" title="如果地雷埋得很深">
+有些地雷連著很深的傷，例如失去、被拋下、被傷害。願意看見它已經很勇敢了。你不需要一個人拆它，專業諮商師可以陪你走這段路，課後也歡迎私下找帶領者聊聊。
+</Callout>
+
+## 四、人生的優先次序
+
+兩個人的個性可以很不一樣，但如果**在乎的東西**很接近，關係會走得比較穩。在進入一段關係之前，先知道自己在乎什麼。
+
+<Exercise title="我的前五名" mode="self" minutes={8}>
+<Chips id="values" label="選出現在對你最重要的五項" max={5} items={[
+  '健康', '家人', '伴侶關係', '友誼', '工作與事業', '財務安全', '信仰與靈性', '學習成長', '冒險與旅行', '創作', '服務與回饋社會', '享受生活', '養育孩子', '自由', '安穩',
+]} />
+<Reflect id="values-do" label="為每一項寫下一個「下個月就能做」的具體行動" rows={5} placeholder="例如：友誼 → 每個月約一位老朋友吃飯" />
+</Exercise>
+
+<Exercise title="比一比我們的前五名" mode="pair" minutes={8}>
+交換你們的前五名。有哪些重疊？有哪些完全不同？
+
+情侶可以聊：哪些不同可以互補？哪些需要好好談？單身的夥伴可以聊：如果將來交往，你希望對方的前五名裡一定要有哪一項？
+</Exercise>
+
+## 五、風箏與錨
+
+心理治療師 Esther Perel 指出：在關係裡，人同時渴望兩種相反的東西，一種是**安全感**，一種是**新鮮感**。
+
+有些人比較像**風箏**：喜歡出發、變化、新的可能。有些人比較像**錨**：喜歡穩定、熟悉、回家的感覺。兩種都很好，而好的關係兩種都需要：兩個風箏要記得回家，兩個錨要記得出發。
+
+<Exercise title="我是風箏還是錨？" mode="self" minutes={5}>
+<Spectrum id="kite" rows={[
+  { left: '週末想出門探索', right: '週末想在家充電' },
+  { left: '旅行喜歡即興', right: '旅行喜歡排好行程' },
+  { left: '遇到新機會：先跳再說', right: '遇到新機會：想清楚再動' },
+  { left: '喜歡驚喜', right: '喜歡事先知道' },
+  { left: '生活要有變化才有活力', right: '規律讓我安心' },
+]} />
+</Exercise>
+
+<Exercise title="人體光譜" mode="table" minutes={8}>
+全場起立。帶領者唸出一組題目，大家依照自己的傾向，在教室兩端之間站成一排：左邊是風箏，右邊是錨。看看誰和你站得最近，誰離你最遠。
+</Exercise>
+
+## 結業：寫在背上的欣賞
+
+<Exercise title="寫在背上的欣賞" mode="table" minutes={10}>
+每個人在背上貼一張白紙。音樂響起時，在教室裡走動，在同學背上寫下一句你欣賞他的話。不署名也可以。
+
+結束前，把紙取下來，安靜讀完。這是你帶回家的禮物。
+</Exercise>
+
+<Exercise title="給三個月後的自己" mode="self" minutes={8}>
+寫一封信給三個月後的自己。這五週，你最想記住什麼？你想帶著哪一個改變繼續走下去？
+<Reflect id="letter" label="親愛的自己⋯⋯" rows={8} />
+<p class="muted small">寫完後按頁面下方的「下載我的筆記」存起來，並在手機行事曆設一個三個月後的提醒。</p>
+</Exercise>
+
+<Callout type="experiment" title="課程結束，關係沒有結束">
+和你的桌組約一次同學會吧。這五個晚上，你練習了聆聽、吵架、選擇、靠近和冒險，也認識了一群一樣認真看待關係的人。這本身，就是最好的開始。
+</Callout>
+
+## 延伸閱讀
+
+- Esther Perel，《情慾徒刑》
+- John Gottman、Nan Silver，《七個讓愛延續的方法》
+- 佛洛姆，《愛的藝術》

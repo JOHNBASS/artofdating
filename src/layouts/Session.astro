@@ -1,0 +1,254 @@
+---
+import Base from './Base.astro';
+import { sessions, modes } from '../data/sessions.js';
+import { url } from '../scripts/paths.js';
+
+const { frontmatter } = Astro.props;
+const num = Number(frontmatter.num);
+const s = sessions.find((x) => x.num === num);
+const prev = sessions.find((x) => x.num === num - 1);
+const next = sessions.find((x) => x.num === num + 1);
+---
+
+<Base title={`第 ${num} 堂・${s.title}`} description={s.summary}>
+  <div data-notes-page={`s${num}`}>
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">第 {num} 堂 · {s.theme}</p>
+        <h1 data-session-title>{s.title}</h1>
+        <p class="tagline">{s.tagline}</p>
+        <p class="summary">{s.summary}</p>
+        <ul class="legend" aria-label="練習方式">
+          {
+            Object.entries(modes).map(([k, m]) => (
+              <li class={`m-${k}`}>
+                <span aria-hidden="true">{m.icon}</span>
+                <strong>{m.label}</strong>
+                <span class="muted">{m.desc}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <nav class="session-tabs wrap" aria-label="五堂課">
+      {
+        sessions.map((x) => (
+          <a href={url(`sessions/${x.num}/`)} aria-current={x.num === num ? 'page' : undefined}>
+            <span class="n">{x.num}</span>
+            <span class="t">{x.title}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    <article class="wrap content">
+      <slot />
+    </article>
+
+    <div class="wrap">
+      <div class="toolbar">
+        <div>
+          <strong>我的筆記</strong>
+          <p class="muted small">這一堂填寫的內容只存在這台裝置。可以下載成文字檔留念，或清除重來。</p>
+        </div>
+        <div class="actions">
+          <button type="button" data-export>下載我的筆記</button>
+          <button type="button" data-clear>清除這一堂</button>
+        </div>
+      </div>
+
+      <nav class="pager" aria-label="上一堂與下一堂">
+        {
+          prev ? (
+            <a href={url(`sessions/${prev.num}/`)} class="prev">
+              <span class="muted small">← 上一堂</span>
+              {prev.title}
+            </a>
+          ) : (
+            <a href={url('')} class="prev">
+              <span class="muted small">← 回到</span>
+              課程介紹
+            </a>
+          )
+        }
+        {
+          next ? (
+            <a href={url(`sessions/${next.num}/`)} class="next">
+              <span class="muted small">下一堂 →</span>
+              {next.title}
+            </a>
+          ) : (
+            <a href={url('')} class="next">
+              <span class="muted small">完成了 →</span>
+              回到課程介紹
+            </a>
+          )
+        }
+      </nav>
+    </div>
+    <p class="save-status" data-save-status role="status"></p>
+  </div>
+</Base>
+
+<script>
+  import '../scripts/notes.js';
+</script>
+
+<style>
+  .hero {
+    background:
+      radial-gradient(1200px 400px at 85% -10%, var(--gold-soft), transparent 60%),
+      radial-gradient(900px 400px at -10% 0%, var(--accent-soft), transparent 60%);
+    padding: 2.5em 0 1.5em;
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    margin: 0;
+  }
+  h1 {
+    margin: 0.15em 0 0.1em;
+  }
+  .tagline {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+  }
+  .summary {
+    max-width: 36em;
+  }
+  .legend {
+    list-style: none;
+    padding: 0;
+    margin: 1.2em 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 0.88rem;
+  }
+  .legend li {
+    display: flex;
+    gap: 0.4em;
+    align-items: baseline;
+  }
+  .m-self strong,
+  .m-self span:first-child {
+    color: var(--self);
+  }
+  .m-pair strong,
+  .m-pair span:first-child {
+    color: var(--pair);
+  }
+  .m-table strong,
+  .m-table span:first-child {
+    color: var(--table);
+  }
+  .session-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-top: 14px;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+  }
+  .session-tabs a {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.45em;
+    text-decoration: none;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.3em 0.85em 0.3em 0.35em;
+    font-size: 0.9rem;
+    background: var(--surface);
+  }
+  .session-tabs .n {
+    display: inline-grid;
+    place-items: center;
+    width: 1.7em;
+    height: 1.7em;
+    border-radius: 50%;
+    background: var(--surface-2);
+    font-weight: 700;
+    font-size: 0.85em;
+  }
+  .session-tabs a[aria-current='page'] {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .session-tabs a[aria-current='page'] .n {
+    background: var(--accent);
+    color: var(--surface);
+  }
+  .content {
+    padding-top: 0.5em;
+  }
+  .toolbar {
+    margin-top: 3em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .toolbar p {
+    margin: 0.2em 0 0;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .actions :global(.danger) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 1.5em;
+  }
+  .pager a {
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--serif);
+    font-weight: 700;
+  }
+  .pager .next {
+    text-align: right;
+  }
+  .save-status {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translate(-50%, 20px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 0.4em 1em;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    margin: 0;
+  }
+  .save-status:global(.on) {
+    opacity: 0.92;
+    transform: translate(-50%, 0);
+  }
+</style>

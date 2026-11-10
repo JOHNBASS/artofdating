@@ -1,0 +1,151 @@
+---
+import '../styles/global.css';
+import { url } from '../scripts/paths.js';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = '約會的藝術：給單身與交往中的人的五堂關係課。在五個晚上，練習聆聽、吵架、選擇、靠近與冒險。',
+} = Astro.props;
+const pageTitle = title ? `${title}｜約會的藝術` : '約會的藝術';
+const path = Astro.url.pathname;
+const nav = [
+  { href: url(''), label: '課程介紹', match: (p: string) => p === url('') || p === url('').replace(/\/$/, '') },
+  { href: url('sessions/1/'), label: '五堂課', match: (p: string) => p.includes('/sessions/') },
+  { href: url('timer/'), label: '計時器', match: (p: string) => p.includes('/timer') },
+];
+---
+
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#8e3b46" />
+    <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{pageTitle}</title>
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到主要內容</a>
+    <header class="site-header">
+      <div class="wrap-wide bar">
+        <a class="brand" href={url('')}>
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          約會的藝術
+        </a>
+        <nav aria-label="主選單">
+          {
+            nav.map((n) => (
+              <a href={n.href} aria-current={n.match(path) ? 'page' : undefined}>
+                {n.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap-wide">
+        <p>
+          約會的藝術 · 五堂關係課
+          <br />
+          <span class="muted small">你在本站填寫的內容只儲存在你自己的瀏覽器裡，不會上傳到任何地方。</span>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: absolute;
+    left: -999px;
+    top: 0;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.5em 1em;
+    z-index: 10;
+  }
+  .skip:focus {
+    left: 8px;
+    top: 8px;
+  }
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(1.4) blur(10px);
+    -webkit-backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 58px;
+  }
+  .brand {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .brand-mark {
+    color: var(--gold);
+    margin-right: 0.25em;
+  }
+  nav {
+    display: flex;
+    gap: 2px;
+  }
+  nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.92rem;
+    padding: 0.4em 0.65em;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  nav a:hover {
+    color: var(--ink);
+  }
+  nav a[aria-current='page'] {
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .site-footer {
+    margin-top: 5em;
+    padding: 2em 0 3em;
+    border-top: 1px solid var(--line);
+    font-size: 0.95rem;
+  }
+  @media (max-width: 420px) {
+    .brand {
+      font-size: 1rem;
+    }
+    nav a {
+      padding: 0.4em 0.5em;
+      font-size: 0.86rem;
+    }
+  }
+</style>

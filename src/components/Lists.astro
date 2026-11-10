@@ -1,0 +1,61 @@
+---
+interface Props {
+  id: string;
+  groups: { title: string; hint?: string; count?: number }[];
+}
+
+const { id, groups } = Astro.props;
+---
+
+<div class="lists">
+  {
+    groups.map((g, gi) => (
+      <div class="group">
+        <h4>{g.title}</h4>
+        {g.hint && <p class="muted small">{g.hint}</p>}
+        <ol>
+          {Array.from({ length: g.count ?? 5 }, (_, i) => (
+            <li>
+              <input
+                type="text"
+                aria-label={`${g.title} 第 ${i + 1} 項`}
+                data-save={`${id}:${gi}:${i}`}
+                data-label={`${g.title} ${i + 1}`}
+              />
+            </li>
+          ))}
+        </ol>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .lists {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    margin: 0 0 1.1em;
+  }
+  .group {
+    background: var(--surface-2);
+    border-radius: 12px;
+    padding: 12px 14px 4px;
+  }
+  h4 {
+    margin: 0 0 0.2em;
+    font-size: 1.05rem;
+  }
+  .group p {
+    margin-bottom: 0.5em;
+  }
+  ol {
+    padding-left: 1.4em;
+  }
+  li {
+    margin: 0 0 0.45em;
+  }
+  input {
+    padding: 0.4em 0.6em;
+  }
+</style>

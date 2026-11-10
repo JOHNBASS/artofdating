@@ -1,0 +1,341 @@
+---
+import Base from '../layouts/Base.astro';
+import { sessions, modes } from '../data/sessions.js';
+import { url } from '../scripts/paths.js';
+
+const evening = [
+  { time: '18:45', title: '入場與破冰', desc: '找到你的桌組，從一個輕鬆的小遊戲開始。' },
+  { time: '19:00', title: '一起晚餐', desc: '先吃飯，從忙碌的一天慢慢放鬆下來。' },
+  { time: '19:30', title: '三段主題', desc: '每段都是一個故事、一段短講，再加上一個練習。' },
+  { time: '21:00', title: '本週約會實驗', desc: '帶一個小任務回家，在生活裡試試看。' },
+  { time: '21:15', title: '結束', desc: '想多聊的人可以留下來，想早點回家的人也沒問題。' },
+];
+
+const faqs = [
+  {
+    q: '我是單身，會不會很尷尬？',
+    a: '不會。這門課就是以單身者為主而設計的。每個練習都可以自己做，或和當晚的練習夥伴一起做，不需要帶伴侶來。',
+  },
+  {
+    q: '這是聯誼嗎？',
+    a: '不是。這不是配對活動，我們不會安排你和誰約會。但你確實會認識一群認真看待關係的人，也許會交到好朋友。',
+  },
+  {
+    q: '一定要分享自己的隱私嗎？',
+    a: '不用。每個練習都標示了是「自己」、「兩人」還是「桌組」。比較私密的題目只會自己書寫，或兩人之間談。任何問題你都可以說「pass」。',
+  },
+  {
+    q: '這是宗教課程嗎？',
+    a: '不是。創辦人是基督徒，如果你有興趣，很樂意私下和你聊聊信仰。但課程內容以關係心理學的研究和生活經驗為基礎，不傳教，也不需要任何信仰背景。課程中談到價值觀或信仰時，目的是幫你整理自己的想法，沒有標準答案。',
+  },
+  {
+    q: '我已經在交往了，可以兩人一起來嗎？',
+    a: '非常歡迎。兩人一起來時，「兩人」的練習就由你們彼此一組。',
+  },
+  {
+    q: '我在網站上填的內容，會被別人看到嗎？',
+    a: '不會。每一堂課頁面上的練習，填寫內容只存在你自己手機或電腦的瀏覽器裡，不會上傳到任何地方。你可以把它下載成文字檔保存，也可以隨時清除。',
+  },
+  {
+    q: '需要準備什麼？',
+    a: '一支手機（用來打開這個網站做練習）或一支筆，再加上一顆願意試試看的心。',
+  },
+];
+---
+
+<Base>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">五堂關係課 · 給單身，也給交往中的你</p>
+      <h1>約會的藝術</h1>
+      <p class="lead">
+        愛不只是遇到對的人，也是一種可以學習的能力。<br />
+        用五個晚上，一起吃飯、聊天、練習，<br class="br-wide" />好好認識自己，也好好認識彼此。
+      </p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#sessions">看看五堂課</a>
+        <a class="btn" href={url('sessions/1/')}>從第一堂開始</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>這門課像什麼？</h2>
+    <div class="features">
+      <div class="feature">
+        <span class="icon" aria-hidden="true">☾</span>
+        <h3>像一場約會</h3>
+        <p>晚餐、柔和的燈光、輕柔的音樂。沒有講台，也沒有教室的感覺。</p>
+      </div>
+      <div class="feature">
+        <span class="icon" aria-hidden="true">✎</span>
+        <h3>練習，不是聽講</h3>
+        <p>每晚三段簡短的分享，其餘的時間都留給練習：寫下來、說出口、聽進去。</p>
+      </div>
+      <div class="feature">
+        <span class="icon" aria-hidden="true">◎</span>
+        <h3>認識一群人</h3>
+        <p>五週都坐同一張桌子，每週換一位練習夥伴。課程結束時，你會多一群朋友。</p>
+      </div>
+    </div>
+
+    <h2>適合誰？</h2>
+    <ul class="who">
+      <li><strong>單身的你</strong>：想更認識自己，也想在下一段關係開始前，先準備好自己。</li>
+      <li><strong>正在約會或曖昧的你</strong>：想看清楚這段關係，也想知道怎麼好好談。</li>
+      <li><strong>交往中或準備結婚的你</strong>：歡迎兩個人一起來，為你們的關係投資五個晚上。</li>
+    </ul>
+  </section>
+
+  <section class="wrap-wide" id="sessions">
+    <h2 class="center">五堂課</h2>
+    <div class="session-grid">
+      {
+        sessions.map((s) => (
+          <a class="session-card" href={url(`sessions/${s.num}/`)}>
+            <span class="num">第 {s.num} 堂 · {s.theme}</span>
+            <span class="title">{s.title}</span>
+            <span class="tag">{s.tagline}</span>
+            <span class="sum">{s.summary}</span>
+            <span class="exp">本週約會實驗：{s.experiment}</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>每個晚上怎麼進行</h2>
+    <ol class="timeline">
+      {
+        evening.map((e) => (
+          <li>
+            <span class="time">{e.time}</span>
+            <div>
+              <strong>{e.title}</strong>
+              <p class="muted">{e.desc}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <h2>三種練習方式</h2>
+    <div class="modes">
+      {
+        Object.entries(modes).map(([k, m]) => (
+          <div class={`mode m-${k}`}>
+            <span class="mode-badge">
+              <span aria-hidden="true">{m.icon}</span> {m.label}
+            </span>
+            <p>{m.desc}</p>
+          </div>
+        ))
+      }
+    </div>
+    <p class="muted">
+      越私密的題目，越留給自己或兩人之間；桌組只聊輕鬆、好玩、能拉近距離的話題。任何問題，你永遠可以說「pass」。
+    </p>
+
+    <h2>常見問題</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+
+    <h2>課程參考的研究與書籍</h2>
+    <p class="muted small credits">
+      John Gottman 的伴侶關係研究、Gary Chapman《愛之語》、Arthur Aron 的親密感實驗、Scott Stanley 的承諾研究、Everett
+      Worthington 的寬恕研究、Sue Johnson 的情緒取向治療、Esther Perel 對安全感與新鮮感的觀察，以及佛洛姆《愛的藝術》。
+    </p>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding: 4.5em 0 3.5em;
+    text-align: center;
+    background:
+      radial-gradient(800px 360px at 50% -10%, var(--gold-soft), transparent 70%),
+      radial-gradient(700px 400px at 0% 30%, var(--accent-soft), transparent 65%),
+      radial-gradient(700px 400px at 100% 40%, var(--accent-soft), transparent 65%);
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+  h1 {
+    font-size: clamp(2.6rem, 10vw, 4.2rem);
+    margin: 0.2em 0 0.3em;
+    letter-spacing: 0.08em;
+  }
+  .lead {
+    font-family: var(--serif);
+    font-size: clamp(1.05rem, 3.6vw, 1.25rem);
+    color: var(--ink-soft);
+    line-height: 1.9;
+  }
+  .cta {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.6em;
+  }
+  .features {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  .feature {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .feature h3 {
+    margin: 0.3em 0 0.3em;
+  }
+  .feature p {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+  .icon {
+    color: var(--gold);
+    font-size: 1.4rem;
+  }
+  .who {
+    list-style: none;
+    padding: 0;
+  }
+  .who li {
+    padding: 0.7em 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .center {
+    text-align: center;
+  }
+  .session-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+  .session-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    padding: 20px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .session-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
+  .session-card .num {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+  }
+  .session-card .title {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .session-card .tag {
+    font-family: var(--serif);
+    color: var(--ink-soft);
+  }
+  .session-card .sum {
+    font-size: 0.95rem;
+    flex: 1;
+  }
+  .session-card .exp {
+    margin-top: 0.4em;
+    font-size: 0.85rem;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .timeline {
+    list-style: none;
+    padding: 0;
+  }
+  .timeline li {
+    display: grid;
+    grid-template-columns: 4.2em 1fr;
+    gap: 12px;
+    padding: 0.6em 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .timeline .time {
+    font-family: var(--serif);
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .timeline p {
+    margin: 0.1em 0 0;
+  }
+  .modes {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-bottom: 1em;
+  }
+  .mode {
+    --c: var(--self);
+    --cs: var(--self-soft);
+    background: var(--cs);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .m-pair {
+    --c: var(--pair);
+    --cs: var(--pair-soft);
+  }
+  .m-table {
+    --c: var(--table);
+    --cs: var(--table-soft);
+  }
+  .mode-badge {
+    color: var(--c);
+    font-weight: 700;
+  }
+  .mode p {
+    margin: 0.2em 0 0;
+  }
+  .faq details {
+    border-bottom: 1px solid var(--line);
+    padding: 0.8em 0;
+  }
+  .faq summary {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1.05rem;
+  }
+  .faq p {
+    margin: 0.6em 0 0.2em;
+    color: var(--ink-soft);
+  }
+  .credits {
+    line-height: 1.9;
+  }
+  @media (max-width: 520px) {
+    .br-wide {
+      display: none;
+    }
+  }
+</style>
