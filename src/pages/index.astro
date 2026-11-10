@@ -85,6 +85,9 @@ const faqs = [
     footer.closing ul.keywords > li:hover { background: var(--accent); border-color: var(--accent); color: var(--p-accent-ink); }
     /* 中文標題只在詞組之間換行（<wbr>），不會斷在詞的中間 */
     #hero-h, #close-h { word-break: keep-all; }
+    #hero-h .nowrap { white-space: nowrap; }
+    /* 輪播字的遮罩只在下方留空間；中文字比英文高，上緣會被切到，所以上方也留一點 */
+    #hero-h .mo-wr { padding-top: 0.16em; margin-top: -0.16em; }
     /* 區塊高度依內容決定，不再固定成一屏或兩屏：矮的螢幕不會切字，高的螢幕不會留大片空白。
        英雄區至少一屏、放不下時自己長高；捲動定格的流程區由它自己的特效決定高度 */
     main > section.section:not([data-moment="pinned-chapters"]), footer.footer.closing { height: auto !important; min-height: 0 !important; }
@@ -155,7 +158,7 @@ const faqs = [
       />
       <div class="wrap"><div class="hero-text">
         <div class="hero__text">
-          <h1 id="hero-h">給<span data-moment="word-rotate" data-moment-opts='{"words": ["單身", "情侶"], "every": 2400}'>單身</span>的<wbr />五晚<wbr />關係課</h1>
+          <h1 id="hero-h"><span class="nowrap">給<span data-moment="word-rotate" data-moment-opts='{"words": ["單身", "情侶"], "every": 2400}'>單身</span>的</span><wbr />五晚<wbr />關係課</h1>
           <p class="hero__lead">五個晚上，每晚 18:45 到 21:15。先一起吃晚餐，再用練習學會聆聽、吵架、做選擇和靠近。內容以關係研究為基礎，單身來就好，情侶也歡迎。</p>
           <div class="btn-row">
             <a class="btn btn--primary" href="#sessions">{mainAction}<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"></path><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"></path></svg></a>
