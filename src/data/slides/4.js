@@ -1,8 +1,8 @@
 // 第 4 堂：靠近的藝術（投影片）。格式說明見 ./index.js
 export default [
-  { kind: 'cover', notes: '今晚談連結：在小事裡靠近彼此。' },
+  { kind: 'cover', notes: '今天談連結：在小事裡靠近彼此。' },
   { kind: 'qr', notes: '請大家打開第 4 堂的頁面。' },
-  { kind: 'agenda', notes: '今晚最後一段（親密的步調與界線）是個人書寫，不在桌組分享。' },
+  { kind: 'agenda', notes: '今天最後一段（親密的步調與界線）是個人書寫，不在桌組分享。' },
   {
     kind: 'exercise',
     title: '上次約會實驗分享',
@@ -10,8 +10,8 @@ export default [
     minutes: 10,
     steps: ['你找了誰聊你的三張清單？', '對方的回饋裡，有沒有一句話讓你印象特別深刻？'],
   },
-  { kind: 'break', title: '晚餐', text: '慢慢吃、慢慢聊。', until: '19:30' },
-  { kind: 'section', mark: '一', title: '愛的五種語言', time: '19:30' },
+  { kind: 'break', text: '慢慢吃、慢慢聊。' },
+  { kind: 'section', mark: '一', title: '愛的五種語言' },
   {
     kind: 'points',
     title: '愛的五種語言',
@@ -47,7 +47,7 @@ export default [
     minutes: 10,
     steps: ['先猜對方「最容易收到」的第一名，再公布答案', '分享一個你的愛的語言被說中的故事', '也分享一次「明明是好意，對方卻沒收到」的經驗'],
   },
-  { kind: 'section', mark: '二', title: '每天的小小邀請', time: '20:00' },
+  { kind: 'section', mark: '二', title: '每天的小小邀請' },
   {
     kind: 'statement',
     text: '「今天好累喔」、一張貓咪的照片、「你看那朵雲」',
@@ -79,7 +79,7 @@ export default [
     phone: true,
     steps: ['接下來這幾天，留意別人對你發出的小小邀請', '也留意自己發出的邀請', '記下你的回應：轉向、轉開，還是對抗？'],
   },
-  { kind: 'section', mark: '三', title: '設計一場好約會', time: '20:20' },
+  { kind: 'section', mark: '三', title: '設計一場好約會' },
   {
     kind: 'points',
     title: '好的約會，是專心的時間',
@@ -113,7 +113,7 @@ export default [
     phone: true,
     steps: ['每個人分享一個最喜歡的約會點子', '或和朋友相處最難忘的一次聚會', '把聽到的好點子記下來'],
   },
-  { kind: 'section', mark: '四', title: '親密的步調與界線', time: '20:45' },
+  { kind: 'section', mark: '四', title: '親密的步調與界線' },
   {
     kind: 'statement',
     text: '這門課**不替你決定答案**。',
@@ -145,7 +145,7 @@ export default [
     text: '你寫下的內容只存在你的裝置裡。如果它觸碰到過去的傷害，你不需要獨自面對。',
     points: ['課後可以私下找帶領者聊聊', '或尋求專業諮商的協助'],
   },
-  { kind: 'section', mark: '☾', title: '帶回家的約會實驗', time: '21:05' },
+  { kind: 'section', mark: '☾', title: '帶回家的約會實驗' },
   {
     kind: 'experiment',
     title: '用對方的語言愛他一次',

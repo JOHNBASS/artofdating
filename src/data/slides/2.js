@@ -1,6 +1,6 @@
 // 第 2 堂：吵架的藝術（投影片）。格式說明見 ./index.js
 export default [
-  { kind: 'cover', notes: '歡迎回來。今晚談衝突：不是不吵，是吵得好。' },
+  { kind: 'cover', notes: '歡迎回來。今天談衝突：不是不吵，是吵得好。' },
   { kind: 'qr', notes: '請大家打開第 2 堂的頁面。' },
   { kind: 'agenda' },
   {
@@ -12,16 +12,14 @@ export default [
   },
   {
     kind: 'break',
-    title: '晚餐',
     text: '慢慢吃、慢慢聊。',
-    until: '19:30',
   },
   {
     kind: 'statement',
     text: '衝突不代表「選錯人」，而是兩個不同的人，在學習如何一起生活。',
     sub: '關係的好壞，不在於吵不吵架，而在於**怎麼吵、吵完怎麼修復**。',
   },
-  { kind: 'section', mark: '一', title: '生氣底下，藏著什麼', time: '19:30' },
+  { kind: 'section', mark: '一', title: '生氣底下，藏著什麼' },
   {
     kind: 'compare',
     title: '生氣的時候，我們會往哪裡靠？',
@@ -56,7 +54,7 @@ export default [
     minutes: 8,
     steps: ['先猜對方是哪一型', '再分享自己的答案', '聊聊：你家裡誰是火山、誰是冰山？'],
   },
-  { kind: 'section', mark: '二', title: '把問題放到桌上', time: '20:00' },
+  { kind: 'section', mark: '二', title: '把問題放到桌上' },
   {
     kind: 'statement',
     text: '問題是一件**放在桌上的東西**。你們兩個坐在同一邊，一起看著它。',
@@ -105,7 +103,7 @@ export default [
     phone: true,
     steps: ['挑一個**低風險**的小摩擦', '情侶：聊彼此之間的小事', '練習夥伴：各挑一件和室友、家人或同事的小事', '陪對方走一次四個步驟'],
   },
-  { kind: 'section', mark: '三', title: '修復：道歉與原諒', time: '20:35' },
+  { kind: 'section', mark: '三', title: '修復：道歉與原諒' },
   {
     kind: 'points',
     title: '一個好的道歉',
@@ -143,7 +141,7 @@ export default [
     steps: ['有沒有一句我欠某個人的道歉？我想怎麼說？', '有沒有一件事，我想選擇開始放下？'],
     foot: '只寫給自己。要不要真的說出口、什麼時候說，由你決定。',
   },
-  { kind: 'section', mark: '◇', title: '健康的衝突，和需要警覺的訊號', time: '20:55' },
+  { kind: 'section', mark: '◇', title: '健康的衝突，和需要警覺的訊號' },
   {
     kind: 'exercise',
     title: '安靜檢查',
@@ -159,7 +157,7 @@ export default [
     text: '健康的衝突：兩個人都能說話、對事不對人、吵完還能感覺到彼此的善意。',
     points: ['找一位信任的朋友聊聊', '**113 保護專線**（24 小時，台灣）', '課後歡迎私下找帶領者談'],
   },
-  { kind: 'section', mark: '☾', title: '帶回家的約會實驗', time: '21:05' },
+  { kind: 'section', mark: '☾', title: '帶回家的約會實驗' },
   {
     kind: 'experiment',
     title: '暫停暗號',

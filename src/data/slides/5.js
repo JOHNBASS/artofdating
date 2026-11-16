@@ -8,8 +8,8 @@ const kite = [
 ];
 
 export default [
-  { kind: 'cover', notes: '最後一堂。今晚不談技巧，而是談帶著什麼樣的自己出發。' },
-  { kind: 'qr', notes: '請大家打開第 5 堂的頁面。今晚結尾會寫一封給自己的信，記得保存筆記。' },
+  { kind: 'cover', notes: '最後一堂。今天不談技巧，而是談帶著什麼樣的自己出發。' },
+  { kind: 'qr', notes: '請大家打開第 5 堂的頁面。今天結尾會寫一封給自己的信，記得保存筆記。' },
   { kind: 'agenda', notes: '結業活動需要每人一張白紙和紙膠帶，還有一首可以邊走邊聽的音樂。' },
   {
     kind: 'exercise',
@@ -18,13 +18,13 @@ export default [
     minutes: 10,
     steps: ['你用誰的愛的語言愛了他一次？', '對方的反應有沒有讓你意外？'],
   },
-  { kind: 'break', title: '晚餐', text: '慢慢吃、慢慢聊。', until: '19:30' },
+  { kind: 'break', text: '慢慢吃、慢慢聊。' },
   {
     kind: 'statement',
     text: '一段關係就像一趟旅程。',
     sub: '最後一堂，我們不談技巧，而是談**帶著什麼樣的自己出發**。',
   },
-  { kind: 'section', mark: '一', title: '欣賞的眼光', time: '19:30' },
+  { kind: 'section', mark: '一', title: '欣賞的眼光' },
   {
     kind: 'compare',
     title: '優點的背面',
@@ -62,7 +62,7 @@ export default [
     steps: ['寫下三個你欣賞夥伴（或伴侶）的地方', '要具體，最好附上一個你看見的時刻', '輪流唸給對方聽'],
     foot: '聽的人只需要說「謝謝」，不需要謙虛或反駁。',
   },
-  { kind: 'section', mark: '二', title: '放下不切實際的劇本', time: '19:50' },
+  { kind: 'section', mark: '二', title: '放下不切實際的劇本' },
   {
     kind: 'points',
     title: '帶著劇本的人，常常陷入一個循環',
@@ -83,7 +83,7 @@ export default [
     phone: true,
     steps: ['我對愛情的想像主要來自哪裡？', '改寫：「對的人會懂我，不用我說。」', '還有一個我想改寫的劇本⋯⋯'],
   },
-  { kind: 'section', mark: '三', title: '我的地雷地圖', time: '20:10' },
+  { kind: 'section', mark: '三', title: '我的地雷地圖' },
   {
     kind: 'statement',
     text: '別人催一下就火大、訊息晚回就焦慮、被開玩笑就受傷。',
@@ -108,7 +108,7 @@ export default [
     text: '有些地雷連著很深的傷：失去、被拋下、被傷害。願意看見它，已經很勇敢了。',
     points: ['你不需要一個人拆它', '專業諮商師可以陪你走這段路', '課後歡迎私下找帶領者聊聊'],
   },
-  { kind: 'section', mark: '四', title: '人生的優先次序', time: '20:30' },
+  { kind: 'section', mark: '四', title: '人生的優先次序' },
   {
     kind: 'exercise',
     title: '我的前五名',
@@ -125,7 +125,7 @@ export default [
     minutes: 8,
     steps: ['交換你們的前五名：哪些重疊？哪些完全不同？', '情侶：哪些不同可以互補？哪些需要好好談？', '單身：將來交往，對方的前五名裡一定要有哪一項？'],
   },
-  { kind: 'section', mark: '五', title: '風箏與錨', time: '20:45' },
+  { kind: 'section', mark: '五', title: '風箏與錨' },
   {
     kind: 'compare',
     title: '安全感，和新鮮感',
@@ -159,7 +159,7 @@ export default [
     rightLabel: '錨',
     notes: i === 0 ? '每題給大家 20 到 30 秒移動位置，可以隨機問兩端的人為什麼站在那裡。' : undefined,
   })),
-  { kind: 'section', mark: '◎', title: '結業：寫在背上的欣賞', time: '21:00' },
+  { kind: 'section', mark: '◎', title: '結業：寫在背上的欣賞' },
   {
     kind: 'exercise',
     title: '寫在背上的欣賞',
@@ -185,7 +185,7 @@ export default [
   {
     kind: 'statement',
     text: '課程結束，關係沒有結束。',
-    sub: '和你的桌組約一次同學會吧。這五個晚上，你練習了**聆聽、吵架、選擇、靠近和冒險**，也認識了一群一樣認真看待關係的人。',
+    sub: '和你的桌組約一次同學會吧。這五堂課，你練習了**聆聽、吵架、選擇、靠近和冒險**，也認識了一群一樣認真看待關係的人。',
   },
   { kind: 'end' },
 ];

@@ -92,13 +92,13 @@ function renderPresenter() {
   renderPace();
 }
 
-// 和今晚流程比對：下一段預定幾點開始、還有幾分鐘
+// 和上課流程比對：下一段預定幾點開始、還有幾分鐘
 function renderPace() {
   const el = $('[data-pv-pace]');
   const next = sections.find((x) => x.k > index);
   const now = new Date();
   const left = next ? toMin(next.time) - (now.getHours() * 60 + now.getMinutes()) : NaN;
-  // 不在上課時段（例如白天先預習）就不顯示
+  // 不在上課時段（例如前一天先預習）就不顯示
   if (!next || left > 150 || left < -60) {
     el.hidden = true;
     return;

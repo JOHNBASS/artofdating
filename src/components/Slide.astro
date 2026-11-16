@@ -1,5 +1,5 @@
 ---
-import { modes, agendaWithMinutes } from '../data/sessions.js';
+import { modes, agendaWithMinutes, schedule } from '../data/sessions.js';
 import { inline } from '../scripts/inline.js';
 import { fmt } from '../scripts/timer-utils.js';
 
@@ -20,13 +20,20 @@ const seconds = kind === 'exercise' && slide.minutes ? slide.minutes * 60 : unde
 // 講者畫面和總覽用的短標題
 const label =
   slide.title ||
-  { cover: session.title, qr: '打開手機頁面', agenda: '今晚流程', statement: slide.text, end: '結尾' }[kind] ||
+  { cover: session.title, qr: '打開手機頁面', agenda: '今天的流程', statement: slide.text, end: '結尾' }[kind] ||
   kind;
 const labelText = String(label).replace(/\*\*/g, '');
 const lastSession = !next;
 const agenda = agendaWithMinutes(session.agenda);
-// 段落標題：從今晚流程找出這一段的結束時間和長度
-const segment = kind === 'section' ? agenda.find((a) => a.time === slide.time) : undefined;
+// 段落和用餐：用標題在 sessions.js 的流程裡找到這一段，帶出開始、結束時間和長度
+const breakTitle = kind === 'break' ? slide.title || schedule.meal : undefined;
+const segment =
+  kind === 'section' || kind === 'break'
+    ? agenda.find((a) => a.label.includes(slide.title || breakTitle))
+    : undefined;
+if (kind === 'section' && !segment) {
+  console.warn(`[投影片] 第 ${session.num} 堂的段落「${slide.title}」在 sessions.js 的流程裡找不到，不會顯示時間`);
+}
 ---
 
 <section
@@ -34,7 +41,7 @@ const segment = kind === 'section' ? agenda.find((a) => a.time === slide.time) :
   data-slide
   data-label={labelText}
   data-minutes={seconds}
-  data-time={slide.time || slide.until}
+  data-time={kind === 'section' ? segment?.time : undefined}
   data-kind={kind}
   aria-roledescription="投影片"
   aria-label={`第 ${index + 1} 張，共 ${total} 張：${labelText}`}
@@ -57,9 +64,9 @@ const segment = kind === 'section' ? agenda.find((a) => a.time === slide.time) :
         kind === 'qr' && (
           <div class="qr-grid">
             <div>
-              <p class="eyebrow">今晚的練習本</p>
+              <p class="eyebrow">今天的練習本</p>
               <h2 class="title">用手機打開第 {session.num} 堂</h2>
-              <p class="lead">今晚的練習都在這一頁。你填寫的內容，只存在自己的手機。</p>
+              <p class="lead">今天的練習都在這一頁。你填寫的內容，只存在自己的手機。</p>
               <p class="url">{qr.text}</p>
             </div>
             <div class="qr-box" set:html={qr.svg} />
@@ -70,7 +77,7 @@ const segment = kind === 'section' ? agenda.find((a) => a.time === slide.time) :
       {
         kind === 'agenda' && (
           <>
-            <h2 class="title">今晚流程</h2>
+            <h2 class="title">今天的流程</h2>
             <ol class:list={['agenda', agenda.length > 6 && 'is-long']}>
               {agenda.map((a) => (
                 <li>
@@ -87,16 +94,16 @@ const segment = kind === 'section' ? agenda.find((a) => a.time === slide.time) :
       {
         kind === 'break' && (
           <div class="break">
-            <h2 class="break-title">{slide.title}</h2>
+            <h2 class="break-title">{breakTitle}</h2>
             {slide.text && <p class="lead">{slide.text}</p>}
             <p class="break-time">
               <span class="muted">現在</span> <strong data-clock>--:--</strong>
-              {slide.until && (
+              {segment && (
                 <>
                   <span class="dot" aria-hidden="true">
                     ·
                   </span>
-                  <span class="muted">{slide.until} 回到座位</span>
+                  <span class="muted">{segment.end} 回到座位</span>
                 </>
               )}
             </p>
@@ -112,13 +119,11 @@ const segment = kind === 'section' ? agenda.find((a) => a.time === slide.time) :
             </span>
             <div>
               <h2 class="section-title">{slide.title}</h2>
-              {segment ? (
+              {segment && (
                 <p class="section-time">
                   {segment.time}–{segment.end}
                   <span class="mins">{segment.minutes} 分鐘</span>
                 </p>
-              ) : (
-                slide.time && <p class="section-time">{slide.time}</p>
               )}
             </div>
           </div>
@@ -310,7 +315,7 @@ const segment = kind === 'section' ? agenda.find((a) => a.time === slide.time) :
             <div class="end">
               <h2 class="cover-title">謝謝你們</h2>
               <p class="cover-tag">聆聽、吵架、選擇、靠近、冒險</p>
-              <p class="lead">五個晚上結束了，練習才剛開始。</p>
+              <p class="lead">五堂課結束了，練習才剛開始。</p>
             </div>
           ) : (
             <div class="end">

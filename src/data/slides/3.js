@@ -1,6 +1,6 @@
 // 第 3 堂：選擇的藝術（投影片）。格式說明見 ./index.js
 export default [
-  { kind: 'cover', notes: '今晚談承諾：愛，是一個又一個決定。' },
+  { kind: 'cover', notes: '今天談承諾：愛，是一個又一個決定。' },
   { kind: 'qr', notes: '請大家打開第 3 堂的頁面。' },
   { kind: 'agenda' },
   {
@@ -10,8 +10,8 @@ export default [
     minutes: 10,
     steps: ['你們約定了什麼暫停暗號？', '有沒有派上用場？', '哪一個暗號最有創意？'],
   },
-  { kind: 'break', title: '晚餐', text: '慢慢吃、慢慢聊。', until: '19:30' },
-  { kind: 'section', mark: '一', title: '心動，和決定去愛', time: '19:30' },
+  { kind: 'break', text: '慢慢吃、慢慢聊。' },
+  { kind: 'section', mark: '一', title: '心動，和決定去愛' },
   {
     kind: 'statement',
     text: '心動很美好，但它通常**不會一直維持在高點**。',
@@ -48,7 +48,7 @@ export default [
     phone: true,
     steps: ['勾選：哪些里程碑，我想先和對方**好好談過**再走？', '回想一個我「順著滑過去」的決定（不一定是感情）', '如果重來，我會怎麼做？'],
   },
-  { kind: 'section', mark: '二', title: '我真正在找什麼', time: '20:00' },
+  { kind: 'section', mark: '二', title: '我真正在找什麼' },
   {
     kind: 'exercise',
     title: '我的三張清單',
@@ -71,7 +71,7 @@ export default [
     steps: ['從三張清單裡**各挑一項**', '告訴夥伴它背後的故事', '聽的人用「複述、命名、好奇」回應'],
     foot: '情侶可以交換清單比對：哪些很一致？哪些需要再多聊聊？',
   },
-  { kind: 'section', mark: '三', title: '錢，和家人的期待', time: '20:35' },
+  { kind: 'section', mark: '三', title: '錢，和家人的期待' },
   {
     kind: 'statement',
     text: '錢很少只是錢。',
@@ -110,7 +110,7 @@ export default [
     ],
     foot: '挑你願意說的部分就好。',
   },
-  { kind: 'section', mark: '☾', title: '帶回家的約會實驗', time: '21:05' },
+  { kind: 'section', mark: '☾', title: '帶回家的約會實驗' },
   {
     kind: 'experiment',
     title: '我的清單對談',

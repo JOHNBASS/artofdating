@@ -17,12 +17,12 @@ const cards = sessions.map((s) => {
 });
 ---
 
-<Base title="帶領者" description="帶領者用的五堂課投影片：講者備註、練習倒數、今晚流程，接上投影機就能上課。">
+<Base title="帶領者" description="帶領者用的五堂課投影片：講者備註、練習倒數、上課流程，接上投影機就能上課。">
   <section class="wrap-wide leader">
     <p class="eyebrow">給帶領者</p>
     <h1>投影片</h1>
     <p class="lead">
-      每一堂一份投影片，照今晚流程排好：開場、段落、每一個練習的步驟和時間。練習投影片上有倒數計時，講者畫面看得到備註和下一張。
+      每一堂一份投影片，照上課流程排好：開場、段落、每一個練習的步驟和時間。練習投影片上有倒數計時，講者畫面看得到備註和下一張。
     </p>
 
     <ol class="decks">
@@ -36,7 +36,7 @@ const cards = sessions.map((s) => {
               {s.count} 張 · {s.exercises} 個練習，共 {s.exerciseMinutes} 分鐘
             </p>
             <details>
-              <summary>今晚流程</summary>
+              <summary>上課流程</summary>
               <ul class="agenda">
                 {s.agenda.map((a) => (
                   <li>

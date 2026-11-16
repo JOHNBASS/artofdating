@@ -6,9 +6,11 @@
 // 張數種類（kind）：
 //   cover       封面：自動帶入 sessions.js 的第幾堂、標題、副標
 //   qr          掃描 QR code 打開這一堂的手機頁面（網址自動產生）
-//   agenda      今晚流程：自動帶入 sessions.js 的 agenda
-//   break       休息／晚餐：{ title, text, until: '19:30' }，畫面會顯示現在時間
-//   section     段落標題：{ mark: '一', title, time: '19:30' }，講者畫面用 time 提醒進度
+//   agenda      今天的流程：自動帶入 sessions.js 的 agenda，時間從 schedule.start 往下算
+//   break       用餐／休息：{ title?, text }，畫面會顯示現在時間和幾點回到座位
+//               沒寫 title 就用 sessions.js 的 schedule.meal（例如「晚餐」），用標題找到流程裡那一段
+//   section     段落標題：{ mark: '一', title }，title 要出現在 sessions.js 流程的某一段文字裡，
+//               投影片會自動帶出那一段的時間和分鐘數，講者畫面也用它提醒進度
 //   statement   一句大字：{ text, sub?, cite? }
 //   points      重點清單：{ title, points: [...], ordered?, flow?（畫成箭頭循環）, foot? }
 //   compare     兩欄對照：{ title, cols: [左, 右], rows: [[左, 右], ...], foot? }
