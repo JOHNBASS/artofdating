@@ -19,10 +19,13 @@ const statement: (string | { strong: string })[] = [
 // 時間從 sessions.js 的 schedule 算出來（以第 1 堂為例）：入場、第一段主題、帶回家的約會實驗
 const { meal } = schedule;
 const hours = `${classHours.start} 到 ${classHours.end}`;
+// 「先一起吃晚餐，再用練習學會⋯⋯」；不安排用餐時換成「圍著同一張桌子，用練習學會⋯⋯」
+const opening = meal ? `先一起吃${meal}，再` : '圍著同一張桌子，';
 const first = agendaWithMinutes(sessions[0].agenda);
+const firstTopic = first.find((a) => a.label.startsWith('一'));
 const flow = [
-  { title: `${first[0].time}　入場、破冰，一起吃${meal}`, desc: '找到你的桌組，從輕鬆的小遊戲開始。同桌 4 到 6 人，五堂課都坐同一桌。', img: 'ai-e1-dinner', alt: '燭光長桌上，大家正把台菜一盤盤傳過去' },
-  { title: `${first[2].time}　三段主題：短講加練習`, desc: '每段一個短講，接著自己寫、兩人聊或同桌聊。任何問題，你都可以說 pass。', img: 'ai-e2-practice', alt: '兩個人在燭光小桌兩側對坐，一人拿著一張題目卡' },
+  { title: `${first[0].time}　入場、破冰${meal ? `，一起吃${meal}` : ''}`, desc: '找到你的桌組，從輕鬆的小遊戲開始。同桌 4 到 6 人，五堂課都坐同一桌。', img: 'ai-e1-dinner', alt: '燭光長桌上，大家正把台菜一盤盤傳過去' },
+  { title: `${firstTopic.time}　三段主題：短講加練習`, desc: '每段一個短講，接著自己寫、兩人聊或同桌聊。任何問題，你都可以說 pass。', img: 'ai-e2-practice', alt: '兩個人在燭光小桌兩側對坐，一人拿著一張題目卡' },
   { title: `${first.at(-1).time}　帶一個約會實驗回家`, desc: '每堂課一個小任務，在生活裡試試看。想多聊可以留下，想早點回家也沒問題。', img: 'ai-e3-home', alt: '夜裡在家門口，一隻手把摺好的小卡片放進大衣口袋' },
 ];
 
@@ -51,7 +54,7 @@ const faqs = [
 
 <Landing
   title="關係練習室：給單身者的五堂關係課"
-  description={`五堂課，每次先一起吃${meal}，再用關係研究和練習學會聆聽、吵架、做選擇和靠近。以單身者為主，情侶也歡迎。`}
+  description={`五堂課，每次${opening}用關係研究和練習學會聆聽、吵架、做選擇和靠近。以單身者為主，情侶也歡迎。`}
   moments={['word-rotate', 'lines-rise', 'counter-rolls', 'word-highlight', 'pinned-chapters', 'picture-develops']}
 >
   <style is:inline slot="head">
@@ -164,7 +167,7 @@ const faqs = [
       <div class="wrap"><div class="hero-text">
         <div class="hero__text">
           <h1 id="hero-h"><span class="nowrap">給<span data-moment="word-rotate" data-moment-opts='{"words": ["單身", "情侶"], "every": 2400}'>單身</span>的</span><wbr />五堂<wbr />關係課</h1>
-          <p class="hero__lead">五堂課，每次 {hours}。先一起吃{meal}，再用練習學會聆聽、吵架、做選擇和靠近。內容以關係研究為基礎，單身來就好，情侶也歡迎。</p>
+          <p class="hero__lead">五堂課，每次 {hours}。{opening}用練習學會聆聽、吵架、做選擇和靠近。內容以關係研究為基礎，單身來就好，情侶也歡迎。</p>
           <div class="btn-row">
             <a class="btn btn--primary" href="#sessions">{mainAction}<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"></path><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"></path></svg></a>
             <a class="btn btn--secondary" href={url('sessions/1/')}>開始第一堂</a>
@@ -337,7 +340,7 @@ const faqs = [
         <ul class="keywords" aria-label="五堂課會練習的事">{keywords.map((k) => <li>{k}</li>)}</ul>
         <div class="section-head">
           <h2 id="close-h">一個人也很好，<wbr />兩個人可以更好。</h2>
-          <p class="t-small muted">五堂課，每次 {hours}，含{meal}。</p>
+          <p class="t-small muted">五堂課，每次 {hours}{meal && `，含${meal}`}。</p>
         </div>
         <a class="btn btn--primary btn--xl btn--wide" href="#sessions">{mainAction}<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"></path><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"></path></svg></a>
       </div>
@@ -345,7 +348,7 @@ const faqs = [
         <div class="grid">
           <div class="span-4 stack-4">
             <a class="nav__logo" href="#top"><span class="mark" data-mark="rings" aria-hidden="true"></span>關係練習室</a>
-            <p class="footer__lede">在餐桌上練習愛的五堂課</p>
+            <p class="footer__lede">{meal ? '在餐桌上練習愛的五堂課' : '圍著一張桌子練習愛的五堂課'}</p>
           </div>
           <div class="span-2 footer__col"><h3>擔心</h3><ul><li><a href="#worries">四個擔心</a></li><li><a href={url('sources/')}>資料來源</a></li></ul></div>
           <div class="span-2 footer__col"><h3>五堂課</h3><ul>{sessions.map((s) => <li><a href={url(`sessions/${s.num}/`)}>{s.title}</a></li>)}</ul></div>

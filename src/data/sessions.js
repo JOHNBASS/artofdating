@@ -2,11 +2,14 @@
 
 // 上課時間：只要改這裡，首頁、課程頁、投影片上的每一個時間都會跟著變。
 //   start：入場時間，例如晚上班 '18:45'、週六下午班 '14:00'、週日中午班 '11:30'
-//   meal ：這一餐叫什麼，例如 '晚餐'、'午餐'、'早午餐'、'下午茶'
+//   meal ：這一餐叫什麼，例如 '晚餐'、'午餐'、'早午餐'、'下午茶'；
+//          不安排用餐就寫 null：五堂的用餐段和用餐投影片會自動拿掉，每堂少 30 分鐘，
+//          首頁和投影片備註裡「一起吃飯」的說法也會換掉
 export const schedule = { start: '18:45', meal: '晚餐' };
 const { meal } = schedule;
 
 // agenda：每一段 [幾分鐘, 內容]，照順序排；開始時間從 schedule.start 自動往下算。
+// [30, meal] 是用餐段，meal 是 null 時這一段不算。
 // 投影片的段落（section）和用餐（break）會用標題對到這裡的某一段，所以改內容文字時，投影片標題也要一起改。
 export const sessions = [
   {
@@ -102,9 +105,10 @@ const toMin = (t) => {
 const toTime = (n) => `${String(Math.floor(n / 60) % 24).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`;
 
 // 把 [幾分鐘, 內容] 換算成每一段的開始、結束時間：[{ time, end, label, minutes }]
+// 沒有內容的段落（不安排用餐時的 [30, null]）會跳過
 export function agendaWithMinutes(agenda) {
   let t = toMin(schedule.start);
-  return agenda.map(([minutes, label]) => {
+  return agenda.filter(([, label]) => label).map(([minutes, label]) => {
     const time = toTime(t);
     t += minutes;
     return { time, end: toTime(t), label, minutes };

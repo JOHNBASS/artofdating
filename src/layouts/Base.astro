@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { url } from '../scripts/paths.js';
+import { schedule } from '../data/sessions.js';
 
 interface Props {
   title?: string;
@@ -9,7 +10,7 @@ interface Props {
 
 const {
   title,
-  description = '關係練習室：給單身者的五堂關係課。每次先一起吃飯，再練習聆聽、吵架、選擇、靠近與冒險。',
+  description = `關係練習室：給單身者的五堂關係課。每次${schedule.meal ? '先一起吃飯，再' : '圍著同一張桌子，'}練習聆聽、吵架、選擇、靠近與冒險。`,
 } = Astro.props;
 const pageTitle = title ? `${title}｜關係練習室` : '關係練習室';
 const path = Astro.url.pathname;

@@ -17,7 +17,7 @@ npm run dev
 
 | 想改什麼 | 檔案 |
 |---|---|
-| 上課時間（幾點入場、吃哪一餐） | `src/data/sessions.js` 最上面的 `schedule` |
+| 上課時間（幾點入場、吃哪一餐，或不安排用餐） | `src/data/sessions.js` 最上面的 `schedule` |
 | 五堂課的標題、副標、摘要、上課流程（每段幾分鐘） | `src/data/sessions.js` |
 | 每一堂的上課內容與練習 | `src/pages/sessions/1.mdx` ～ `5.mdx` |
 | 首頁（介紹、課程列表、流程、常見問題） | `src/pages/index.astro` |
@@ -58,9 +58,12 @@ npm run dev
 export const schedule = { start: '18:45', meal: '晚餐' }; // 晚上班
 export const schedule = { start: '14:00', meal: '下午茶' }; // 週六下午班
 export const schedule = { start: '11:30', meal: '午餐' };   // 週日中午班
+export const schedule = { start: '14:00', meal: null };     // 不安排用餐（每堂 2 小時）
 ```
 
 改了之後，首頁的「每次幾點到幾點」、課程頁和投影片上每一段的時間、用餐投影片的「幾點回到座位」都會跟著變。每一堂的流程寫的是每段**幾分鐘**，不是幾點。
+
+`meal` 寫 `null` 就是不安排用餐：五堂的用餐段（30 分鐘）和用餐投影片會自動拿掉，入場破冰後直接進入第一段，每堂變成 2 小時；首頁、網站說明和第 1 堂投影片備註裡「一起吃飯」的說法也會換成不提吃飯的版本。首頁「每一堂的流程」第一段的照片是晚餐桌，不安排用餐時可以考慮換一張。
 
 ## 首頁的設計系統與動態
 
