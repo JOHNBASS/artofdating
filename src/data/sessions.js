@@ -5,7 +5,7 @@
 //   meal ：這一餐叫什麼，例如 '晚餐'、'午餐'、'早午餐'、'下午茶'；
 //          不安排用餐就寫 null：五堂的用餐段和用餐投影片會自動拿掉，每堂少 30 分鐘，
 //          首頁和投影片備註裡「一起吃飯」的說法也會換掉
-export const schedule = { start: '18:45', meal: '晚餐' };
+export const schedule = { start: '14:00', meal: '下午茶' };
 const { meal } = schedule;
 
 // agenda：每一段 [幾分鐘, 內容]，照順序排；開始時間從 schedule.start 自動往下算。
