@@ -176,7 +176,7 @@ const publicRoles = Object.fromEntries(
     if (lock) lock.hidden = true;
   }
 
-  // 名牌上的代碼是「角色代碼-老闆」，例如 TDCP6V-M：M 是梅叔、F 是梅姐。
+  // 名牌上的代碼是「角色代碼-老闆」，例如 AB3C9X-M：M 是梅叔、F 是梅姐。
   // 只輸入前 6 碼也可以，老闆就照之前的設定（或網站預設）。
   function parseCode(input) {
     const s = norm(input).replace(/[^A-Z0-9]/g, '');
