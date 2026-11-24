@@ -1,0 +1,453 @@
+---
+// 列印包：角色名牌（背面有 QR code）、線索卡、七封信、問題卡、觀察表、欣賞卡。要 DM 密碼。
+import Base from '../../layouts/Base.astro';
+import { mystery } from '../../data/mystery.js';
+import sealed from '../../data/mystery-sealed.json';
+import { url } from '../../scripts/paths.js';
+import '../../styles/mystery.css';
+
+const payload = { iterations: sealed.iterations, dm: sealed.dm };
+const pub = {
+  roles: mystery.roles,
+  title: mystery.title,
+  // QR code 一律指向正式網站，在本機列印也不會掃到 localhost
+  playUrl: new URL(url('mystery/play/'), Astro.site).href,
+  dmUrl: url('mystery/dm/'),
+};
+const sections = [
+  ['tags', '角色名牌（6 張，對折）'],
+  ['clues', '線索卡（10 張）'],
+  ['letters', '七封信（放進信封）'],
+  ['questions', '問題卡（16 張）'],
+  ['observer', '觀察表（4 張）'],
+  ['thanks', '欣賞卡（30 張）'],
+];
+---
+
+<Base title={`列印包・${mystery.title}`} description="劇本殺版《沒寄出的信》列印包。">
+  <section class="wrap pr-controls">
+    <p class="mx-eyebrow">劇本殺版《{mystery.title}》</p>
+    <h1>列印包</h1>
+    <div data-gate>
+      <p class="mx-lead">裡面有劇情和角色代碼，需要 DM 密碼。</p>
+      <form class="mx-lock" data-gate-form>
+        <label class="visually-hidden" for="pr-pass">DM 密碼</label>
+        <input id="pr-pass" type="text" autocomplete="off" spellcheck="false" placeholder="DM 密碼" required />
+        <button class="btn-primary" type="submit">打開</button>
+      </form>
+      <p class="mx-error" data-gate-error role="status"></p>
+    </div>
+    <div data-ready hidden>
+      <p class="mx-lead">勾選要印的部分，用 A4 直印。卡片沿虛線剪下，名牌沿中間的線對折。</p>
+      <ul class="pr-pick">
+        {
+          sections.map(([id, label]) => (
+            <li>
+              <label>
+                <input type="checkbox" data-sec={id} checked /> {label}
+              </label>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="mx-actions">
+        <button type="button" class="btn-primary" data-print>列印</button>
+        <a class="btn" href={pub.dmUrl}>回到 DM 控制台</a>
+      </div>
+      <p class="muted small">手機上也可以預覽，但建議用電腦列印。</p>
+    </div>
+  </section>
+
+  <div class="pr-sheets" data-sheets></div>
+
+  <script type="application/json" id="mx-dm" set:html={JSON.stringify(payload)} />
+  <script type="application/json" id="mx-public" set:html={JSON.stringify(pub)} />
+</Base>
+
+<style is:global>
+  .pr-controls {
+    padding-top: 1.6em;
+  }
+  .pr-controls h1 {
+    margin: 0.1em 0 0.3em;
+  }
+  .pr-pick {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+  .pr-pick label {
+    display: inline-flex;
+    gap: 0.5em;
+    align-items: center;
+    cursor: pointer;
+  }
+  .pr-sheets {
+    padding: 1em 16px 3em;
+  }
+  .pr-sec-title {
+    max-width: 210mm;
+    margin: 2em auto 0.6em;
+    font-size: 1.1rem;
+  }
+  .pr-page {
+    width: 210mm;
+    max-width: 100%;
+    margin: 0 auto 16px;
+    padding: 10mm;
+    background: #fff;
+    color: #2b2024;
+    box-shadow: var(--shadow);
+    display: grid;
+    gap: 0;
+    font-size: 11pt;
+    line-height: 1.7;
+  }
+  .pr-page .clue {
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+  .pr-cut {
+    border: 1px dashed #b9a9ad;
+    padding: 6mm 7mm;
+    overflow: hidden;
+    position: relative;
+  }
+  .pr-cut + .pr-cut {
+    margin-top: -1px;
+  }
+  .pr-foot {
+    position: absolute;
+    right: 6mm;
+    bottom: 3mm;
+    font-size: 8pt;
+    color: #8a777c;
+  }
+
+  /* 名牌：左半正面、右半背面，沿中線對折 */
+  .pr-tags {
+    grid-template-rows: repeat(3, 1fr);
+    height: 297mm;
+  }
+  .pr-tag {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0;
+  }
+  .pr-tag > div {
+    padding: 8mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .pr-tag .front {
+    border-right: 1px dashed #b9a9ad;
+    text-align: center;
+  }
+  .pr-tag .name {
+    font-family: var(--serif);
+    font-size: 40pt;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+  }
+  .pr-tag .sub {
+    color: #6b5a5f;
+    font-size: 10pt;
+    margin: 0.4em 0 0;
+  }
+  .pr-tag .back {
+    align-items: center;
+    text-align: center;
+    gap: 2mm;
+  }
+  .pr-tag .qr svg {
+    width: 38mm;
+    height: 38mm;
+    display: block;
+  }
+  .pr-tag .code {
+    font-size: 16pt;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    margin: 0;
+  }
+  .pr-tag .hint {
+    font-size: 8.5pt;
+    color: #6b5a5f;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .pr-halves {
+    grid-template-rows: repeat(2, 1fr);
+    height: 297mm;
+  }
+  .pr-halves .clue {
+    font-size: 12.5pt;
+    line-height: 1.8;
+  }
+  .pr-halves h4,
+  .pr-halves h3 {
+    margin: 0 0 0.4em;
+    font-family: var(--serif);
+  }
+  .pr-halves .clue-id {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #b9832f;
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+  .pr-halves blockquote {
+    color: #2b2024;
+  }
+  .pr-letter {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12mm 18mm;
+  }
+  .pr-letter .to {
+    font-size: 9pt;
+    color: #8a777c;
+    margin: 0 0 1em;
+  }
+  .pr-letter .text {
+    font-family: var(--serif);
+    font-size: 14pt;
+    line-height: 2.1;
+  }
+  .pr-letter .text del {
+    text-decoration-thickness: 2px;
+  }
+  .pr-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
+    height: 297mm;
+  }
+  .pr-grid .pr-cut {
+    margin: 0 0 -1px -1px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .pr-q {
+    font-family: var(--serif);
+    font-size: 15pt;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .pr-q-mark {
+    text-align: center;
+    color: #b9832f;
+    font-size: 9pt;
+    letter-spacing: 0.15em;
+    margin: 0 0 0.6em;
+  }
+  .pr-obs li {
+    margin: 0.7em 0;
+    font-size: 12pt;
+  }
+  .pr-obs .box {
+    display: inline-block;
+    width: 4.5mm;
+    height: 4.5mm;
+    border: 1.2px solid #2b2024;
+    border-radius: 1mm;
+    margin-right: 3mm;
+    vertical-align: -0.6mm;
+  }
+  .pr-thanks .lead {
+    font-family: var(--serif);
+    font-size: 13pt;
+    margin: 0 0 auto;
+  }
+  .pr-thanks .lines {
+    border-bottom: 1px solid #d8cbcf;
+    height: 7mm;
+  }
+  .pr-thanks .from {
+    font-size: 9pt;
+    color: #8a777c;
+    text-align: right;
+    margin: 2mm 0 0;
+  }
+
+  @media print {
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    body {
+      background: #fff !important;
+    }
+    .site-header,
+    .site-footer,
+    .inapp,
+    .skip,
+    .pr-controls,
+    .pr-sec-title {
+      display: none !important;
+    }
+    .pr-sheets {
+      padding: 0;
+    }
+    .pr-page {
+      box-shadow: none;
+      margin: 0;
+      break-after: page;
+      width: 210mm;
+      max-width: none;
+    }
+    .pr-sec.is-off {
+      display: none !important;
+    }
+    * {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+
+<script>
+  import QRCode from 'qrcode';
+  import { open, actKey, norm, cryptoReady } from '../../scripts/mystery/crypto.js';
+
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const sealed = JSON.parse($('#mx-dm').textContent);
+  const pub = JSON.parse($('#mx-public').textContent);
+  const PASS_KEY = 'aod:mystery:dm-pass';
+  const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
+  const get = (k, s) => {
+    try {
+      return s.getItem(k);
+    } catch {
+      return null;
+    }
+  };
+
+  async function build(D) {
+    const qr = await Promise.all(
+      pub.roles.map((r) =>
+        QRCode.toString(`${pub.playUrl}?openExternalBrowser=1#k=${encodeURIComponent(D.passwords.roles[r.id])}`, {
+          type: 'svg',
+          margin: 0,
+          errorCorrectionLevel: 'M',
+        }),
+      ),
+    );
+    const tags = chunk(pub.roles.map((r, i) => ({ r, qr: qr[i] })), 3)
+      .map(
+        (page) => `<div class="pr-page pr-tags">${page
+          .map(
+            ({ r, qr }) => `<div class="pr-cut pr-tag">
+              <div class="front"><p class="name">${esc(r.name)}</p><p class="sub">${esc(r.gender)}・${esc(pub.title)}</p></div>
+              <div class="back"><div class="qr">${qr}</div><p class="code">${esc(D.passwords.roles[r.id])}</p>
+                <p class="hint">用手機相機掃描，打開你的劇本<br />掃不到就到網站輸入這組代碼<br />不要給別人看</p></div>
+            </div>`,
+          )
+          .join('')}</div>`,
+      )
+      .join('');
+
+    const clues = chunk(D.clues, 2)
+      .map(
+        (page) => `<div class="pr-page pr-halves">${page
+          .map((c) => `<div class="pr-cut clue"><p class="clue-id">${esc(c.id)}</p><h4>${c.title}</h4>${c.html}<span class="pr-foot">${c.id.startsWith('P') ? c.holder.replace(/（.*$/, '') + ' 持有' : c.round.replace(/（.*$/, '')}</span></div>`)
+          .join('')}</div>`,
+      )
+      .join('');
+
+    const seventh = D.clues.find((c) => c.id === 'C1');
+    const letterItems = [
+      ...pub.roles.map((r) => ({ to: `給十年後的${r.name}（放進寫著「${r.name}」的信封）`, html: D.letters[r.id] })),
+      { to: '第七封信（放進只寫著「給妳」的信封）', html: (seventh.html.match(/<blockquote>([\s\S]*?)<\/blockquote>/) || [, seventh.html])[1] },
+    ];
+    const letters = chunk(letterItems, 2)
+      .map(
+        (page) => `<div class="pr-page pr-halves">${page
+          .map((l) => `<div class="pr-cut pr-letter"><p class="to">${esc(l.to)}</p><div class="text">${l.html}</div></div>`)
+          .join('')}</div>`,
+      )
+      .join('');
+
+    const questions = chunk(D.questionCards, 8)
+      .map(
+        (page) => `<div class="pr-page pr-grid">${page
+          .map((q) => `<div class="pr-cut"><p class="pr-q-mark">問題卡</p><p class="pr-q">${q}</p></div>`)
+          .join('')}</div>`,
+      )
+      .join('');
+
+    const obsSheet = `<div class="pr-cut"><h3>觀察表：十年前那一架</h3>
+      <p>看阿哲和志明的談話，有做到的就打勾。勾到 3 項以上，交給梅姐。</p>
+      <ul class="pr-obs" style="list-style:none;padding:0">${D.observer.map((o) => `<li><span class="box"></span>${o}</li>`).join('')}</ul>
+      <p style="margin-top:1.2em">我看到最好的一句話：</p><div style="border-bottom:1px solid #d8cbcf;height:9mm"></div></div>`;
+    const observer = chunk([1, 2, 3, 4], 2)
+      .map((page) => `<div class="pr-page pr-halves">${page.map(() => obsSheet).join('')}</div>`)
+      .join('');
+
+    const thanks = chunk(Array.from({ length: 30 }), 10)
+      .map(
+        (page) => `<div class="pr-page pr-grid pr-thanks" style="grid-template-rows:repeat(5,1fr)">${page
+          .map(() => `<div class="pr-cut"><p class="lead">${D.appreciation}</p><div class="lines"></div><div class="lines"></div><p class="from">給＿＿＿＿＿</p></div>`)
+          .join('')}</div>`,
+      )
+      .join('');
+
+    const sec = (id, title, html) => `<div class="pr-sec" data-sec-block="${id}"><h2 class="pr-sec-title">${title}</h2>${html}</div>`;
+    $('[data-sheets]').innerHTML = [
+      sec('tags', '角色名牌', tags),
+      sec('clues', '線索卡', clues),
+      sec('letters', '七封信', letters),
+      sec('questions', '問題卡', questions),
+      sec('observer', '觀察表', observer),
+      sec('thanks', '欣賞卡', thanks),
+    ].join('');
+    $('[data-gate]').hidden = true;
+    $('[data-ready]').hidden = false;
+    syncSections();
+  }
+
+  function syncSections() {
+    $$('[data-sec]').forEach((box) => {
+      const block = $(`[data-sec-block="${box.dataset.sec}"]`);
+      if (block) block.classList.toggle('is-off', !box.checked);
+    });
+  }
+
+  async function unlock(pass) {
+    const D = await open(sealed.dm, actKey(pass, 1), sealed.iterations);
+    if (!D) return false;
+    await build(D);
+    return true;
+  }
+
+  document.addEventListener('change', (e) => {
+    if (e.target.dataset.sec) syncSections();
+  });
+  $('[data-print]').addEventListener('click', () => window.print());
+
+  if (cryptoReady()) {
+    const saved = get(PASS_KEY, localStorage) || get(PASS_KEY, sessionStorage);
+    if (saved) unlock(saved);
+  }
+  $('[data-gate-form]').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ok = await unlock($('#pr-pass').value);
+    if (!ok) $('[data-gate-error]').textContent = '密碼不對。';
+    else {
+      try {
+        sessionStorage.setItem(PASS_KEY, norm($('#pr-pass').value));
+      } catch {
+        /* ignore */
+      }
+    }
+  });
+</script>

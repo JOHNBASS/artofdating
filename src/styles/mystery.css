@@ -1,0 +1,343 @@
+/* 劇本殺版共用樣式：介紹頁、玩家頁、DM 頁、列印包 */
+
+.mx-eyebrow {
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.mx-lead {
+  font-size: 1.08rem;
+  color: var(--ink-soft);
+  max-width: 34em;
+}
+
+.mx-section {
+  padding: 2.2em 0 0.5em;
+}
+
+.mx-section > h2:first-child {
+  margin-top: 0;
+}
+
+.mx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 1.2em 0;
+  list-style: none;
+}
+
+.mx-chips li {
+  margin: 0;
+  padding: 0.3em 0.85em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.9rem;
+}
+
+.mx-chips li span {
+  color: var(--ink-soft);
+  margin-right: 0.4em;
+}
+
+.mx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 14px;
+}
+
+.mx-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+
+.mx-card h3 {
+  margin: 0 0 0.2em;
+}
+
+.mx-card p:last-child {
+  margin-bottom: 0;
+}
+
+.mx-tag {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 0.05em 0.6em;
+  margin-left: 0.4em;
+  vertical-align: 0.15em;
+  font-family: var(--sans);
+}
+
+.mx-flow {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.mx-flow li {
+  display: grid;
+  grid-template-columns: 4.2em 1fr auto;
+  gap: 4px 12px;
+  padding: 0.65em 0;
+  border-bottom: 1px solid var(--line);
+  margin: 0;
+}
+
+.mx-flow .t {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+
+.mx-flow .m {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.mx-flow .d {
+  grid-column: 2 / -1;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.mx-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 1.4em 0 0;
+}
+
+/* ---------- 解鎖表單 ---------- */
+.mx-lock {
+  display: flex;
+  gap: 8px;
+  margin: 0.6em 0 0;
+}
+
+.mx-lock input {
+  flex: 1;
+  min-width: 0;
+  letter-spacing: 0.08em;
+}
+
+.mx-lock button {
+  flex: none;
+}
+
+.mx-error {
+  color: var(--accent);
+  font-size: 0.9rem;
+  margin: 0.5em 0 0;
+  min-height: 1.4em;
+}
+
+/* ---------- 劇本內容（解密後塞進來的 HTML）---------- */
+.mx-script h3 {
+  font-size: 1.08rem;
+  margin: 1.8em 0 0.5em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--line);
+}
+
+.mx-script h4 {
+  margin: 0 0 0.4em;
+  font-size: 1rem;
+}
+
+.mx-script > p:first-child {
+  font-size: 1.1rem;
+}
+
+.mx-script blockquote {
+  color: var(--ink);
+}
+
+.mx-script del,
+.clue del {
+  text-decoration-thickness: 2px;
+  color: var(--ink-soft);
+}
+
+.clue {
+  background: var(--gold-soft);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 1em 0 1.3em;
+}
+
+.clue .clue-id {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin: 0 0 0.2em;
+}
+
+.clue blockquote {
+  margin: 0.6em 0;
+}
+
+.clue > :last-child {
+  margin-bottom: 0;
+}
+
+.letter {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px 12px 12px 4px;
+  padding: 14px 18px;
+  font-size: 1.05rem;
+  line-height: 2;
+}
+
+.letter p:last-child {
+  margin-bottom: 0;
+}
+
+.choice-label {
+  font-weight: 700;
+  margin: 1em 0 0.3em;
+}
+
+.choices {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.choices li {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.choices li strong {
+  display: block;
+}
+
+.choices li span {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+/* ---------- 玩家頁的三幕 ---------- */
+.mx-act {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin: 0 0 14px;
+}
+
+.mx-act > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 18px;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.mx-act > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mx-act > summary .state {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.mx-act[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.mx-act .body {
+  padding: 4px 18px 18px;
+}
+
+.mx-act.is-locked > summary {
+  color: var(--ink-soft);
+}
+
+/* 有人在旁邊時，一鍵蓋住畫面 */
+.mx-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  text-align: center;
+  padding: 24px;
+}
+
+.mx-cover[hidden] {
+  display: none;
+}
+
+.mx-cover p {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+}
+
+.mx-toolbar {
+  position: sticky;
+  top: 58px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.mx-toolbar .who {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.mx-toolbar .tools {
+  display: flex;
+  gap: 6px;
+}
+
+.mx-toolbar button {
+  min-height: 38px;
+  padding: 0.35em 0.85em;
+  font-size: 0.88rem;
+}
+
+.mx-rules {
+  font-size: 0.95rem;
+}
+
+.mx-rules li {
+  margin: 0.4em 0;
+}

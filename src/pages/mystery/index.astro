@@ -1,0 +1,129 @@
+---
+// 劇本殺版介紹頁：只放不會劇透的內容
+import Base from '../../layouts/Base.astro';
+import { mystery, mysteryTimeline, mysteryHours } from '../../data/mystery.js';
+import { inline } from '../../scripts/inline.js';
+import { url } from '../../scripts/paths.js';
+import '../../styles/mystery.css';
+
+const tl = mysteryTimeline();
+const hours = mysteryHours();
+---
+
+<Base title={`劇本殺版《${mystery.title}》`} description={`${mystery.summary}${mystery.premise[0]}`}>
+  <section class="wrap hero">
+    <p class="mx-eyebrow">劇本殺版</p>
+    <h1>《{mystery.title}》</h1>
+    <p class="tagline">{mystery.tagline}</p>
+    {mystery.premise.map((p) => <p class="mx-lead">{p}</p>)}
+    <ul class="mx-chips">
+      {
+        mystery.facts.map(([k, v]) => (
+          <li>
+            <span>{k}</span>
+            {v}
+          </li>
+        ))
+      }
+      <li><span>時段</span>{hours.start}–{hours.end}</li>
+    </ul>
+    <div class="mx-actions">
+      <a class="btn btn-primary" href={url('mystery/play/')}>我是玩家：打開我的劇本</a>
+      <a class="btn" href={url('mystery/dm/')}>我是 DM</a>
+    </div>
+  </section>
+
+  <section class="wrap mx-section">
+    <h2>六個角色</h2>
+    <p class="muted">角色會依報名事先分好，當天拿到名牌，用手機掃背面的 QR code 打開自己的劇本。</p>
+    <div class="mx-grid">
+      {
+        mystery.roles.map((r) => (
+          <div class="mx-card">
+            <h3>
+              {r.name}
+              <span class="mx-tag">{r.gender}</span>
+            </h3>
+            <p class="muted">{r.blurb}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap mx-section">
+    <h2>2.5 小時的流程</h2>
+    <ol class="mx-flow">
+      {
+        tl.map((p) => (
+          <li>
+            <span class="t">{p.time}</span>
+            <strong>{p.title}</strong>
+            <span class="m">{p.minutes} 分鐘</span>
+            <span class="d">{p.desc}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="wrap mx-section">
+    <h2>五堂課，藏在這場劇本殺裡</h2>
+    <p class="muted">劇本殺版是五堂課的體驗場。你會透過角色，先練習一次聆聽、吵架和說出口；最後 20 分鐘離開角色，再把它接回自己身上。</p>
+    <ul class="arts">
+      {
+        mystery.arts.map(([art, how]) => (
+          <li>
+            <strong>{art}</strong>
+            <span>{how}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="muted small">這不是聯誼，我們不配對。角色之間的感情線都在十年前的劇情裡，玩家之間不需要演戀愛。</p>
+  </section>
+
+  <section class="wrap mx-section">
+    <h2>遊戲規則</h2>
+    <ol class="mx-rules">{mystery.rules.map((r) => <li set:html={inline(r)} />)}</ol>
+    <div class="mx-actions">
+      <a class="btn btn-primary" href={url('mystery/play/')}>打開我的劇本</a>
+      <a class="btn" href={url('course/')}>看五堂課的課程版</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-top: 2.4em;
+  }
+  h1 {
+    margin: 0.1em 0 0.15em;
+  }
+  .tagline {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    color: var(--ink);
+    margin-bottom: 1.1em;
+  }
+  .arts {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .arts li {
+    display: grid;
+    grid-template-columns: 3.5em 1fr;
+    gap: 10px;
+    margin: 0;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .arts strong {
+    color: var(--accent);
+    font-family: var(--serif);
+  }
+</style>

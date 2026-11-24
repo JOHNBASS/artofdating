@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # tasteskill 的檢查暫存（截圖、Chrome 設定檔、建置紀錄）
 .taste-skill/
+
+# 劇本殺的劇本與真相（repo 是公開的，不能上傳）
+private/

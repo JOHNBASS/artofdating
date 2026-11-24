@@ -1,0 +1,282 @@
+---
+// 玩家頁：掃名牌背面的 QR code（或輸入代碼）打開自己的劇本；第二、三幕要等 DM 公布密碼
+import Base from '../../layouts/Base.astro';
+import { mystery } from '../../data/mystery.js';
+import sealed from '../../data/mystery-sealed.json';
+import { inline } from '../../scripts/inline.js';
+import '../../styles/mystery.css';
+
+const acts = [1, 2, 3];
+const actName = (n: number) => `第${'一二三'[n - 1]}幕`;
+// 只放玩家需要的：每個角色三幕的加密內容；DM 的資料不在這一頁
+const payload = { iterations: sealed.iterations, roles: sealed.roles };
+const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r.name, gender: r.gender }]));
+---
+
+<Base title={`我的劇本・${mystery.title}`} description="劇本殺版《沒寄出的信》玩家頁：打開你的角色劇本。">
+  <section class="wrap play">
+    <div data-entry>
+      <p class="mx-eyebrow">劇本殺版《{mystery.title}》</p>
+      <h1>打開你的劇本</h1>
+      <p class="mx-lead">用手機相機掃名牌背面的 QR code，或輸入名牌背面的代碼。</p>
+      <form class="mx-lock" data-code-form>
+        <label class="visually-hidden" for="mx-code">角色代碼</label>
+        <input id="mx-code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="名牌背面的 6 碼代碼" required />
+        <button class="btn-primary" type="submit">打開</button>
+      </form>
+      <p class="mx-error" data-code-error role="status"></p>
+      <p class="muted small" data-no-crypto hidden>這個瀏覽器無法解開劇本。請改用手機內建的 Safari 或 Chrome 打開這一頁。</p>
+
+      <h2>遊戲規則</h2>
+      <ol class="mx-rules">{mystery.rules.map((r) => <li set:html={inline(r)} />)}</ol>
+    </div>
+
+    <div data-player hidden>
+      <div class="mx-toolbar">
+        <p class="who" data-who></p>
+        <div class="tools">
+          <button type="button" data-cover-btn>蓋住畫面</button>
+          <button type="button" data-switch>換角色</button>
+        </div>
+      </div>
+      <p class="muted small">你的劇本只有你看得到。有人靠近的時候，可以按「蓋住畫面」。</p>
+
+      {
+        acts.map((n) => (
+          <details class="mx-act is-locked" data-act={n} open={n === 1}>
+            <summary>
+              {actName(n)}
+              <span class="state" data-state>
+                {n === 1 ? '' : '等 DM 公布密碼'}
+              </span>
+            </summary>
+            <div class="body">
+              <div class="mx-script" data-body />
+              {n > 1 && (
+                <div data-lock>
+                  <p class="muted">DM 說「{actName(n)}的密碼是⋯⋯」的時候，把密碼輸入在這裡。</p>
+                  <form class="mx-lock" data-act-form>
+                    <label class="visually-hidden" for={`mx-act-${n}`}>
+                      {actName(n)}密碼
+                    </label>
+                    <input id={`mx-act-${n}`} type="text" autocomplete="off" spellcheck="false" placeholder={`${actName(n)}密碼`} required />
+                    <button class="btn-primary" type="submit">
+                      打開
+                    </button>
+                  </form>
+                  <p class="mx-error" data-act-error role="status" />
+                </div>
+              )}
+            </div>
+          </details>
+        ))
+      }
+
+      <details class="mx-act">
+        <summary>我的推理筆記</summary>
+        <div class="body">
+          <label class="visually-hidden" for="mx-notes">我的推理筆記</label>
+          <textarea id="mx-notes" data-notes rows="6" placeholder="誰說了什麼、哪張線索很可疑⋯⋯"></textarea>
+          <p class="muted small">筆記只存在這支手機。</p>
+        </div>
+      </details>
+
+      <details class="mx-act">
+        <summary>遊戲規則</summary>
+        <div class="body">
+          <ol class="mx-rules">{mystery.rules.map((r) => <li set:html={inline(r)} />)}</ol>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <div class="mx-cover" data-cover hidden>
+    <div>
+      <p>畫面已蓋住</p>
+      <button type="button" class="btn-primary" data-uncover>回到我的劇本</button>
+    </div>
+  </div>
+
+  <script type="application/json" id="mx-sealed" set:html={JSON.stringify(payload)} />
+  <script type="application/json" id="mx-roles" set:html={JSON.stringify(publicRoles)} />
+</Base>
+
+<style>
+  .play {
+    padding-top: 2em;
+  }
+  h1 {
+    margin: 0.1em 0 0.3em;
+  }
+</style>
+
+<script>
+  import { open, actKey, norm, cryptoReady } from '../../scripts/mystery/crypto.js';
+
+  const $ = (s, el = document) => el.querySelector(s);
+  const data = JSON.parse($('#mx-sealed').textContent);
+  const roles = JSON.parse($('#mx-roles').textContent);
+  const KEY = 'aod:mystery:player';
+  const actName = (n) => `第${'一二三'[n - 1]}幕`;
+
+  const load = () => {
+    try {
+      return JSON.parse(localStorage.getItem(KEY)) || {};
+    } catch {
+      return {};
+    }
+  };
+  const save = (s) => {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(s));
+    } catch {
+      /* 私密瀏覽等情況存不了，重新整理後要再輸入一次 */
+    }
+  };
+
+  let state = load();
+  let role = null;
+
+  // 用代碼試每一個角色的第一幕，解得開的就是你的角色
+  async function findRole(code) {
+    const tries = await Promise.all(
+      Object.keys(data.roles).map(async (id) => [id, await open(data.roles[id][1], actKey(code, 1), data.iterations)]),
+    );
+    return tries.find(([, v]) => v) || null;
+  }
+
+  function showAct(n, html) {
+    const el = $(`[data-act="${n}"]`);
+    $('[data-body]', el).innerHTML = html;
+    el.classList.remove('is-locked');
+    $('[data-state]', el).textContent = '';
+    const lock = $('[data-lock]', el);
+    if (lock) lock.hidden = true;
+  }
+
+  async function start(code, { fromForm = false } = {}) {
+    const err = $('[data-code-error]');
+    const btn = $('[data-code-form] button');
+    err.textContent = '';
+    btn.disabled = true;
+    btn.textContent = '打開中⋯';
+    const found = await findRole(code);
+    btn.disabled = false;
+    btn.textContent = '打開';
+    if (!found) {
+      if (fromForm) err.textContent = '代碼不對。請再看一次名牌背面，或問 DM。';
+      state = {};
+      save(state);
+      return;
+    }
+    const [id, act1] = found;
+    if (state.code !== norm(code)) state = { code: norm(code), acts: {} };
+    role = id;
+    save(state);
+
+    const r = roles[id];
+    $('[data-who]').textContent = `你是 ${r.name}（${r.gender}）`;
+    document.title = `${r.name}的劇本・沒寄出的信`;
+    showAct(1, act1.html);
+    $('[data-entry]').hidden = true;
+    $('[data-player]').hidden = false;
+
+    // 之前已經解開過的幕，重新整理後直接打開
+    let latest = 1;
+    for (const n of [2, 3]) {
+      const pass = state.acts?.[n];
+      if (!pass) continue;
+      const v = await open(data.roles[id][n], actKey(state.code, n, pass), data.iterations);
+      if (v) {
+        showAct(n, v.html);
+        latest = n;
+      }
+    }
+    document.querySelectorAll('[data-act]').forEach((el) => (el.open = Number(el.dataset.act) === latest));
+    try {
+      $('[data-notes]').value = localStorage.getItem(`aod:mystery:notes:${id}`) || '';
+    } catch {
+      /* ignore */
+    }
+  }
+
+  // ---------- 事件 ----------
+  if (!cryptoReady()) {
+    $('[data-no-crypto]').hidden = false;
+    $('[data-code-form] button').disabled = true;
+  } else {
+    // QR code 的網址長這樣：/mystery/play/#k=代碼；讀完就把代碼從網址列拿掉
+    const m = location.hash.match(/k=([^&]+)/);
+    if (m) {
+      history.replaceState(null, '', location.pathname + location.search);
+      start(decodeURIComponent(m[1]));
+    } else if (state.code) {
+      start(state.code);
+    }
+  }
+
+  $('[data-code-form]').addEventListener('submit', (e) => {
+    e.preventDefault();
+    start($('#mx-code').value, { fromForm: true });
+  });
+
+  document.querySelectorAll('[data-act-form]').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const el = form.closest('[data-act]');
+      const n = Number(el.dataset.act);
+      const input = $('input', form);
+      const err = $('[data-act-error]', el);
+      const btn = $('button', form);
+      err.textContent = '';
+      btn.disabled = true;
+      btn.textContent = '打開中⋯';
+      const v = await open(data.roles[role][n], actKey(state.code, n, input.value), data.iterations);
+      btn.disabled = false;
+      btn.textContent = '打開';
+      if (!v) {
+        err.textContent = `密碼不對。再聽一次 DM 唸的${actName(n)}密碼。`;
+        return;
+      }
+      state.acts = { ...state.acts, [n]: norm(input.value) };
+      save(state);
+      showAct(n, v.html);
+      document.querySelectorAll('[data-act]').forEach((d) => (d.open = d === el));
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  $('[data-notes]').addEventListener('input', (e) => {
+    try {
+      localStorage.setItem(`aod:mystery:notes:${role}`, e.target.value);
+    } catch {
+      /* ignore */
+    }
+  });
+
+  // 蓋住畫面
+  const cover = $('[data-cover]');
+  $('[data-cover-btn]').addEventListener('click', () => {
+    cover.hidden = false;
+    $('[data-uncover]').focus();
+  });
+  $('[data-uncover]').addEventListener('click', () => (cover.hidden = true));
+
+  // 換角色：按兩次才清掉，避免誤按
+  const sw = $('[data-switch]');
+  let armed = false;
+  sw.addEventListener('click', () => {
+    if (!armed) {
+      armed = true;
+      sw.textContent = '確定要換？';
+      setTimeout(() => {
+        armed = false;
+        sw.textContent = '換角色';
+      }, 3000);
+      return;
+    }
+    state = {};
+    save(state);
+    location.reload();
+  });
+</script>

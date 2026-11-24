@@ -15,8 +15,8 @@ const {
 const pageTitle = title ? `${title}｜關係練習室` : '關係練習室';
 const path = Astro.url.pathname;
 const nav = [
-  { href: url(''), label: '課程介紹', match: (p: string) => p === url('') || p === url('').replace(/\/$/, '') },
-  { href: url('sessions/1/'), label: '五堂課', match: (p: string) => p.includes('/sessions/') },
+  { href: url('course/'), label: '課程', match: (p: string) => p.includes('/course') || p.includes('/sessions/') },
+  { href: url('mystery/'), label: '劇本殺', match: (p: string) => p.includes('/mystery') },
   { href: url('present/'), label: '帶領者', match: (p: string) => p.includes('/present') || p.includes('/timer') },
 ];
 ---

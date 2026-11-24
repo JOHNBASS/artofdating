@@ -98,11 +98,11 @@ export const sessions = [
   },
 ];
 
-const toMin = (t) => {
+export const toMin = (t) => {
   const [h, m] = t.split(':').map(Number);
   return h * 60 + m;
 };
-const toTime = (n) => `${String(Math.floor(n / 60) % 24).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`;
+export const toTime = (n) => `${String(Math.floor(n / 60) % 24).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`;
 
 // 把 [幾分鐘, 內容] 換算成每一段的開始、結束時間：[{ time, end, label, minutes }]
 // 沒有內容的段落（不安排用餐時的 [30, null]）會跳過

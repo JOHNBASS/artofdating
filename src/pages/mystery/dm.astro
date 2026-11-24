@@ -1,0 +1,751 @@
+---
+// DM 控制台：輸入 DM 密碼後，看得到流程、梅姐台詞、線索、投票與結局、真相、每個角色的劇本和密碼
+import Base from '../../layouts/Base.astro';
+import { mystery, mysteryTimeline } from '../../data/mystery.js';
+import sealed from '../../data/mystery-sealed.json';
+import { url } from '../../scripts/paths.js';
+import '../../styles/mystery.css';
+
+const payload = { iterations: sealed.iterations, dm: sealed.dm, sealedAt: sealed.sealedAt };
+const pub = {
+  phases: mysteryTimeline(),
+  roles: mystery.roles.map((r) => ({ id: r.id, name: r.name, gender: r.gender })),
+  printUrl: url('mystery/print/'),
+};
+---
+
+<Base title={`DM 控制台・${mystery.title}`} description="劇本殺版《沒寄出的信》DM 控制台。">
+  <section class="wrap-wide dm">
+    <div data-gate class="dm-gate">
+      <p class="mx-eyebrow">劇本殺版《{mystery.title}》</p>
+      <h1>DM 控制台</h1>
+      <p class="mx-lead">這裡有完整的真相、每個角色的劇本和密碼。請輸入 DM 密碼。</p>
+      <form class="mx-lock" data-gate-form>
+        <label class="visually-hidden" for="dm-pass">DM 密碼</label>
+        <input id="dm-pass" type="text" autocomplete="off" spellcheck="false" placeholder="DM 密碼" required />
+        <button class="btn-primary" type="submit">打開</button>
+      </form>
+      <label class="dm-remember"><input type="checkbox" data-remember checked /> 在這台裝置記住密碼</label>
+      <p class="mx-error" data-gate-error role="status"></p>
+      <p class="muted small" data-no-crypto hidden>這個瀏覽器無法解密。請改用 Safari 或 Chrome 打開。</p>
+    </div>
+
+    <div data-console hidden>
+      <div class="dm-bar" data-bar>
+        <div class="dm-now">
+          <span class="muted">現在</span>
+          <strong data-clock>--:--</strong>
+        </div>
+        <div class="dm-cur">
+          <span class="muted" data-cur-time></span>
+          <strong data-cur-title></strong>
+        </div>
+        <div class="dm-timer">
+          <strong data-timer>--:--</strong>
+          <button type="button" data-act="toggle">開始</button>
+          <button type="button" data-act="minus" aria-label="減一分鐘">−1</button>
+          <button type="button" data-act="plus" aria-label="加一分鐘">+1</button>
+          <button type="button" data-act="next">下一段 →</button>
+        </div>
+      </div>
+
+      <nav class="dm-tabs" aria-label="控制台分頁">
+        <button type="button" data-tab="flow" aria-pressed="true">流程</button>
+        <button type="button" data-tab="clues">線索</button>
+        <button type="button" data-tab="endings">投票與結局</button>
+        <button type="button" data-tab="truth">真相</button>
+        <button type="button" data-tab="scripts">角色劇本</button>
+        <button type="button" data-tab="keys">密碼與列印</button>
+      </nav>
+
+      <div class="dm-panel" data-panel="flow"></div>
+      <div class="dm-panel" data-panel="clues" hidden></div>
+      <div class="dm-panel" data-panel="endings" hidden></div>
+      <div class="dm-panel" data-panel="truth" hidden></div>
+      <div class="dm-panel" data-panel="scripts" hidden></div>
+      <div class="dm-panel" data-panel="keys" hidden></div>
+    </div>
+  </section>
+
+  <script type="application/json" id="mx-dm" set:html={JSON.stringify(payload)} />
+  <script type="application/json" id="mx-public" set:html={JSON.stringify(pub)} />
+</Base>
+
+<style is:global>
+  .dm {
+    padding-top: 1.6em;
+  }
+  .dm-gate {
+    max-width: 560px;
+  }
+  .dm-gate h1 {
+    margin: 0.1em 0 0.3em;
+  }
+  .dm-remember {
+    display: inline-flex;
+    gap: 0.5em;
+    align-items: center;
+    margin-top: 0.6em;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  .dm-bar {
+    position: sticky;
+    top: 58px;
+    z-index: 4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 18px;
+    padding: 10px 14px;
+    margin: 0 0 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow);
+  }
+  .dm-bar strong {
+    font-variant-numeric: tabular-nums;
+  }
+  .dm-now,
+  .dm-cur {
+    display: flex;
+    gap: 0.5em;
+    align-items: baseline;
+  }
+  .dm-cur {
+    flex: 1;
+    min-width: 12em;
+  }
+  .dm-timer {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .dm-timer strong {
+    font-size: 1.6rem;
+    min-width: 3.2em;
+    text-align: right;
+  }
+  .dm-timer button {
+    min-height: 40px;
+    padding: 0.3em 0.8em;
+  }
+  .dm-bar.is-done {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .dm-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+    scrollbar-width: none;
+  }
+  .dm-tabs button {
+    flex: none;
+    min-height: 40px;
+    padding: 0.3em 1em;
+  }
+  .dm-tabs button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .dm-panel h2 {
+    margin: 1.2em 0 0.5em;
+  }
+  .dm-panel > :first-child {
+    margin-top: 0.4em;
+  }
+  .dm-phase {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    margin: 0 0 10px;
+  }
+  .dm-phase > summary {
+    list-style: none;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 7.5em 1fr auto;
+    gap: 10px;
+    align-items: baseline;
+    padding: 12px 16px;
+  }
+  .dm-phase > summary::-webkit-details-marker {
+    display: none;
+  }
+  .dm-phase.is-current {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+  .dm-phase.is-current > summary strong::after {
+    content: '進行中';
+    margin-left: 0.6em;
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 0.05em 0.6em;
+    border-radius: 999px;
+    vertical-align: 0.15em;
+  }
+  .dm-time,
+  .dm-min {
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.92rem;
+  }
+  .dm-phase-body {
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--line);
+  }
+  .dm-phase-body h3 {
+    font-size: 0.95rem;
+    font-family: var(--sans);
+    color: var(--ink-soft);
+    margin: 1.2em 0 0.4em;
+    letter-spacing: 0.05em;
+  }
+  .dm-phase-body > button {
+    margin-top: 12px;
+  }
+  .dm-checks {
+    list-style: none;
+    padding: 0;
+  }
+  .dm-checks label {
+    display: flex;
+    gap: 0.6em;
+    align-items: flex-start;
+    cursor: pointer;
+  }
+  .dm-checks input {
+    margin-top: 0.45em;
+    width: 1.1em;
+    height: 1.1em;
+    flex: none;
+  }
+  .dm-checks input:checked + span {
+    color: var(--ink-soft);
+    text-decoration: line-through;
+  }
+  .dm-say p {
+    font-family: var(--serif);
+    font-size: 1.12rem;
+    line-height: 1.9;
+    padding: 0.5em 0.9em;
+    border-left: 3px solid var(--gold);
+    background: var(--gold-soft);
+    border-radius: 0 10px 10px 0;
+    margin: 0 0 0.6em;
+  }
+  .dm-say mark,
+  .dm-keys mark {
+    background: var(--accent);
+    color: #fff;
+    padding: 0 0.35em;
+    border-radius: 6px;
+    font-family: var(--sans);
+    letter-spacing: 0.08em;
+  }
+  .dm-tips {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+  .dm-npc {
+    margin: 0 0 12px;
+  }
+  .dm-npc > summary {
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .dm-facts {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .dm-facts li {
+    margin: 0;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .dm-facts .topic {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .dm-clue-meta {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin: -0.2em 0 0.5em;
+  }
+  .dm-form {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 1em;
+  }
+  .dm-form .row {
+    display: grid;
+    grid-template-columns: 1fr minmax(9em, 14em) 6em;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .dm-form .mark-ok {
+    color: var(--table);
+    font-weight: 700;
+  }
+  .dm-form .mark-no {
+    color: var(--accent);
+    font-size: 0.88rem;
+  }
+  .dm-picks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 10px;
+  }
+  .dm-picks .mx-card label {
+    display: block;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0.5em 0 0.2em;
+  }
+  .dm-endings .ending {
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    margin: 0 0 10px;
+  }
+  .dm-endings .ending.common {
+    background: var(--gold-soft);
+  }
+  .dm-endings .ending h3 {
+    margin: 0 0 0.3em;
+  }
+  .dm-endings .ending p {
+    font-family: var(--serif);
+    font-size: 1.08rem;
+    line-height: 1.9;
+    margin: 0 0 0.5em;
+  }
+  .dm-endings .combo {
+    padding-left: 0.9em;
+    border-left: 3px solid var(--accent);
+  }
+  .dm-endings .k {
+    font-family: var(--sans) !important;
+    font-size: 0.85rem !important;
+    color: var(--ink-soft);
+    margin: 0 !important;
+  }
+  .dm-timeline td:first-child {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+  }
+  .dm-reveal p {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    line-height: 2;
+  }
+  .dm-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .dm-roles button[aria-pressed='true'] {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .dm-keys .big {
+    font-size: 1.3rem;
+  }
+  .dm-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 2em;
+    padding-top: 1em;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 640px) {
+    .dm-bar {
+      top: 54px;
+      padding: 8px 10px;
+    }
+    .dm-timer {
+      width: 100%;
+    }
+    .dm-timer strong {
+      font-size: 1.35rem;
+      margin-right: auto;
+      text-align: left;
+    }
+    .dm-phase > summary {
+      grid-template-columns: 1fr auto;
+    }
+    .dm-phase > summary .dm-time {
+      grid-column: 1 / -1;
+    }
+    .dm-form .row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+  }
+</style>
+
+<script>
+  import { open, actKey, norm, cryptoReady } from '../../scripts/mystery/crypto.js';
+  import { fmt, chime, keepAwake } from '../../scripts/timer-utils.js';
+
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+  const sealed = JSON.parse($('#mx-dm').textContent);
+  const pub = JSON.parse($('#mx-public').textContent);
+  const roleName = Object.fromEntries(pub.roles.map((r) => [r.id, r.name]));
+  const PASS_KEY = 'aod:mystery:dm-pass';
+  const STATE_KEY = 'aod:mystery:dm-state';
+
+  const store = {
+    get(k, s = localStorage) {
+      try {
+        return s.getItem(k);
+      } catch {
+        return null;
+      }
+    },
+    set(k, v, s = localStorage) {
+      try {
+        s.setItem(k, v);
+      } catch {
+        /* ignore */
+      }
+    },
+    del(k) {
+      try {
+        localStorage.removeItem(k);
+        sessionStorage.removeItem(k);
+      } catch {
+        /* ignore */
+      }
+    },
+  };
+
+  const fresh = () => ({ phase: 0, remaining: pub.phases[0].minutes * 60, running: false, endAt: 0, checks: {}, votes: {}, picks: {}, tab: 'flow', role: pub.roles[0].id });
+  let S = (() => {
+    try {
+      return { ...fresh(), ...JSON.parse(store.get(STATE_KEY)) };
+    } catch {
+      return fresh();
+    }
+  })();
+  const saveState = () => store.set(STATE_KEY, JSON.stringify(S));
+
+  let D = null;
+  let ticking = 0;
+
+  // ---------- 解鎖 ----------
+  async function unlock(pass, remember) {
+    const d = await open(sealed.dm, actKey(pass, 1), sealed.iterations);
+    if (!d) return false;
+    D = d;
+    if (remember !== undefined) {
+      store.del(PASS_KEY);
+      store.set(PASS_KEY, norm(pass), remember ? localStorage : sessionStorage);
+    }
+    $('[data-gate]').hidden = true;
+    $('[data-console]').hidden = false;
+    renderAll();
+    showTab(S.tab);
+    tick();
+    if (!ticking) ticking = setInterval(tick, 500);
+    return true;
+  }
+
+  // ---------- 流程 ----------
+  function renderFlow() {
+    const npc = `<details class="dm-npc mx-card"><summary>梅姐：被問到才說的事</summary>
+      <p class="muted">${esc(D.npc.persona)}</p>
+      <ul class="dm-facts">${D.npc.facts.map((f) => `<li><span class="topic">話題：${f.topic}</span>${f.say}</li>`).join('')}</ul></details>`;
+    const list = pub.phases
+      .map((p, i) => {
+        const dp = D.phases[p.id] || { do: [], say: [], tips: [] };
+        const cur = i === S.phase;
+        const pass = p.id === 'read2' ? D.passwords.acts['2'] : p.id === 'act3' ? D.passwords.acts['3'] : null;
+        const say = dp.say.map((t) => (pass ? t.replace('（唸密碼）', `<mark>${esc(pass)}</mark>`) : t));
+        return `<details class="dm-phase${cur ? ' is-current' : ''}" data-i="${i}"${cur ? ' open' : ''}>
+          <summary><span class="dm-time">${p.time}–${p.end}</span><strong>${esc(p.title)}</strong><span class="dm-min">${p.minutes} 分</span></summary>
+          <div class="dm-phase-body">
+            <button type="button" class="btn-primary" data-start="${i}">${cur ? '重新計時這一段' : '開始這一段'}</button>
+            ${dp.do.length ? `<h3>要做的事</h3><ul class="dm-checks">${dp.do.map((t, j) => `<li><label><input type="checkbox" data-check="${p.id}.${j}"${S.checks[`${p.id}.${j}`] ? ' checked' : ''} /> <span>${t}</span></label></li>`).join('')}</ul>` : ''}
+            ${say.length ? `<h3>台詞（「」裡是梅姐說的）</h3><div class="dm-say">${say.map((t) => `<p>${t}</p>`).join('')}</div>` : ''}
+            ${dp.tips.length ? `<h3>提醒</h3><ul class="dm-tips">${dp.tips.map((t) => `<li>${t}</li>`).join('')}</ul>` : ''}
+          </div></details>`;
+      })
+      .join('');
+    $('[data-panel="flow"]').innerHTML = npc + list;
+  }
+
+  // ---------- 線索 ----------
+  function renderClues() {
+    $('[data-panel="clues"]').innerHTML =
+      `<p class="muted">C 開頭的放上桌；P 開頭的在玩家手上（劇本裡也看得到）。列印版在「密碼與列印」分頁。</p>` +
+      D.clues
+        .map((c) => `<div class="clue"><p class="clue-id">${esc(c.id)}</p><h4>${c.title}</h4><p class="dm-clue-meta">什麼時候：${c.round}　·　誰拿著：${c.holder}</p>${c.html}</div>`)
+        .join('');
+  }
+
+  // ---------- 投票與結局 ----------
+  const pickKey = (id, g) => `${id}.${g}`;
+  const match = (c) => Object.entries(c.when).every(([k, v]) => (Array.isArray(v) ? v.includes(S.picks[k]) : S.picks[k] === v));
+
+  function renderEndings() {
+    const opts = pub.roles.map((r) => `<option value="${r.id}">${esc(r.name)}</option>`).join('') + '<option value="none">沒有共識</option>';
+    const votes = D.questions
+      .map(
+        (q) => `<div class="row"><span>${q.q}</span>
+        <select data-vote="${q.id}" aria-label="${esc(q.q.replace(/<[^>]+>/g, ''))}"><option value="">還沒投</option>${opts}</select>
+        <span data-vote-mark="${q.id}"></span></div>`,
+      )
+      .join('');
+    const picks = D.endingOrder
+      .map(
+        (id) => `<div class="mx-card"><h3>${esc(roleName[id])}</h3>${D.choices[id]
+          .map(
+            (g) => `<label for="pick-${id}-${g.id}">${g.label}</label>
+            <select id="pick-${id}-${g.id}" data-pick="${pickKey(id, g.id)}"><option value="">還沒選</option>${g.options.map((o) => `<option value="${o.id}">${o.id}. ${o.label}</option>`).join('')}</select>`,
+          )
+          .join('')}</div>`,
+      )
+      .join('');
+    $('[data-panel="endings"]').innerHTML = `
+      <h2>投票（多數決）</h2>
+      <p class="muted">每一題記下全桌多數的答案。答對的題數決定共同結局。</p>
+      <div class="dm-form">${votes}</div>
+      <h2>每個人的選擇</h2>
+      <p class="muted">第三幕時，每個人小聲告訴你他的選擇，在這裡選好。</p>
+      <div class="dm-picks">${picks}</div>
+      <h2>照順序唸</h2>
+      <div class="dm-endings" data-endings></div>
+      <div class="dm-footer"><button type="button" data-reset>重新開始一場（清除投票、選擇、勾選和計時）</button></div>`;
+    $$('[data-vote]').forEach((el) => (el.value = S.votes[el.dataset.vote] || ''));
+    $$('[data-pick]').forEach((el) => (el.value = S.picks[el.dataset.pick] || ''));
+    renderEndingText();
+  }
+
+  function renderEndingText() {
+    D.questions.forEach((q) => {
+      const v = S.votes[q.id];
+      const el = $(`[data-vote-mark="${q.id}"]`);
+      el.className = !v ? '' : v === q.answer ? 'mark-ok' : 'mark-no';
+      el.textContent = !v ? '' : v === q.answer ? '✓ 答對' : `✗ 答案：${roleName[q.answer]}`;
+    });
+    const correct = D.questions.filter((q) => S.votes[q.id] === q.answer).length;
+    const voted = D.questions.filter((q) => S.votes[q.id]).length;
+    const common = [...D.commonEndings].sort((a, b) => b.min - a.min).find((e) => correct >= e.min);
+    let html = `<div class="ending common"><p class="k">共同結局：答對 ${correct} 題${voted < D.questions.length ? `（還有 ${D.questions.length - voted} 題沒投）` : ''}</p><h3>〈${common.title}〉</h3><p>${common.text}</p></div>`;
+    for (const id of D.endingOrder) {
+      const parts = D.choices[id].map((g) => {
+        const o = g.options.find((x) => x.id === S.picks[pickKey(id, g.id)]);
+        return o ? `<p>${o.ending}</p>` : `<p class="k">（${g.label}：還沒選）</p>`;
+      });
+      const extra = D.combos.filter((c) => c.after === id && match(c)).map((c) => `<p class="combo">${c.text}</p>`);
+      html += `<div class="ending"><h3>${esc(roleName[id])}</h3>${parts.join('')}${extra.join('')}</div>`;
+    }
+    $('[data-endings]').innerHTML = html;
+  }
+
+  // ---------- 真相 ----------
+  function renderTruth() {
+    $('[data-panel="truth"]').innerHTML = `
+      <h2>一句話</h2><p>${D.truth.summary}</p>
+      <h2>答案</h2>
+      <div class="dm-form">${D.questions.map((q) => `<div class="mx-card"><strong>${q.q}</strong> → ${esc(roleName[q.answer])}<p class="muted small">${q.why}</p></div>`).join('')}</div>
+      <h2>時間線</h2>
+      <div class="table-wrap"><table class="dm-timeline"><tbody>${D.truth.timeline.map(([t, s]) => `<tr><td>${t}</td><td>${s}</td></tr>`).join('')}</tbody></table></div>
+      <h2>復盤稿（梅姐唸）</h2><div class="dm-reveal">${D.reveal}</div>`;
+  }
+
+  // ---------- 角色劇本 ----------
+  function renderScripts() {
+    const id = S.role;
+    $('[data-panel="scripts"]').innerHTML = `
+      <div class="dm-roles">${pub.roles.map((r) => `<button type="button" data-role="${r.id}" aria-pressed="${r.id === id}">${esc(r.name)}</button>`).join('')}</div>
+      ${[1, 2, 3].map((n) => `<details class="mx-act"${n === 1 ? ' open' : ''}><summary>${esc(roleName[id])}・第${'一二三'[n - 1]}幕</summary><div class="body mx-script">${D.scripts[id][n]}</div></details>`).join('')}`;
+  }
+
+  // ---------- 密碼與列印 ----------
+  function renderKeys() {
+    $('[data-panel="keys"]').innerHTML = `
+      <div class="dm-keys">
+        <h2>要唸給大家的密碼</h2>
+        <p class="big">第二幕：<mark>${esc(D.passwords.acts['2'])}</mark>　第三幕：<mark>${esc(D.passwords.acts['3'])}</mark></p>
+        <h2>角色代碼（印在名牌背面）</h2>
+        <div class="table-wrap"><table><tbody>${pub.roles.map((r) => `<tr><td>${esc(r.name)}（${esc(r.gender)}）</td><td><strong>${esc(D.passwords.roles[r.id])}</strong></td></tr>`).join('')}</tbody></table></div>
+        <p class="muted">有人掃不到 QR code，就請他在玩家頁輸入代碼。</p>
+        <h2>列印包</h2>
+        <p>角色名牌（含 QR code）、線索卡、七封信、問題卡、觀察表、欣賞卡。</p>
+        <p><a class="btn btn-primary" href="${pub.printUrl}">打開列印包</a></p>
+        <p class="muted small">加密檔產生日期：${esc(sealed.sealedAt || '')}</p>
+      </div>
+      <div class="dm-footer"><button type="button" data-logout>登出這台裝置</button></div>`;
+  }
+
+  function renderAll() {
+    renderFlow();
+    renderClues();
+    renderEndings();
+    renderTruth();
+    renderScripts();
+    renderKeys();
+  }
+
+  function showTab(tab) {
+    S.tab = tab;
+    saveState();
+    $$('[data-tab]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
+    $$('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== tab));
+  }
+
+  // ---------- 計時 ----------
+  let chimed = false;
+  const remainingNow = () => (S.running ? Math.max(0, (S.endAt - Date.now()) / 1000) : S.remaining);
+
+  function setPhase(i, { start = false } = {}) {
+    S.phase = Math.max(0, Math.min(pub.phases.length - 1, i));
+    S.remaining = pub.phases[S.phase].minutes * 60;
+    S.running = false;
+    chimed = false;
+    if (start) toggle();
+    saveState();
+    renderFlow();
+    tick();
+  }
+
+  function toggle() {
+    if (S.running) {
+      S.remaining = remainingNow();
+      S.running = false;
+    } else {
+      if (S.remaining <= 0) S.remaining = pub.phases[S.phase].minutes * 60;
+      S.endAt = Date.now() + S.remaining * 1000;
+      S.running = true;
+      chimed = false;
+    }
+    keepAwake(S.running);
+    saveState();
+    tick();
+  }
+
+  function adjust(sec) {
+    const r = Math.max(0, remainingNow() + sec);
+    if (S.running) S.endAt = Date.now() + r * 1000;
+    else S.remaining = r;
+    chimed = false;
+    saveState();
+    tick();
+  }
+
+  function tick() {
+    const now = new Date();
+    $('[data-clock]').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const p = pub.phases[S.phase];
+    $('[data-cur-time]').textContent = `${p.time}–${p.end}`;
+    $('[data-cur-title]').textContent = `${S.phase + 1}/${pub.phases.length} ${p.title}`;
+    const r = remainingNow();
+    $('[data-timer]').textContent = fmt(Math.ceil(r));
+    $('[data-act="toggle"]').textContent = S.running ? (r <= 0 ? '停止' : '暫停') : r > 0 && r < p.minutes * 60 ? '繼續' : '開始';
+    $('[data-bar]').classList.toggle('is-done', S.running && r <= 0);
+    if (S.running && r <= 0 && !chimed) {
+      chimed = true;
+      chime();
+    }
+  }
+
+  // ---------- 事件 ----------
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button, a');
+    if (!t) return;
+    if (t.dataset.tab) showTab(t.dataset.tab);
+    else if (t.dataset.start) setPhase(Number(t.dataset.start), { start: true });
+    else if (t.dataset.act === 'toggle') toggle();
+    else if (t.dataset.act === 'minus') adjust(-60);
+    else if (t.dataset.act === 'plus') adjust(60);
+    else if (t.dataset.act === 'next') setPhase(S.phase + 1);
+    else if (t.dataset.role) {
+      S.role = t.dataset.role;
+      saveState();
+      renderScripts();
+    } else if (t.hasAttribute('data-reset')) {
+      if (t.dataset.armed) {
+        const keep = { tab: S.tab, role: S.role };
+        S = { ...fresh(), ...keep };
+        saveState();
+        renderAll();
+        showTab(S.tab);
+        tick();
+      } else {
+        t.dataset.armed = '1';
+        t.textContent = '確定要清除嗎？再按一次';
+        setTimeout(() => {
+          delete t.dataset.armed;
+          t.textContent = '重新開始一場（清除投票、選擇、勾選和計時）';
+        }, 3000);
+      }
+    } else if (t.hasAttribute('data-logout')) {
+      store.del(PASS_KEY);
+      location.reload();
+    }
+  });
+
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset.check) {
+      S.checks[t.dataset.check] = t.checked;
+      saveState();
+    } else if (t.dataset.vote) {
+      S.votes[t.dataset.vote] = t.value;
+      saveState();
+      renderEndingText();
+    } else if (t.dataset.pick) {
+      S.picks[t.dataset.pick] = t.value;
+      saveState();
+      renderEndingText();
+    }
+  });
+
+  if (!cryptoReady()) {
+    $('[data-no-crypto]').hidden = false;
+    $('[data-gate-form] button').disabled = true;
+  } else {
+    const saved = store.get(PASS_KEY) || store.get(PASS_KEY, sessionStorage);
+    if (saved) unlock(saved);
+  }
+
+  $('[data-gate-form]').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('[data-gate-form] button');
+    btn.disabled = true;
+    btn.textContent = '打開中⋯';
+    const ok = await unlock($('#dm-pass').value, $('[data-remember]').checked);
+    btn.disabled = false;
+    btn.textContent = '打開';
+    if (!ok) $('[data-gate-error]').textContent = '密碼不對。';
+  });
+</script>

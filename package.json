@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "seal": "node scripts/seal-mystery.mjs",
     "astro": "astro"
   },
   "dependencies": {

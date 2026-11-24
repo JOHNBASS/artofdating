@@ -76,7 +76,7 @@ const next = sessions.find((x) => x.num === num + 1);
               {prev.title}
             </a>
           ) : (
-            <a href={url('')} class="prev">
+            <a href={url('course/')} class="prev">
               <span class="muted small">← 回到</span>
               課程介紹
             </a>
@@ -89,7 +89,7 @@ const next = sessions.find((x) => x.num === num + 1);
               {next.title}
             </a>
           ) : (
-            <a href={url('')} class="next">
+            <a href={url('course/')} class="next">
               <span class="muted small">完成了 →</span>
               回到課程介紹
             </a>
