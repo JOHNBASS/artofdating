@@ -394,3 +394,75 @@
 .mx-rules li {
   margin: 0.4em 0;
 }
+
+/* 掃了 DM 的同步 QR code 之後的提示 */
+.mx-synced {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--table-soft);
+  color: var(--table);
+  font-size: 0.92rem;
+}
+
+/* 角色劇本封面：圖在上，名字和一句話疊在下方的漸層上 */
+.mx-role-cover {
+  position: relative;
+  margin: 4px 0 14px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  max-height: 70vh;
+  width: 100%;
+  background: var(--surface-2);
+  box-shadow: var(--shadow);
+}
+
+.mx-role-cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.mx-role-cover figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 48px 18px 16px;
+  color: #fff;
+  background: linear-gradient(to top, rgba(20, 12, 14, 0.82), rgba(20, 12, 14, 0.45) 55%, transparent);
+}
+
+.mx-role-cover .series {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+}
+
+.mx-role-cover strong {
+  font-family: var(--serif);
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.mx-role-cover figcaption > span:last-child {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  opacity: 0.92;
+}
+
+.mx-role-cover.is-small {
+  max-width: 360px;
+  aspect-ratio: 3 / 4;
+}
+
+.mx-role-cover.is-small strong {
+  font-size: 1.5rem;
+}

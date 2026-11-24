@@ -1,7 +1,7 @@
 ---
 // 劇本殺版介紹頁：只放不會劇透的內容
 import Base from '../../layouts/Base.astro';
-import { mystery, mysteryTimeline, mysteryHours } from '../../data/mystery.js';
+import { mystery, mysteryTimeline, mysteryHours, coverSrc } from '../../data/mystery.js';
 import { inline } from '../../scripts/inline.js';
 import { url } from '../../scripts/paths.js';
 import '../../styles/mystery.css';
@@ -39,12 +39,15 @@ const hours = mysteryHours();
     <div class="mx-grid">
       {
         mystery.roles.map((r) => (
-          <div class="mx-card">
-            <h3>
-              {r.name}
-              <span class="mx-tag">{r.gender}</span>
-            </h3>
-            <p class="muted">{r.blurb}</p>
+          <div class="mx-card role">
+            <img src={coverSrc(url(''), r.id, 600)} alt={r.alt} width="600" height="900" loading="lazy" decoding="async" />
+            <div class="role-text">
+              <h3>
+                {r.name}
+                <span class="mx-tag">{r.gender}</span>
+              </h3>
+              <p class="muted">{r.blurb}</p>
+            </div>
           </div>
         ))
       }
@@ -105,6 +108,23 @@ const hours = mysteryHours();
     font-size: 1.25rem;
     color: var(--ink);
     margin-bottom: 1.1em;
+  }
+  .role {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .role img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: center 40%;
+    background: var(--surface-2);
+  }
+  .role-text {
+    padding: 14px 18px 16px;
   }
   .arts {
     list-style: none;

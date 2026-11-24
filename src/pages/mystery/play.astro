@@ -1,16 +1,23 @@
 ---
 // 玩家頁：掃名牌背面的 QR code（或輸入代碼）打開自己的劇本；第二、三幕要等 DM 公布密碼
 import Base from '../../layouts/Base.astro';
-import { mystery, hosts, hostGender } from '../../data/mystery.js';
+import { mystery, hosts, hostGender, coverSrc } from '../../data/mystery.js';
 import sealed from '../../data/mystery-sealed.json';
 import { inline } from '../../scripts/inline.js';
+import { url } from '../../scripts/paths.js';
 import '../../styles/mystery.css';
 
 const acts = [1, 2, 3];
 const actName = (n: number) => `第${'一二三'[n - 1]}幕`;
 // 只放玩家需要的：每個角色三幕的加密內容；DM 的資料不在這一頁
 const payload = { iterations: sealed.iterations, roles: sealed.roles };
-const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r.name, gender: r.gender }]));
+const base = url('');
+const publicRoles = Object.fromEntries(
+  mystery.roles.map((r) => [
+    r.id,
+    { name: r.name, gender: r.gender, blurb: r.blurb, alt: r.alt, src: coverSrc(base, r.id, 1024), small: coverSrc(base, r.id, 600) },
+  ]),
+);
 ---
 
 <Base title={`我的劇本・${mystery.title}`} description="劇本殺版《沒寄出的信》玩家頁：打開你的角色劇本。">
@@ -21,7 +28,7 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
       <p class="mx-lead">用手機相機掃名牌背面的 QR code，或輸入名牌背面的代碼。</p>
       <form class="mx-lock" data-code-form>
         <label class="visually-hidden" for="mx-code">角色代碼</label>
-        <input id="mx-code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="名牌背面的 6 碼代碼" required />
+        <input id="mx-code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="名牌背面的代碼，例如 AB3C9X-F" required />
         <button class="btn-primary" type="submit">打開</button>
       </form>
       <p class="mx-error" data-code-error role="status"></p>
@@ -39,7 +46,16 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
           <button type="button" data-switch>換角色</button>
         </div>
       </div>
+      <figure class="mx-role-cover" data-role-cover>
+        <img data-role-cover-img alt="" width="1024" height="1536" decoding="async" />
+        <figcaption>
+          <span class="series">劇本殺《{mystery.title}》</span>
+          <strong data-role-cover-name></strong>
+          <span data-role-cover-blurb></span>
+        </figcaption>
+      </figure>
       <p class="muted small">你的劇本只有你看得到。有人靠近的時候，可以按「蓋住畫面」。</p>
+      <p class="mx-synced" data-synced role="status" hidden></p>
 
       {
         acts.map((n) => (
@@ -160,7 +176,17 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
     if (lock) lock.hidden = true;
   }
 
-  async function start(code, { fromForm = false } = {}) {
+  // 名牌上的代碼是「角色代碼-老闆」，例如 TDCP6V-M：M 是梅叔、F 是梅姐。
+  // 只輸入前 6 碼也可以，老闆就照之前的設定（或網站預設）。
+  function parseCode(input) {
+    const s = norm(input).replace(/[^A-Z0-9]/g, '');
+    if (s.length === 7 && /[FM]$/.test(s)) return { code: s.slice(0, 6), host: s.endsWith('M') ? 'male' : 'female' };
+    return { code: s, host: null };
+  }
+
+  async function start(input, { fromForm = false } = {}) {
+    const { code, host: pickedHost } = parseCode(input);
+    if (pickedHost) state.host = pickedHost;
     const err = $('[data-code-error]');
     const btn = $('[data-code-form] button');
     err.textContent = '';
@@ -171,7 +197,7 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
     btn.textContent = '打開';
     if (!found) {
       if (fromForm) err.textContent = '代碼不對。請再看一次名牌背面，或問 DM。';
-      state = {};
+      state = { host: state.host };
       save(state);
       return;
     }
@@ -182,6 +208,14 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
 
     const r = roles[id];
     $('[data-who]').textContent = `你是 ${r.name}（${r.gender}）`;
+    // 劇本封面
+    const img = $('[data-role-cover-img]');
+    img.src = r.small;
+    img.srcset = `${r.small} 600w, ${r.src} 1024w`;
+    img.sizes = '(max-width: 760px) 100vw, 728px';
+    img.alt = r.alt;
+    $('[data-role-cover-name]').textContent = r.name;
+    $('[data-role-cover-blurb]').textContent = r.blurb;
     document.title = `${r.name}的劇本・沒寄出的信`;
     showAct(1, act1.html);
     $('[data-entry]').hidden = true;
@@ -211,18 +245,27 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
     $('[data-no-crypto]').hidden = false;
     $('[data-code-form] button').disabled = true;
   } else {
-    // QR code 的網址長這樣：/mystery/play/#k=代碼；讀完就把代碼從網址列拿掉
+    // 名牌 QR code：/mystery/play/#k=代碼&h=female｜male
+    // DM 控制台的同步 QR code：/mystery/play/#h=male（只換老闆，不換角色）
+    // 讀完就把這些從網址列拿掉
     const m = location.hash.match(/k=([^&]+)/);
     const h = location.hash.match(/h=(female|male)/);
+    if (m || h) history.replaceState(null, '', location.pathname + location.search);
     if (h) {
       state.host = h[1];
       save(state);
     }
     if (m) {
-      history.replaceState(null, '', location.pathname + location.search);
       start(decodeURIComponent(m[1]));
     } else if (state.code) {
-      start(state.code);
+      start(state.code).then(() => {
+        if (!h) return;
+        const el = $('[data-synced]');
+        el.textContent = `已同步：今天的老闆是${host().name}。`;
+        el.hidden = false;
+      });
+    } else if (h) {
+      $('[data-code-error]').textContent = `已同步：今天的老闆是${host().name}。請輸入名牌背面的代碼。`;
     }
   }
 

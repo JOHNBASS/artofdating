@@ -1,7 +1,7 @@
 ---
 // DM 控制台：輸入 DM 密碼後，看得到流程與小劇場、老闆（梅姐／梅叔，可切換）的台詞、線索、還原與結局、真相、每個角色的劇本和密碼
 import Base from '../../layouts/Base.astro';
-import { mystery, mysteryTimeline, hosts, hostGender } from '../../data/mystery.js';
+import { mystery, mysteryTimeline, hosts, hostGender, coverSrc } from '../../data/mystery.js';
 import sealed from '../../data/mystery-sealed.json';
 import { url } from '../../scripts/paths.js';
 import '../../styles/mystery.css';
@@ -9,8 +9,10 @@ import '../../styles/mystery.css';
 const payload = { iterations: sealed.iterations, dm: sealed.dm, sealedAt: sealed.sealedAt };
 const pub = {
   phases: mysteryTimeline(),
-  roles: mystery.roles.map((r) => ({ id: r.id, name: r.name, gender: r.gender })),
+  roles: mystery.roles.map((r) => ({ id: r.id, name: r.name, gender: r.gender, blurb: r.blurb, alt: r.alt, cover: coverSrc(url(''), r.id, 600) })),
   printUrl: url('mystery/print/'),
+  // 同步 QR code 一律指向正式網站
+  playUrl: new URL(url('mystery/play/'), Astro.site).href,
   hosts,
   hostGender,
 };
@@ -64,6 +66,14 @@ const pub = {
           <button type="button" data-host="male">梅叔</button>
         </div>
       </nav>
+
+      <div class="dm-notice" data-host-notice hidden>
+        <p data-host-notice-text></p>
+        <div class="row">
+          <button type="button" class="btn-primary" data-tab="keys">看同步 QR code</button>
+          <button type="button" data-notice-close>知道了</button>
+        </div>
+      </div>
 
       <div class="dm-panel" data-panel="flow"></div>
       <div class="dm-panel" data-panel="clues" hidden></div>
@@ -170,6 +180,47 @@ const pub = {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
+  }
+  .dm-notice {
+    margin: 0 0 12px;
+    padding: 12px 16px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+  }
+  .dm-notice p {
+    margin: 0 0 8px;
+  }
+  .dm-notice .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .dm-sync {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .dm-sync .qr {
+    width: 168px;
+    height: 168px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 10px;
+    flex: none;
+  }
+  .dm-sync .qr svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .dm-sync p {
+    margin: 0 0 0.4em;
   }
   .dm-scenes {
     list-style: none;
@@ -504,6 +555,7 @@ const pub = {
   import { open, actKey, norm, cryptoReady } from '../../scripts/mystery/crypto.js';
   import { fmt, chime, keepAwake } from '../../scripts/timer-utils.js';
   import { fillHost } from '../../scripts/mystery/host.js';
+  import QRCode from 'qrcode';
 
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -666,6 +718,10 @@ const pub = {
     const id = S.role;
     $('[data-panel="scripts"]').innerHTML = `
       <div class="dm-roles">${pub.roles.map((r) => `<button type="button" data-role="${r.id}" aria-pressed="${r.id === id}">${esc(r.name)}</button>`).join('')}</div>
+      ${(() => {
+        const r = pub.roles.find((x) => x.id === id);
+        return `<figure class="mx-role-cover is-small"><img src="${r.cover}" alt="${esc(r.alt)}" width="600" height="900" /><figcaption><strong>${esc(r.name)}</strong><span>${esc(r.blurb)}</span></figcaption></figure>`;
+      })()}
       ${[1, 2, 3].map((n) => `<details class="mx-act"${n === 1 ? ' open' : ''}><summary>${esc(roleName[id])}・第${'一二三'[n - 1]}幕</summary><div class="body mx-script">${D.scripts[id][n]}</div></details>`).join('')}`;
     // DM 看得到每個結局選項的台詞
     $$('[data-panel="scripts"] [data-perform]').forEach((el) => (el.hidden = false));
@@ -677,9 +733,20 @@ const pub = {
       <div class="dm-keys">
         <h2>要唸給大家的密碼</h2>
         <p class="big">第二幕：<mark>${esc(D.passwords.acts['2'])}</mark>　第三幕：<mark>${esc(D.passwords.acts['3'])}</mark></p>
+        <h2>今天的老闆：${esc(host().name)}</h2>
+        <p>玩家手機上的劇本，會跟著下面三種方式知道今天是梅姐還是梅叔：</p>
+        <ol>
+          <li><strong>名牌的 QR code</strong>：列印包會帶著目前的設定。</li>
+          <li><strong>名牌上的代碼</strong>：最後一碼 <strong>F</strong> 是梅姐、<strong>M</strong> 是梅叔，掃不到 QR code 的人照著輸入就好。</li>
+          <li><strong>同步 QR code</strong>：名牌已經印好、或玩家已經打開劇本之後才切換的話，請每個人用手機掃一次下面這個，劇本就會換成${esc(host().name)}，角色不會變。</li>
+        </ol>
+        <div class="dm-sync"><div class="qr" data-sync-qr></div><div>
+          <p><strong>同步 QR code：${esc(host().name)}</strong></p>
+          <p class="muted small">只換老闆的稱呼，不會換角色，也不會看到別人的劇本。</p>
+        </div></div>
         <h2>角色代碼（印在名牌背面）</h2>
-        <div class="table-wrap"><table><tbody>${pub.roles.map((r) => `<tr><td>${esc(r.name)}（${esc(r.gender)}）</td><td><strong>${esc(D.passwords.roles[r.id])}</strong></td></tr>`).join('')}</tbody></table></div>
-        <p class="muted">有人掃不到 QR code，就請他在玩家頁輸入代碼。</p>
+        <div class="table-wrap"><table><tbody>${pub.roles.map((r) => `<tr><td>${esc(r.name)}（${esc(r.gender)}）</td><td><strong>${esc(D.passwords.roles[r.id])}-${S.host === 'male' ? 'M' : 'F'}</strong></td></tr>`).join('')}</tbody></table></div>
+        <p class="muted">有人掃不到 QR code，就請他在玩家頁輸入代碼（含最後的 -${S.host === 'male' ? 'M' : 'F'}）。</p>
         <h2>列印包</h2>
         <p>角色名牌（含 QR code）、線索卡、七封信、問題卡、觀察表、欣賞卡。</p>
         <p>目前的老闆是<strong>${esc(host().name)}</strong>。名牌上的 QR code 會帶著這個設定，玩家手機上的劇本就會顯示「${esc(host().name)}」。在右上角切換後，記得重新印名牌。</p>
@@ -687,6 +754,10 @@ const pub = {
         <p class="muted small">加密檔產生日期：${esc(sealed.sealedAt || '')}</p>
       </div>
       <div class="dm-footer"><button type="button" data-logout>登出這台裝置</button></div>`;
+    QRCode.toString(`${pub.playUrl}?openExternalBrowser=1#h=${S.host}`, { type: 'svg', margin: 0, errorCorrectionLevel: 'M' }).then((svg) => {
+      const box = $('[data-sync-qr]');
+      if (box) box.innerHTML = svg;
+    });
   }
 
   function renderAll() {
@@ -771,11 +842,16 @@ const pub = {
     else if (t.dataset.act === 'plus') adjust(60);
     else if (t.dataset.act === 'next') setPhase(S.phase + 1);
     else if (t.dataset.host) {
+      if (t.dataset.host === S.host) return;
       S.host = t.dataset.host;
       saveState();
       applyHost();
       renderAll();
       showTab(S.tab);
+      $('[data-host-notice-text]').textContent = `已切換成${host().name}。名牌還沒印的話，直接打開列印包印；名牌已經印好、或玩家已經打開劇本，請每個人掃一次「密碼與列印」分頁的同步 QR code，大家的劇本就會換成${host().name}。`;
+      $('[data-host-notice]').hidden = false;
+    } else if (t.hasAttribute('data-notice-close')) {
+      $('[data-host-notice]').hidden = true;
     } else if (t.dataset.role) {
       S.role = t.dataset.role;
       saveState();

@@ -362,7 +362,7 @@ const sections = [
           .map(
             ({ r, qr }) => `<div class="pr-cut pr-tag">
               <div class="front"><p class="name">${esc(r.name)}</p><p class="sub">${esc(r.gender)}・${esc(pub.title)}</p></div>
-              <div class="back"><div class="qr">${qr}</div><p class="code">${esc(D.passwords.roles[r.id])}</p>
+              <div class="back"><div class="qr">${qr}</div><p class="code">${esc(D.passwords.roles[r.id])}-${hostId === 'male' ? 'M' : 'F'}</p>
                 <p class="hint">用手機相機掃描，打開你的劇本<br />掃不到就到網站輸入這組代碼<br />不要給別人看</p></div>
             </div>`,
           )
