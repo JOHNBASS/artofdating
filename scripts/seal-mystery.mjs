@@ -88,13 +88,20 @@ const clueById = Object.fromEntries(dm.clues.map((c) => [c.id, c]));
 const clueHtml = (c) =>
   `<div class="clue"><p class="clue-id">${esc(c.id)}</p><h4>${inline(c.title)}</h4>${md(c.text)}</div>`;
 const letterHtml = (id) => `<blockquote class="letter">${md(dm.letters[id])}</blockquote>`;
+// 結局小劇場：每個選項是一顆按鈕，點了才出現那個選項的台詞（玩家頁的程式負責切換）
 const choicesHtml = (id) =>
   (dm.choices[id] || [])
     .map(
-      (g) =>
-        `<div class="choice-group">${(dm.choices[id].length > 1 ? `<p class="choice-label">${inline(g.label)}</p>` : '')}<ul class="choices">${g.options
-          .map((o) => `<li><strong>${esc(o.id)}. ${inline(o.label)}</strong>${o.desc ? `<span>${inline(o.desc)}</span>` : ''}</li>`)
-          .join('')}</ul></div>`,
+      (g) => `<div class="mx-choice" data-group="${esc(g.id)}">
+        <p class="choice-label">${inline(g.label)}</p>
+        <div class="choices">${g.options
+          .map(
+            (o) =>
+              `<button type="button" class="choice" data-pick="${esc(o.id)}" aria-pressed="false"><strong>${esc(o.id)}. ${inline(o.label)}</strong>${o.desc ? `<span>${inline(o.desc)}</span>` : ''}</button>`,
+          )
+          .join('')}</div>
+        ${g.options.map((o) => `<div class="mx-perform" data-perform="${esc(o.id)}" hidden><p class="k">你的台詞（照唸，或用自己的話說）</p>${md(o.perform)}</div>`).join('')}
+      </div>`,
     )
     .join('');
 
@@ -134,9 +141,9 @@ for (const id of roleIds) {
 
 // DM 稿：流程 id 要和公開資料一致
 for (const p of mystery.phases) check(dm.phases[p.id], `dm.mjs 的 phases 少了「${p.title}」（${p.id}）`);
-const choiceKeys = new Set(roleIds.flatMap((id) => (dm.choices[id] || []).map((g) => `${id}.${g.id}`)));
-for (const c of dm.combos) for (const k of Object.keys(c.when)) check(choiceKeys.has(k), `combos 裡的條件 ${k} 不存在`);
-for (const q of dm.questions) check(roleIds.includes(q.answer), `投票題 ${q.id} 的答案 ${q.answer} 不是角色 id`);
+for (const id of roleIds) for (const g of dm.choices[id] || []) for (const o of g.options) check(o.perform, `${id} 的選項 ${o.id} 少了 perform（結局台詞）`);
+check(dm.endingOrder.length === roleIds.length && roleIds.every((id) => dm.endingOrder.includes(id)), 'endingOrder 要剛好列出六個角色');
+check(dm.truths?.length && dm.epilogues?.length, 'dm.mjs 要有 truths（還原清單）和 epilogues（最後一句話）');
 
 if (problems.length) {
   console.error('劇本有問題，沒有加密：\n- ' + problems.join('\n- '));
@@ -153,14 +160,14 @@ const dmData = {
       dm.choices[id].map((g) => ({
         id: g.id,
         label: inline(g.label),
-        options: g.options.map((o) => ({ id: o.id, label: inline(o.label), desc: inline(o.desc || ''), ending: inline(o.ending) })),
+        options: g.options.map((o) => ({ id: o.id, label: inline(o.label), desc: inline(o.desc || ''), perform: md(o.perform) })),
       })),
     ]),
   ),
-  combos: dm.combos.map((c) => ({ when: c.when, after: c.after, text: inline(c.text) })),
   endingOrder: dm.endingOrder,
-  questions: dm.questions.map((q) => ({ ...q, q: inline(q.q), why: inline(q.why) })),
-  commonEndings: dm.commonEndings.map((e) => ({ min: e.min, title: inline(e.title), text: inline(e.text) })),
+  scenes: dm.scenes.map((x) => ({ no: inline(x.no), title: inline(x.title), round: inline(x.round), cast: inline(x.cast), how: inline(x.how) })),
+  truths: dm.truths.map((t) => ({ id: t.id, text: inline(t.text), hint: inline(t.hint) })),
+  epilogues: dm.epilogues.map((e) => ({ min: e.min, title: inline(e.title), text: inline(e.text) })),
   phases: Object.fromEntries(
     Object.entries(dm.phases).map(([k, p]) => [k, { say: (p.say || []).map(inline), do: (p.do || []).map(inline), tips: (p.tips || []).map(inline) }]),
   ),

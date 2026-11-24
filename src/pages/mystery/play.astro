@@ -1,7 +1,7 @@
 ---
 // 玩家頁：掃名牌背面的 QR code（或輸入代碼）打開自己的劇本；第二、三幕要等 DM 公布密碼
 import Base from '../../layouts/Base.astro';
-import { mystery, host } from '../../data/mystery.js';
+import { mystery, hosts, hostGender } from '../../data/mystery.js';
 import sealed from '../../data/mystery-sealed.json';
 import { inline } from '../../scripts/inline.js';
 import '../../styles/mystery.css';
@@ -99,7 +99,7 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
 
   <script type="application/json" id="mx-sealed" set:html={JSON.stringify(payload)} />
   <script type="application/json" id="mx-roles" set:html={JSON.stringify(publicRoles)} />
-  <script type="application/json" id="mx-host" set:html={JSON.stringify(host)} />
+  <script type="application/json" id="mx-host" set:html={JSON.stringify({ hosts, hostGender })} />
 </Base>
 
 <style>
@@ -117,7 +117,9 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
 
   const $ = (s, el = document) => el.querySelector(s);
   const data = JSON.parse($('#mx-sealed').textContent);
-  const host = JSON.parse($('#mx-host').textContent);
+  const hostCfg = JSON.parse($('#mx-host').textContent);
+  // 老闆是梅姐還是梅叔：跟著名牌 QR code（#k=代碼&h=female／male），沒有就用網站預設
+  const host = () => hostCfg.hosts[state.host] || hostCfg.hosts[hostCfg.hostGender];
   const roles = JSON.parse($('#mx-roles').textContent);
   const KEY = 'aod:mystery:player';
   const actName = (n) => `第${'一二三'[n - 1]}幕`;
@@ -150,7 +152,8 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
 
   function showAct(n, html) {
     const el = $(`[data-act="${n}"]`);
-    $('[data-body]', el).innerHTML = fillHost(html, host);
+    $('[data-body]', el).innerHTML = fillHost(html, host());
+    restoreChoices(el);
     el.classList.remove('is-locked');
     $('[data-state]', el).textContent = '';
     const lock = $('[data-lock]', el);
@@ -173,7 +176,7 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
       return;
     }
     const [id, act1] = found;
-    if (state.code !== norm(code)) state = { code: norm(code), acts: {} };
+    if (state.code !== norm(code)) state = { code: norm(code), acts: {}, picks: {}, host: state.host };
     role = id;
     save(state);
 
@@ -210,6 +213,11 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
   } else {
     // QR code 的網址長這樣：/mystery/play/#k=代碼；讀完就把代碼從網址列拿掉
     const m = location.hash.match(/k=([^&]+)/);
+    const h = location.hash.match(/h=(female|male)/);
+    if (h) {
+      state.host = h[1];
+      save(state);
+    }
     if (m) {
       history.replaceState(null, '', location.pathname + location.search);
       start(decodeURIComponent(m[1]));
@@ -247,6 +255,27 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
       document.querySelectorAll('[data-act]').forEach((d) => (d.open = d === el));
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+  });
+
+  // ---------- 結局小劇場：點選項，出現那個選項的台詞 ----------
+  function showPick(group, id) {
+    group.querySelectorAll('[data-pick]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pick === id)));
+    group.querySelectorAll('[data-perform]').forEach((p) => (p.hidden = p.dataset.perform !== id));
+  }
+  function restoreChoices(el) {
+    el.querySelectorAll('.mx-choice').forEach((g) => {
+      const id = state.picks?.[g.dataset.group];
+      if (id) showPick(g, id);
+    });
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pick]');
+    if (!b) return;
+    const group = b.closest('.mx-choice');
+    showPick(group, b.dataset.pick);
+    state.picks = { ...state.picks, [group.dataset.group]: b.dataset.pick };
+    save(state);
+    group.querySelector(`[data-perform="${b.dataset.pick}"]`).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 
   $('[data-notes]').addEventListener('input', (e) => {

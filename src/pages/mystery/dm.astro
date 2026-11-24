@@ -1,7 +1,7 @@
 ---
-// DM 控制台：輸入 DM 密碼後，看得到流程、老闆（梅姐或梅叔）的台詞、線索、投票與結局、真相、每個角色的劇本和密碼
+// DM 控制台：輸入 DM 密碼後，看得到流程與小劇場、老闆（梅姐／梅叔，可切換）的台詞、線索、還原與結局、真相、每個角色的劇本和密碼
 import Base from '../../layouts/Base.astro';
-import { mystery, mysteryTimeline, host } from '../../data/mystery.js';
+import { mystery, mysteryTimeline, hosts, hostGender } from '../../data/mystery.js';
 import sealed from '../../data/mystery-sealed.json';
 import { url } from '../../scripts/paths.js';
 import '../../styles/mystery.css';
@@ -11,7 +11,8 @@ const pub = {
   phases: mysteryTimeline(),
   roles: mystery.roles.map((r) => ({ id: r.id, name: r.name, gender: r.gender })),
   printUrl: url('mystery/print/'),
-  host,
+  hosts,
+  hostGender,
 };
 ---
 
@@ -53,10 +54,15 @@ const pub = {
       <nav class="dm-tabs" aria-label="控制台分頁">
         <button type="button" data-tab="flow" aria-pressed="true">流程</button>
         <button type="button" data-tab="clues">線索</button>
-        <button type="button" data-tab="endings">投票與結局</button>
+        <button type="button" data-tab="endings">還原與結局</button>
         <button type="button" data-tab="truth">真相</button>
         <button type="button" data-tab="scripts">角色劇本</button>
         <button type="button" data-tab="keys">密碼與列印</button>
+        <div class="dm-host" role="group" aria-label="DM 演的老闆">
+          <span>老闆</span>
+          <button type="button" data-host="female">梅姐</button>
+          <button type="button" data-host="male">梅叔</button>
+        </div>
       </nav>
 
       <div class="dm-panel" data-panel="flow"></div>
@@ -149,6 +155,102 @@ const pub = {
     flex: none;
     min-height: 40px;
     padding: 0.3em 1em;
+  }
+  .dm-host {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    padding-left: 8px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  .dm-host button[aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .dm-scenes {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    margin: 0.4em 0 0;
+  }
+  .dm-scenes li {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 3em 1fr;
+    gap: 2px 10px;
+    font-size: 0.95rem;
+  }
+  .dm-scenes .no {
+    grid-row: span 2;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .dm-scenes .how {
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+  }
+  .dm-truths {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .dm-truths li {
+    margin: 0;
+  }
+  .dm-truths label {
+    display: flex;
+    gap: 0.7em;
+    align-items: flex-start;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .dm-truths input {
+    width: 1.2em;
+    height: 1.2em;
+    margin-top: 0.35em;
+    flex: none;
+  }
+  .dm-truths .hint {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .dm-order {
+    counter-reset: ord;
+    list-style: none;
+    padding: 0;
+  }
+  .dm-order > li {
+    margin: 0 0 8px;
+  }
+  .dm-order details {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  .dm-order summary {
+    cursor: pointer;
+    padding: 10px 14px;
+    font-weight: 700;
+  }
+  .dm-order .opts {
+    padding: 0 14px 12px;
+  }
+  .dm-order .opt h4 {
+    margin: 0.8em 0 0.2em;
+    font-size: 0.95rem;
+  }
+  .dm-order .opt p {
+    margin: 0 0 0.4em;
   }
   .dm-tabs button[aria-pressed='true'] {
     background: var(--ink);
@@ -311,17 +413,6 @@ const pub = {
     color: var(--accent);
     font-size: 0.88rem;
   }
-  .dm-picks {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-    gap: 10px;
-  }
-  .dm-picks .mx-card label {
-    display: block;
-    font-size: 0.88rem;
-    color: var(--ink-soft);
-    margin: 0.5em 0 0.2em;
-  }
   .dm-endings .ending {
     padding: 12px 16px;
     border: 1px solid var(--line);
@@ -449,7 +540,7 @@ const pub = {
     },
   };
 
-  const fresh = () => ({ phase: 0, remaining: pub.phases[0].minutes * 60, running: false, endAt: 0, checks: {}, votes: {}, picks: {}, tab: 'flow', role: pub.roles[0].id });
+  const fresh = () => ({ phase: 0, remaining: pub.phases[0].minutes * 60, running: false, endAt: 0, checks: {}, truths: {}, tab: 'flow', role: pub.roles[0].id, host: pub.hostGender });
   let S = (() => {
     try {
       return { ...fresh(), ...JSON.parse(store.get(STATE_KEY)) };
@@ -459,14 +550,24 @@ const pub = {
   })();
   const saveState = () => store.set(STATE_KEY, JSON.stringify(S));
 
+  let RAW = null; // 解密後、還沒換上老闆稱呼的資料
   let D = null;
   let ticking = 0;
+  const host = () => pub.hosts[S.host] || pub.hosts[pub.hostGender];
+
+  // 切換梅姐／梅叔：重新換上稱呼，整個控制台重畫
+  function applyHost() {
+    D = fillHost(RAW, host());
+    $$('[data-host]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.host === S.host)));
+  }
 
   // ---------- 解鎖 ----------
   async function unlock(pass, remember) {
     const d = await open(sealed.dm, actKey(pass, 1), sealed.iterations);
     if (!d) return false;
-    D = fillHost(d, pub.host);
+    RAW = d;
+    if (!pub.hosts[S.host]) S.host = pub.hostGender;
+    applyHost();
     if (remember !== undefined) {
       store.del(PASS_KEY);
       store.set(PASS_KEY, norm(pass), remember ? localStorage : sessionStorage);
@@ -482,9 +583,11 @@ const pub = {
 
   // ---------- 流程 ----------
   function renderFlow() {
-    const npc = `<details class="dm-npc mx-card"><summary>${esc(pub.host.name)}：被問到才說的事</summary>
+    const npc = `<details class="dm-npc mx-card"><summary>${esc(host().name)}：被問到才說的事</summary>
       <p class="muted">${esc(D.npc.persona)}</p>
-      <ul class="dm-facts">${D.npc.facts.map((f) => `<li><span class="topic">話題：${f.topic}</span>${f.say}</li>`).join('')}</ul></details>`;
+      <ul class="dm-facts">${D.npc.facts.map((f) => `<li><span class="topic">話題：${f.topic}</span>${f.say}</li>`).join('')}</ul></details>
+      <details class="dm-npc mx-card"><summary>小劇場一覽（玩家自己演，台詞在各自的劇本裡）</summary>
+      <ul class="dm-scenes">${D.scenes.map((x) => `<li><span class="no">${x.no}</span><span><strong>${x.title}</strong>　${x.round}・${x.cast}</span><span class="how">${x.how}</span></li>`).join('')}</ul></details>`;
     const list = pub.phases
       .map((p, i) => {
         const dp = D.phases[p.id] || { do: [], say: [], tips: [] };
@@ -496,7 +599,7 @@ const pub = {
           <div class="dm-phase-body">
             <button type="button" class="btn-primary" data-start="${i}">${cur ? '重新計時這一段' : '開始這一段'}</button>
             ${dp.do.length ? `<h3>要做的事</h3><ul class="dm-checks">${dp.do.map((t, j) => `<li><label><input type="checkbox" data-check="${p.id}.${j}"${S.checks[`${p.id}.${j}`] ? ' checked' : ''} /> <span>${t}</span></label></li>`).join('')}</ul>` : ''}
-            ${say.length ? `<h3>台詞（「」裡是${esc(pub.host.name)}說的）</h3><div class="dm-say">${say.map((t) => `<p>${t}</p>`).join('')}</div>` : ''}
+            ${say.length ? `<h3>要說的話（「」裡是${esc(host().name)}說的）</h3><div class="dm-say">${say.map((t) => `<p>${t}</p>`).join('')}</div>` : ''}
             ${dp.tips.length ? `<h3>提醒</h3><ul class="dm-tips">${dp.tips.map((t) => `<li>${t}</li>`).join('')}</ul>` : ''}
           </div></details>`;
       })
@@ -513,75 +616,49 @@ const pub = {
         .join('');
   }
 
-  // ---------- 投票與結局 ----------
-  const pickKey = (id, g) => `${id}.${g}`;
-  const match = (c) => Object.entries(c.when).every(([k, v]) => (Array.isArray(v) ? v.includes(S.picks[k]) : S.picks[k] === v));
-
+  // ---------- 還原與結局 ----------
   function renderEndings() {
-    const opts = pub.roles.map((r) => `<option value="${r.id}">${esc(r.name)}</option>`).join('') + '<option value="none">沒有共識</option>';
-    const votes = D.questions
+    const truths = D.truths
       .map(
-        (q) => `<div class="row"><span>${q.q}</span>
-        <select data-vote="${q.id}" aria-label="${esc(q.q.replace(/<[^>]+>/g, ''))}"><option value="">還沒投</option>${opts}</select>
-        <span data-vote-mark="${q.id}"></span></div>`,
+        (t) => `<li><label><input type="checkbox" data-truth="${t.id}"${S.truths[t.id] ? ' checked' : ''} />
+        <span><strong>${t.text}</strong><span class="hint">線索：${t.hint}</span></span></label></li>`,
       )
       .join('');
-    const picks = D.endingOrder
+    const order = D.endingOrder
       .map(
-        (id) => `<div class="mx-card"><h3>${esc(roleName[id])}</h3>${D.choices[id]
-          .map(
-            (g) => `<label for="pick-${id}-${g.id}">${g.label}</label>
-            <select id="pick-${id}-${g.id}" data-pick="${pickKey(id, g.id)}"><option value="">還沒選</option>${g.options.map((o) => `<option value="${o.id}">${o.id}. ${o.label}</option>`).join('')}</select>`,
-          )
-          .join('')}</div>`,
+        (id) => `<li><details><summary>${esc(roleName[id])}</summary><div class="opts">${D.choices[id]
+          .map((g) => `<p class="k muted small">${g.label}</p>${g.options.map((o) => `<div class="opt"><h4>${o.id}. ${o.label}</h4>${o.perform}</div>`).join('')}`)
+          .join('')}</div></details></li>`,
       )
       .join('');
     $('[data-panel="endings"]').innerHTML = `
-      <h2>投票（多數決）</h2>
-      <p class="muted">每一題記下全桌多數的答案。答對的題數決定共同結局。</p>
-      <div class="dm-form">${votes}</div>
-      <h2>每個人的選擇</h2>
-      <p class="muted">第三幕時，每個人小聲告訴你他的選擇，在這裡選好。</p>
-      <div class="dm-picks">${picks}</div>
-      <h2>照順序唸</h2>
-      <div class="dm-endings" data-endings></div>
-      <div class="dm-footer"><button type="button" data-reset>重新開始一場（清除投票、選擇、勾選和計時）</button></div>`;
-    $$('[data-vote]').forEach((el) => (el.value = S.votes[el.dataset.vote] || ''));
-    $$('[data-pick]').forEach((el) => (el.value = S.picks[el.dataset.pick] || ''));
-    renderEndingText();
+      <h2>還原（不投票）</h2>
+      <p class="muted">大家一起把故事拼起來。在還原或結局小劇場裡，有人說出下面的事，就打勾。</p>
+      <ul class="dm-truths">${D.truths.length ? truths : ''}</ul>
+      <h2>結局小劇場的順序</h2>
+      <p class="muted">每個人在手機上選結局、自己演。點名字可以看他每個選項的台詞，有人卡住時可以提示。</p>
+      <ol class="dm-order">${order}</ol>
+      <h2>最後，${esc(host().name)}的一句話</h2>
+      <div class="dm-endings" data-epilogue></div>
+      <div class="dm-footer"><button type="button" data-reset>重新開始一場（清除打勾和計時）</button></div>`;
+    renderEpilogue();
   }
 
-  function renderEndingText() {
-    D.questions.forEach((q) => {
-      const v = S.votes[q.id];
-      const el = $(`[data-vote-mark="${q.id}"]`);
-      el.className = !v ? '' : v === q.answer ? 'mark-ok' : 'mark-no';
-      el.textContent = !v ? '' : v === q.answer ? '✓ 答對' : `✗ 答案：${roleName[q.answer]}`;
-    });
-    const correct = D.questions.filter((q) => S.votes[q.id] === q.answer).length;
-    const voted = D.questions.filter((q) => S.votes[q.id]).length;
-    const common = [...D.commonEndings].sort((a, b) => b.min - a.min).find((e) => correct >= e.min);
-    let html = `<div class="ending common"><p class="k">共同結局：答對 ${correct} 題${voted < D.questions.length ? `（還有 ${D.questions.length - voted} 題沒投）` : ''}</p><h3>〈${common.title}〉</h3><p>${common.text}</p></div>`;
-    for (const id of D.endingOrder) {
-      const parts = D.choices[id].map((g) => {
-        const o = g.options.find((x) => x.id === S.picks[pickKey(id, g.id)]);
-        return o ? `<p>${o.ending}</p>` : `<p class="k">（${g.label}：還沒選）</p>`;
-      });
-      const extra = D.combos.filter((c) => c.after === id && match(c)).map((c) => `<p class="combo">${c.text}</p>`);
-      html += `<div class="ending"><h3>${esc(roleName[id])}</h3>${parts.join('')}${extra.join('')}</div>`;
-    }
-    $('[data-endings]').innerHTML = html;
+  function renderEpilogue() {
+    const n = D.truths.filter((t) => S.truths[t.id]).length;
+    const e = [...D.epilogues].sort((a, b) => b.min - a.min).find((x) => n >= x.min);
+    $('[data-epilogue]').innerHTML = `<div class="ending common"><p class="k">說出了 ${n} / ${D.truths.length} 件真相</p><h3>〈${e.title}〉</h3><p>${e.text}</p></div>`;
   }
 
   // ---------- 真相 ----------
   function renderTruth() {
     $('[data-panel="truth"]').innerHTML = `
       <h2>一句話</h2><p>${D.truth.summary}</p>
-      <h2>答案</h2>
-      <div class="dm-form">${D.questions.map((q) => `<div class="mx-card"><strong>${q.q}</strong> → ${esc(roleName[q.answer])}<p class="muted small">${q.why}</p></div>`).join('')}</div>
+      <h2>四件真相</h2>
+      <div class="dm-form">${D.truths.map((t) => `<div class="mx-card"><strong>${t.text}</strong><p class="muted small">${t.hint}</p></div>`).join('')}</div>
       <h2>時間線</h2>
       <div class="table-wrap"><table class="dm-timeline"><tbody>${D.truth.timeline.map(([t, s]) => `<tr><td>${t}</td><td>${s}</td></tr>`).join('')}</tbody></table></div>
-      <h2>復盤稿（${esc(pub.host.name)}唸）</h2><div class="dm-reveal">${D.reveal}</div>`;
+      <h2>復盤稿（還原沒拼完整時，出戲前由${esc(host().name)}唸）</h2><div class="dm-reveal">${D.reveal}</div>`;
   }
 
   // ---------- 角色劇本 ----------
@@ -590,6 +667,8 @@ const pub = {
     $('[data-panel="scripts"]').innerHTML = `
       <div class="dm-roles">${pub.roles.map((r) => `<button type="button" data-role="${r.id}" aria-pressed="${r.id === id}">${esc(r.name)}</button>`).join('')}</div>
       ${[1, 2, 3].map((n) => `<details class="mx-act"${n === 1 ? ' open' : ''}><summary>${esc(roleName[id])}・第${'一二三'[n - 1]}幕</summary><div class="body mx-script">${D.scripts[id][n]}</div></details>`).join('')}`;
+    // DM 看得到每個結局選項的台詞
+    $$('[data-panel="scripts"] [data-perform]').forEach((el) => (el.hidden = false));
   }
 
   // ---------- 密碼與列印 ----------
@@ -603,6 +682,7 @@ const pub = {
         <p class="muted">有人掃不到 QR code，就請他在玩家頁輸入代碼。</p>
         <h2>列印包</h2>
         <p>角色名牌（含 QR code）、線索卡、七封信、問題卡、觀察表、欣賞卡。</p>
+        <p>目前的老闆是<strong>${esc(host().name)}</strong>。名牌上的 QR code 會帶著這個設定，玩家手機上的劇本就會顯示「${esc(host().name)}」。在右上角切換後，記得重新印名牌。</p>
         <p><a class="btn btn-primary" href="${pub.printUrl}">打開列印包</a></p>
         <p class="muted small">加密檔產生日期：${esc(sealed.sealedAt || '')}</p>
       </div>
@@ -690,13 +770,19 @@ const pub = {
     else if (t.dataset.act === 'minus') adjust(-60);
     else if (t.dataset.act === 'plus') adjust(60);
     else if (t.dataset.act === 'next') setPhase(S.phase + 1);
-    else if (t.dataset.role) {
+    else if (t.dataset.host) {
+      S.host = t.dataset.host;
+      saveState();
+      applyHost();
+      renderAll();
+      showTab(S.tab);
+    } else if (t.dataset.role) {
       S.role = t.dataset.role;
       saveState();
       renderScripts();
     } else if (t.hasAttribute('data-reset')) {
       if (t.dataset.armed) {
-        const keep = { tab: S.tab, role: S.role };
+        const keep = { tab: S.tab, role: S.role, host: S.host };
         S = { ...fresh(), ...keep };
         saveState();
         renderAll();
@@ -707,7 +793,7 @@ const pub = {
         t.textContent = '確定要清除嗎？再按一次';
         setTimeout(() => {
           delete t.dataset.armed;
-          t.textContent = '重新開始一場（清除投票、選擇、勾選和計時）';
+          t.textContent = '重新開始一場（清除打勾和計時）';
         }, 3000);
       }
     } else if (t.hasAttribute('data-logout')) {
@@ -721,14 +807,10 @@ const pub = {
     if (t.dataset.check) {
       S.checks[t.dataset.check] = t.checked;
       saveState();
-    } else if (t.dataset.vote) {
-      S.votes[t.dataset.vote] = t.value;
+    } else if (t.dataset.truth) {
+      S.truths[t.dataset.truth] = t.checked;
       saveState();
-      renderEndingText();
-    } else if (t.dataset.pick) {
-      S.picks[t.dataset.pick] = t.value;
-      saveState();
-      renderEndingText();
+      renderEpilogue();
     }
   });
 

@@ -238,6 +238,59 @@
   font-size: 0.92rem;
 }
 
+/* 結局小劇場：選項按鈕和台詞 */
+.mx-choice {
+  margin: 0 0 1.4em;
+}
+
+.choices .choice {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border-radius: 12px;
+  padding: 10px 14px;
+  line-height: 1.6;
+  min-height: 0;
+}
+
+.choices .choice strong {
+  display: block;
+}
+
+.choices .choice span {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  font-weight: 400;
+}
+
+.choices .choice[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.mx-perform {
+  margin-top: 10px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  background: var(--surface-2);
+  font-family: var(--serif);
+  font-size: 1.08rem;
+  line-height: 1.9;
+}
+
+.mx-perform .k {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--accent);
+  margin: 0 0 0.4em;
+}
+
+.mx-perform p:last-child {
+  margin-bottom: 0;
+}
+
 /* ---------- 玩家頁的三幕 ---------- */
 .mx-act {
   border: 1px solid var(--line);

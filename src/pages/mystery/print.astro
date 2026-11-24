@@ -1,7 +1,7 @@
 ---
 // 列印包：角色名牌（背面有 QR code）、線索卡、七封信、問題卡、觀察表、欣賞卡。要 DM 密碼。
 import Base from '../../layouts/Base.astro';
-import { mystery, host } from '../../data/mystery.js';
+import { mystery, hosts, hostGender } from '../../data/mystery.js';
 import sealed from '../../data/mystery-sealed.json';
 import { url } from '../../scripts/paths.js';
 import '../../styles/mystery.css';
@@ -13,7 +13,8 @@ const pub = {
   // QR code 一律指向正式網站，在本機列印也不會掃到 localhost
   playUrl: new URL(url('mystery/play/'), Astro.site).href,
   dmUrl: url('mystery/dm/'),
-  host,
+  hosts,
+  hostGender,
 };
 const sections = [
   ['tags', '角色名牌（6 張，對折）'],
@@ -55,6 +56,7 @@ const sections = [
         <button type="button" class="btn-primary" data-print>列印</button>
         <a class="btn" href={pub.dmUrl}>回到 DM 控制台</a>
       </div>
+      <p class="muted small" data-host-note></p>
       <p class="muted small">手機上也可以預覽，但建議用電腦列印。</p>
     </div>
   </section>
@@ -325,6 +327,16 @@ const sections = [
   const sealed = JSON.parse($('#mx-dm').textContent);
   const pub = JSON.parse($('#mx-public').textContent);
   const PASS_KEY = 'aod:mystery:dm-pass';
+  // 老闆是梅姐還是梅叔：跟 DM 控制台的切換一樣
+  const hostKey = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('aod:mystery:dm-state'))?.host;
+    } catch {
+      return null;
+    }
+  })();
+  const hostId = pub.hosts[hostKey] ? hostKey : pub.hostGender;
+  const host = pub.hosts[hostId];
   const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
   const get = (k, s) => {
     try {
@@ -337,7 +349,7 @@ const sections = [
   async function build(D) {
     const qr = await Promise.all(
       pub.roles.map((r) =>
-        QRCode.toString(`${pub.playUrl}?openExternalBrowser=1#k=${encodeURIComponent(D.passwords.roles[r.id])}`, {
+        QRCode.toString(`${pub.playUrl}?openExternalBrowser=1#k=${encodeURIComponent(D.passwords.roles[r.id])}&h=${hostId}`, {
           type: 'svg',
           margin: 0,
           errorCorrectionLevel: 'M',
@@ -388,7 +400,7 @@ const sections = [
       .join('');
 
     const obsSheet = `<div class="pr-cut"><h3>觀察表：十年前那一架</h3>
-      <p>看阿哲和志明的談話，有做到的就打勾。勾到 3 項以上，交給${esc(pub.host.name)}。</p>
+      <p>看阿哲和志明的談話，有做到的就打勾。勾到 3 項以上，交給志明看。</p>
       <ul class="pr-obs" style="list-style:none;padding:0">${D.observer.map((o) => `<li><span class="box"></span>${o}</li>`).join('')}</ul>
       <p style="margin-top:1.2em">我看到最好的一句話：</p><div style="border-bottom:1px solid #d8cbcf;height:9mm"></div></div>`;
     const observer = chunk([1, 2, 3, 4], 2)
@@ -427,7 +439,8 @@ const sections = [
   async function unlock(pass) {
     const D = await open(sealed.dm, actKey(pass, 1), sealed.iterations);
     if (!D) return false;
-    await build(fillHost(D, pub.host));
+    await build(fillHost(D, host));
+    $('[data-host-note]').textContent = `老闆：${host.name}（在 DM 控制台右上角切換）。名牌的 QR code 會帶著這個設定。`;
     return true;
   }
 
