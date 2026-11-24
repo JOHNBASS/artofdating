@@ -1,7 +1,7 @@
 ---
 // 玩家頁：掃名牌背面的 QR code（或輸入代碼）打開自己的劇本；第二、三幕要等 DM 公布密碼
 import Base from '../../layouts/Base.astro';
-import { mystery } from '../../data/mystery.js';
+import { mystery, host } from '../../data/mystery.js';
 import sealed from '../../data/mystery-sealed.json';
 import { inline } from '../../scripts/inline.js';
 import '../../styles/mystery.css';
@@ -99,6 +99,7 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
 
   <script type="application/json" id="mx-sealed" set:html={JSON.stringify(payload)} />
   <script type="application/json" id="mx-roles" set:html={JSON.stringify(publicRoles)} />
+  <script type="application/json" id="mx-host" set:html={JSON.stringify(host)} />
 </Base>
 
 <style>
@@ -112,9 +113,11 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
 
 <script>
   import { open, actKey, norm, cryptoReady } from '../../scripts/mystery/crypto.js';
+  import { fillHost } from '../../scripts/mystery/host.js';
 
   const $ = (s, el = document) => el.querySelector(s);
   const data = JSON.parse($('#mx-sealed').textContent);
+  const host = JSON.parse($('#mx-host').textContent);
   const roles = JSON.parse($('#mx-roles').textContent);
   const KEY = 'aod:mystery:player';
   const actName = (n) => `第${'一二三'[n - 1]}幕`;
@@ -147,7 +150,7 @@ const publicRoles = Object.fromEntries(mystery.roles.map((r) => [r.id, { name: r
 
   function showAct(n, html) {
     const el = $(`[data-act="${n}"]`);
-    $('[data-body]', el).innerHTML = html;
+    $('[data-body]', el).innerHTML = fillHost(html, host);
     el.classList.remove('is-locked');
     $('[data-state]', el).textContent = '';
     const lock = $('[data-lock]', el);

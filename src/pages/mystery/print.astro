@@ -1,7 +1,7 @@
 ---
 // 列印包：角色名牌（背面有 QR code）、線索卡、七封信、問題卡、觀察表、欣賞卡。要 DM 密碼。
 import Base from '../../layouts/Base.astro';
-import { mystery } from '../../data/mystery.js';
+import { mystery, host } from '../../data/mystery.js';
 import sealed from '../../data/mystery-sealed.json';
 import { url } from '../../scripts/paths.js';
 import '../../styles/mystery.css';
@@ -13,6 +13,7 @@ const pub = {
   // QR code 一律指向正式網站，在本機列印也不會掃到 localhost
   playUrl: new URL(url('mystery/play/'), Astro.site).href,
   dmUrl: url('mystery/dm/'),
+  host,
 };
 const sections = [
   ['tags', '角色名牌（6 張，對折）'],
@@ -316,6 +317,7 @@ const sections = [
 <script>
   import QRCode from 'qrcode';
   import { open, actKey, norm, cryptoReady } from '../../scripts/mystery/crypto.js';
+  import { fillHost } from '../../scripts/mystery/host.js';
 
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -386,7 +388,7 @@ const sections = [
       .join('');
 
     const obsSheet = `<div class="pr-cut"><h3>觀察表：十年前那一架</h3>
-      <p>看阿哲和志明的談話，有做到的就打勾。勾到 3 項以上，交給梅姐。</p>
+      <p>看阿哲和志明的談話，有做到的就打勾。勾到 3 項以上，交給${esc(pub.host.name)}。</p>
       <ul class="pr-obs" style="list-style:none;padding:0">${D.observer.map((o) => `<li><span class="box"></span>${o}</li>`).join('')}</ul>
       <p style="margin-top:1.2em">我看到最好的一句話：</p><div style="border-bottom:1px solid #d8cbcf;height:9mm"></div></div>`;
     const observer = chunk([1, 2, 3, 4], 2)
@@ -425,7 +427,7 @@ const sections = [
   async function unlock(pass) {
     const D = await open(sealed.dm, actKey(pass, 1), sealed.iterations);
     if (!D) return false;
-    await build(D);
+    await build(fillHost(D, pub.host));
     return true;
   }
 

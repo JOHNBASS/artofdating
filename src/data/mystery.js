@@ -3,13 +3,22 @@
 // 劇本、線索、真相在 private/沒寄出的信/（不進 git），用 npm run seal 加密成 mystery-sealed.json。
 import { schedule, toMin, toTime } from './sessions.js';
 
+// 咖啡館老闆（由 DM 扮演）：DM 是男生的話，把 'female' 改成 'male'，
+// 全站的「梅姐／老闆娘／她」就會換成「梅叔／老闆／他」（push 之後自動生效，不用重新加密）。
+export const hostGender = 'female';
+export const hosts = {
+  female: { name: '梅姐', title: '老闆娘', pronoun: '她' },
+  male: { name: '梅叔', title: '老闆', pronoun: '他' },
+};
+export const host = hosts[hostGender] || hosts.female;
+
 export const mystery = {
   title: '沒寄出的信',
   tagline: '十年前沒說出口的話，今天還來得及嗎？',
   summary: '一場 2.5 小時的情感推理劇本殺。沒有命案，要解開的是人心。',
   premise: [
     '十年前，大學登山社的六個人，畢業那天在學校旁的「山腳咖啡」埋下時光膠囊。',
-    '今天，咖啡館要收了。老闆娘梅姐把大家找回來，喝最後一次下午茶，打開膠囊。',
+    `今天，咖啡館要收了。${host.title}${host.name}把大家找回來，喝最後一次下午茶，打開膠囊。`,
     '膠囊裡有六封寫給十年後自己的信，還有第七封。信封上沒有名字，只寫著「給妳」。',
   ],
   facts: [
@@ -28,7 +37,7 @@ export const mystery = {
   ],
   // id 對應 DM 稿（private/沒寄出的信/dm.mjs 的 phases）
   phases: [
-    { id: 'open', title: '開場', minutes: 10, desc: '拿角色名牌、說明規則，梅姐打開時光膠囊' },
+    { id: 'open', title: '開場', minutes: 10, desc: `拿角色名牌、說明規則，${host.name}打開時光膠囊` },
     { id: 'read1', title: '第一幕', minutes: 10, desc: '用手機讀自己的劇本' },
     { id: 'intro', title: '自我介紹', minutes: 10, desc: '用角色的身分，跟十年沒見的老朋友打招呼' },
     { id: 'round1', title: '第一輪：下午茶與問題卡', minutes: 30, desc: '邊喝下午茶邊互相問；好問題才換得到真話' },
@@ -36,7 +45,7 @@ export const mystery = {
     { id: 'round2', title: '第二輪：小劇場與搜證', minutes: 25, desc: '一段小劇場、新的線索、私聊' },
     { id: 'vote', title: '公開推理與投票', minutes: 20, desc: '每個人說出推理，一起投票' },
     { id: 'act3', title: '第三幕與結局', minutes: 10, desc: '讀十年前寫給自己的信，做最後的選擇' },
-    { id: 'reveal', title: '真相', minutes: 10, desc: '梅姐把十年前的故事說一次' },
+    { id: 'reveal', title: '真相', minutes: 10, desc: `${host.name}把十年前的故事說一次` },
     { id: 'debrief', title: '出戲', minutes: 20, desc: '離開角色，回到自己' },
   ],
   rules: [

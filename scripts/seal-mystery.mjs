@@ -4,12 +4,13 @@
 // 加密後寫到 src/data/mystery-sealed.json。這個輸出檔可以公開上傳，沒有密碼看不到內容。
 //
 //   roles/<角色 id>.md   每個角色的劇本，用「## 第一幕／## 第二幕／## 第三幕」分幕
-//   dm.mjs               梅姐台詞、線索卡、信、選擇與結局、真相
+//   dm.mjs               老闆（梅姐）台詞、線索卡、信、選擇與結局、真相
 //   passwords.json       DM 密碼、角色代碼、第二三幕密碼
 import { readFile, writeFile, access } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { seal, actKey, ITERATIONS } from '../src/scripts/mystery/crypto.js';
+import { toHostTokens } from '../src/scripts/mystery/host.js';
 import { mystery } from '../src/data/mystery.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -101,7 +102,8 @@ const choicesHtml = (id) =>
 const actNames = { 第一幕: 1, 第二幕: 2, 第三幕: 3 };
 const scripts = {};
 for (const id of roleIds) {
-  const src = await readFile(path.join(dir, 'roles', `${id}.md`), 'utf8');
+  // 老闆的稱呼先換成記號，網頁解密後再依設定換成梅姐或梅叔
+  const src = toHostTokens(await readFile(path.join(dir, 'roles', `${id}.md`), 'utf8'));
   const acts = {};
   let cur = null;
   for (const line of src.replace(/\r/g, '').split('\n')) {
@@ -123,7 +125,7 @@ for (const id of roleIds) {
         check(clueById[cid], `${id}.md 用到不存在的線索 ${cid}`);
         return clueById[cid] ? clueHtml(clueById[cid]) : '';
       });
-    check(!html.includes('{{'), `${id}.md 第 ${n} 幕有沒換掉的 {{⋯}}（要單獨一行）`);
+    check(!/\{\{(?!HOST)/.test(html), `${id}.md 第 ${n} 幕有沒換掉的 {{⋯}}（要單獨一行）`);
     scripts[id][n] = html;
   }
   check(dm.letters[id], `dm.mjs 的 letters 少了 ${id}`);
@@ -179,7 +181,13 @@ for (const id of roleIds) {
     sealed.roles[id][n] = await seal({ role: id, act: n, html: scripts[id][n] }, actKey(passwords.roles[id], n, passwords.acts[n]));
   }
 }
-sealed.dm = await seal(dmData, actKey(passwords.dm, 1));
+const dmSealed = JSON.parse(toHostTokens(JSON.stringify(dmData)));
+check(!/\{\{(?!HOST)/.test(JSON.stringify(dmSealed)), 'dm.mjs 有不認得的 {{⋯}}（指老闆的「她」要寫成 {{她}}）');
+if (problems.length) {
+  console.error('DM 資料有問題，沒有加密：\n- ' + problems.join('\n- '));
+  process.exit(1);
+}
+sealed.dm = await seal(dmSealed, actKey(passwords.dm, 1));
 
 await writeFile(out, JSON.stringify(sealed) + '\n');
 const kb = (JSON.stringify(sealed).length / 1024).toFixed(0);

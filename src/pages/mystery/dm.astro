@@ -1,7 +1,7 @@
 ---
-// DM 控制台：輸入 DM 密碼後，看得到流程、梅姐台詞、線索、投票與結局、真相、每個角色的劇本和密碼
+// DM 控制台：輸入 DM 密碼後，看得到流程、老闆（梅姐或梅叔）的台詞、線索、投票與結局、真相、每個角色的劇本和密碼
 import Base from '../../layouts/Base.astro';
-import { mystery, mysteryTimeline } from '../../data/mystery.js';
+import { mystery, mysteryTimeline, host } from '../../data/mystery.js';
 import sealed from '../../data/mystery-sealed.json';
 import { url } from '../../scripts/paths.js';
 import '../../styles/mystery.css';
@@ -11,6 +11,7 @@ const pub = {
   phases: mysteryTimeline(),
   roles: mystery.roles.map((r) => ({ id: r.id, name: r.name, gender: r.gender })),
   printUrl: url('mystery/print/'),
+  host,
 };
 ---
 
@@ -411,6 +412,7 @@ const pub = {
 <script>
   import { open, actKey, norm, cryptoReady } from '../../scripts/mystery/crypto.js';
   import { fmt, chime, keepAwake } from '../../scripts/timer-utils.js';
+  import { fillHost } from '../../scripts/mystery/host.js';
 
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -464,7 +466,7 @@ const pub = {
   async function unlock(pass, remember) {
     const d = await open(sealed.dm, actKey(pass, 1), sealed.iterations);
     if (!d) return false;
-    D = d;
+    D = fillHost(d, pub.host);
     if (remember !== undefined) {
       store.del(PASS_KEY);
       store.set(PASS_KEY, norm(pass), remember ? localStorage : sessionStorage);
@@ -480,7 +482,7 @@ const pub = {
 
   // ---------- 流程 ----------
   function renderFlow() {
-    const npc = `<details class="dm-npc mx-card"><summary>梅姐：被問到才說的事</summary>
+    const npc = `<details class="dm-npc mx-card"><summary>${esc(pub.host.name)}：被問到才說的事</summary>
       <p class="muted">${esc(D.npc.persona)}</p>
       <ul class="dm-facts">${D.npc.facts.map((f) => `<li><span class="topic">話題：${f.topic}</span>${f.say}</li>`).join('')}</ul></details>`;
     const list = pub.phases
@@ -494,7 +496,7 @@ const pub = {
           <div class="dm-phase-body">
             <button type="button" class="btn-primary" data-start="${i}">${cur ? '重新計時這一段' : '開始這一段'}</button>
             ${dp.do.length ? `<h3>要做的事</h3><ul class="dm-checks">${dp.do.map((t, j) => `<li><label><input type="checkbox" data-check="${p.id}.${j}"${S.checks[`${p.id}.${j}`] ? ' checked' : ''} /> <span>${t}</span></label></li>`).join('')}</ul>` : ''}
-            ${say.length ? `<h3>台詞（「」裡是梅姐說的）</h3><div class="dm-say">${say.map((t) => `<p>${t}</p>`).join('')}</div>` : ''}
+            ${say.length ? `<h3>台詞（「」裡是${esc(pub.host.name)}說的）</h3><div class="dm-say">${say.map((t) => `<p>${t}</p>`).join('')}</div>` : ''}
             ${dp.tips.length ? `<h3>提醒</h3><ul class="dm-tips">${dp.tips.map((t) => `<li>${t}</li>`).join('')}</ul>` : ''}
           </div></details>`;
       })
@@ -579,7 +581,7 @@ const pub = {
       <div class="dm-form">${D.questions.map((q) => `<div class="mx-card"><strong>${q.q}</strong> → ${esc(roleName[q.answer])}<p class="muted small">${q.why}</p></div>`).join('')}</div>
       <h2>時間線</h2>
       <div class="table-wrap"><table class="dm-timeline"><tbody>${D.truth.timeline.map(([t, s]) => `<tr><td>${t}</td><td>${s}</td></tr>`).join('')}</tbody></table></div>
-      <h2>復盤稿（梅姐唸）</h2><div class="dm-reveal">${D.reveal}</div>`;
+      <h2>復盤稿（${esc(pub.host.name)}唸）</h2><div class="dm-reveal">${D.reveal}</div>`;
   }
 
   // ---------- 角色劇本 ----------
