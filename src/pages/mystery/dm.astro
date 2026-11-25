@@ -241,6 +241,15 @@ const pub = {
     font-weight: 700;
     color: var(--accent);
   }
+  .dm-scene-full {
+    grid-column: 2;
+    margin-top: 4px;
+  }
+  .dm-scene-full > summary {
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: var(--accent);
+  }
   .dm-scenes .how {
     color: var(--ink-soft);
     font-size: 0.88rem;
@@ -639,7 +648,13 @@ const pub = {
       <p class="muted">${esc(D.npc.persona)}</p>
       <ul class="dm-facts">${D.npc.facts.map((f) => `<li><span class="topic">話題：${f.topic}</span>${f.say}</li>`).join('')}</ul></details>
       <details class="dm-npc mx-card"><summary>小劇場一覽（玩家自己演，台詞在各自的劇本裡）</summary>
-      <ul class="dm-scenes">${D.scenes.map((x) => `<li><span class="no">${x.no}</span><span><strong>${x.title}</strong>　${x.round}・${x.cast}</span><span class="how">${x.how}</span></li>`).join('')}</ul></details>`;
+      <ul class="dm-scenes">${D.scenes
+        .map(
+          (x) => `<li><span class="no">${x.no}</span><span><strong>${x.title}</strong>　${x.round}・${x.cast}</span><span class="how">${x.how}</span>${
+            x.id && D.sceneHtml?.[x.id] ? `<details class="dm-scene-full"><summary>看完整台詞</summary>${D.sceneHtml[x.id]}</details>` : ''
+          }</li>`,
+        )
+        .join('')}</ul></details>`;
     const list = pub.phases
       .map((p, i) => {
         const dp = D.phases[p.id] || { do: [], say: [], tips: [] };

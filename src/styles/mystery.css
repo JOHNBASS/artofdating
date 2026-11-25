@@ -466,3 +466,75 @@
 .mx-role-cover.is-small strong {
   font-size: 1.5rem;
 }
+
+/* 小劇場台詞：每一段六個人都有台詞，自己的台詞粗體＋底色 */
+.scene {
+  margin: 0.4em 0 1em;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.scene-when,
+.scene-setup,
+.scene-end {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin: 0 0 0.5em;
+}
+
+.scene-end {
+  margin: 0.6em 0 0;
+}
+
+.scene-lines {
+  border-top: 1px dashed var(--line);
+  padding-top: 0.5em;
+}
+
+.scene-lines .line {
+  display: grid;
+  grid-template-columns: 4.6em 1fr;
+  gap: 8px;
+  margin: 0.25em 0;
+  padding: 3px 8px;
+  border-radius: 8px;
+  line-height: 1.75;
+}
+
+.scene-lines .who {
+  font-weight: 700;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.scene-lines .line.is-mine {
+  background: var(--gold-soft);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.scene-lines .line.is-mine .who,
+.scene-lines .line.is-mine strong {
+  color: var(--ink);
+}
+
+.scene-lines .stage {
+  margin: 0.4em 0;
+  padding: 0 8px;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.scene-lines .stage.part {
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 0.8em;
+}
+
+@media (max-width: 420px) {
+  .scene-lines .line {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

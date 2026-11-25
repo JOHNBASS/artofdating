@@ -105,6 +105,27 @@ const choicesHtml = (id) =>
     )
     .join('');
 
+// 小劇場：台詞只寫在 dm.mjs，依角色產生；me 是這份劇本的角色，他的台詞用粗體、加底色
+const roleNameById = Object.fromEntries(mystery.roles.map((r) => [r.id, r.name]));
+const sceneHtml = (sid, me = null) => {
+  const sc = dm.sceneScripts?.[sid];
+  if (!sc) return '';
+  const lines = sc.lines
+    .map(([who, text]) => {
+      if (!who) return `<p class="stage${text.startsWith('【') ? ' part' : ''}">${inline(text)}</p>`;
+      const mine = who === me;
+      const name = esc(roleNameById[who] || who) + (mine ? '（你）' : '');
+      return `<p class="line${mine ? ' is-mine' : ''}"><span class="who">${name}</span>${mine ? `<strong>${inline(text)}</strong>` : `<span>${inline(text)}</span>`}</p>`;
+    })
+    .join('');
+  return `<div class="scene"><p class="scene-when">${inline(sc.when)}</p><p class="scene-setup">${inline(sc.setup)}</p><div class="scene-lines">${lines}</div>${sc.end ? `<p class="scene-end">${inline(sc.end)}</p>` : ''}</div>`;
+};
+for (const [sid, sc] of Object.entries(dm.sceneScripts || {})) {
+  const speakers = new Set(sc.lines.map(([w]) => w).filter(Boolean));
+  for (const id of roleIds) check(speakers.has(id), `小劇場 ${sc.no}${sc.title} 裡，${roleNameById[id]} 沒有台詞`);
+  for (const w of speakers) check(roleIds.includes(w), `小劇場 ${sc.title} 有不認得的角色 ${w}`);
+}
+
 // 劇本：## 第一幕 … ## 第三幕
 const actNames = { 第一幕: 1, 第二幕: 2, 第三幕: 3 };
 const scripts = {};
@@ -128,13 +149,18 @@ for (const id of roleIds) {
     html = html
       .replace(/<p>\{\{信\}\}<\/p>/g, () => letterHtml(id))
       .replace(/<p>\{\{選擇\}\}<\/p>/g, () => choicesHtml(id))
+      .replace(/<p>\{\{小劇場:(\w+)\}\}<\/p>/g, (_, sid) => {
+        check(dm.sceneScripts?.[sid], `${id}.md 用到不存在的小劇場 ${sid}`);
+        return sceneHtml(sid, id);
+      })
       .replace(/<p>\{\{線索:(\w+)\}\}<\/p>/g, (_, cid) => {
         check(clueById[cid], `${id}.md 用到不存在的線索 ${cid}`);
         return clueById[cid] ? clueHtml(clueById[cid]) : '';
       });
     check(!/\{\{(?!HOST)/.test(html), `${id}.md 第 ${n} 幕有沒換掉的 {{⋯}}（要單獨一行）`);
-    scripts[id][n] = html;
+    scripts[id][n] = toHostTokens(html);
   }
+  for (const sid of Object.keys(dm.sceneScripts || {})) check(src.includes(`{{小劇場:${sid}}}`), `${id}.md 少了小劇場 ${sid}`);
   check(dm.letters[id], `dm.mjs 的 letters 少了 ${id}`);
   check(dm.choices[id]?.length, `dm.mjs 的 choices 少了 ${id}`);
 }
@@ -165,7 +191,8 @@ const dmData = {
     ]),
   ),
   endingOrder: dm.endingOrder,
-  scenes: dm.scenes.map((x) => ({ no: inline(x.no), title: inline(x.title), round: inline(x.round), cast: inline(x.cast), how: inline(x.how) })),
+  scenes: dm.scenes.map((x) => ({ id: x.id || null, no: inline(x.no), title: inline(x.title), round: inline(x.round), cast: inline(x.cast), how: inline(x.how) })),
+  sceneHtml: Object.fromEntries(Object.keys(dm.sceneScripts || {}).map((sid) => [sid, sceneHtml(sid)])),
   truths: dm.truths.map((t) => ({ id: t.id, text: inline(t.text), hint: inline(t.hint) })),
   epilogues: dm.epilogues.map((e) => ({ min: e.min, title: inline(e.title), text: inline(e.text) })),
   phases: Object.fromEntries(
