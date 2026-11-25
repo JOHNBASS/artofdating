@@ -30,12 +30,12 @@ export const mystery = {
     ['適合', '第一次玩劇本殺也可以'],
   ],
   roles: [
-    { id: 'akai', name: '阿凱', gender: '男', blurb: '在學校旁開登山用品店，十年沒離開這個小鎮。話不多，但總是最早到、最晚走。', alt: '清晨的登山用品店，一個男人背對鏡頭，在木頭櫃台後擦著杯子' },
-    { id: 'xiaoqing', name: '小晴', gender: '女', blurb: '在台北做行銷，說話很快、笑聲很大，當年社團的開心果。', alt: '夜裡的辦公室，一個女人背對鏡頭，看著窗外台北的燈火' },
-    { id: 'azhe', name: '阿哲', gender: '男', blurb: '當年的社長，現在是業務經理，一年有半年在出差。很會帶氣氛。', alt: '黃昏的機場登機門，一個穿西裝的男人背對鏡頭，身旁是登機箱' },
-    { id: 'zhiming', name: '志明', gender: '男', blurb: '工程師，話少、做事仔細，當年負責寫社團日誌。', alt: '深夜的書桌，一雙手在整齊的筆記本上寫字，旁邊睡著一隻灰色虎斑貓' },
-    { id: 'ruotong', name: '若彤', gender: '女', blurb: '在附近的國小教書，說話溫溫的，習慣把話說得很委婉。', alt: '黃昏的國小教室，一個女人雙手捧著一盒自己烤的餅乾' },
-    { id: 'peishan', name: '佩珊', gender: '女', blurb: '在柏林當了十年攝影師，這週剛回台灣。有話直說。', alt: '傍晚的月台，一個女人背對鏡頭，肩上掛著底片相機，身旁是貼滿貼紙的行李箱' },
+    { id: 'akai', name: '阿凱', gender: '男', blurb: '在學校旁開登山用品店，十年沒離開這個小鎮。話不多，但總是最早到、最晚走。', alt: '清晨的登山用品店，一個穿法蘭絨襯衫和帆布圍裙的男人在木頭櫃台後擦杯子，低著頭淡淡地笑' },
+    { id: 'xiaoqing', name: '小晴', gender: '女', blurb: '在台北做行銷，說話很快、笑聲很大，當年社團的開心果。', alt: '夜裡的辦公室，一個圍著橘色圍巾的女人站在窗邊，身後是台北的燈火，笑容裡有一點寂寞' },
+    { id: 'azhe', name: '阿哲', gender: '男', blurb: '當年的社長，現在是業務經理，一年有半年在出差。很會帶氣氛。', alt: '黃昏的機場登機門，一個鬆開領帶的西裝男人站在登機箱旁，對著鏡頭露出疲倦的笑' },
+    { id: 'zhiming', name: '志明', gender: '男', blurb: '工程師，話少、做事仔細，當年負責寫社團日誌。', alt: '深夜的書桌前，一個戴黑框眼鏡的男人從筆記本上抬起頭，旁邊睡著一隻灰色虎斑貓' },
+    { id: 'ruotong', name: '若彤', gender: '女', blurb: '在附近的國小教書，說話溫溫的，習慣把話說得很委婉。', alt: '黃昏的國小教室，一個穿酒紅色針織外套的女人捧著一盒自己烤的餅乾，好像想說什麼' },
+    { id: 'peishan', name: '佩珊', gender: '女', blurb: '在柏林當了十年攝影師，這週剛回台灣。有話直說。', alt: '傍晚的月台，一個短髮、肩上掛著底片相機的女人站在貼滿貼紙的行李箱旁，直直看著鏡頭' },
   ],
   // id 對應 DM 稿（private/沒寄出的信/dm.mjs 的 phases）
   phases: [
@@ -87,7 +87,7 @@ export function mysteryTimeline() {
   });
 }
 
-// 角色封面圖（public/assets/img/mystery/cover-<角色>-<寬>.jpg，AI 生成、不露臉、不劇透）
+// 角色封面圖（public/assets/img/mystery/cover-<角色>-<寬>.jpg，AI 生成的虛構人物，不劇透）
 export const coverSrc = (base, id, w) => `${base}assets/img/mystery/cover-${id}-${w}.jpg`;
 
 export const mysteryHours = () => {
