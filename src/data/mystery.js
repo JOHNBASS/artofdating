@@ -24,7 +24,7 @@ export const mystery = {
   ],
   facts: [
     ['人數', '6 人（3 男 3 女，可反串）'],
-    ['玩法', '破冰遊戲、小劇場、推理，不投票'],
+    ['玩法', '破冰遊戲、回憶與戀愛情境小劇場、推理，不投票'],
     ['時間', '2.5 小時，含下午茶'],
     ['類型', '情感＋輕推理，沒有命案'],
     ['適合', '第一次玩劇本殺也可以'],
@@ -40,15 +40,15 @@ export const mystery = {
   // id 對應 DM 稿（private/沒寄出的信/dm.mjs 的 phases）
   phases: [
     { id: 'open', title: '開場', minutes: 5, desc: '說明今天怎麼玩' },
-    { id: 'icebreak', title: '破冰遊戲', minutes: 20, desc: '用自己的身分：名字接龍、兩真一假、三秒定格' },
+    { id: 'icebreak', title: '破冰遊戲', minutes: 15, desc: '用自己的身分：名字接龍、兩真一假、三秒定格' },
     { id: 'read1', title: '拿角色、讀第一幕', minutes: 10, desc: '用手機讀自己的劇本' },
-    { id: 'reunion', title: '重逢小劇場', minutes: 10, desc: '每個人演自己的進場，老闆打開時光膠囊' },
-    { id: 'round1', title: '第一輪：下午茶與小劇場', minutes: 25, desc: '邊喝下午茶邊用問題卡互相問，兩段回憶小劇場' },
-    { id: 'read2', title: '讀第二幕', minutes: 8, desc: '想起畢業那天的事' },
-    { id: 'round2', title: '第二輪：小劇場與搜證', minutes: 30, desc: '四段小劇場、新的線索、私聊' },
-    { id: 'restore', title: '還原', minutes: 12, desc: '不投票，大家一起把十年前的故事拼起來' },
+    { id: 'reunion', title: '重逢小劇場', minutes: 8, desc: '每個人演自己的進場，老闆打開時光膠囊' },
+    { id: 'round1', title: '第一輪：下午茶與小劇場', minutes: 32, desc: '邊喝下午茶邊用問題卡互相問；兩段回憶小劇場、三段戀愛情境小劇場' },
+    { id: 'read2', title: '讀第二幕', minutes: 7, desc: '想起畢業那天的事' },
+    { id: 'round2', title: '第二輪：小劇場與搜證', minutes: 36, desc: '四段回憶小劇場、三段戀愛情境小劇場、新的線索、私聊' },
+    { id: 'restore', title: '還原', minutes: 10, desc: '不投票，大家一起把十年前的故事拼起來' },
     { id: 'act3', title: '第三幕：結局小劇場', minutes: 15, desc: '讀十年前寫給自己的信，每個人演自己選的結局' },
-    { id: 'debrief', title: '出戲', minutes: 15, desc: '離開角色，回到自己' },
+    { id: 'debrief', title: '出戲', minutes: 12, desc: '離開角色，回到自己' },
   ],
   rules: [
     '你的劇本只有你看得到。不要給別人看，也不要偷看別人的。',
@@ -58,6 +58,15 @@ export const mystery = {
     '**小劇場**的台詞都在你的劇本裡，照唸就好，不用演得很厲害；想加自己的話也可以。不想演，用唸的也沒關係。',
     '任何時候都可以說 **pass**。',
     '不需要任何肢體接觸。角色之間的感情，都只在劇情裡。',
+  ],
+  // 戀愛情境小劇場：每個角色現在的感情處境，先照原樣演一次，再換一種說法重來一次（不劇透）
+  loveScenes: [
+    { title: '第一次約會，一直句點對方', practice: '問好問題，說一點自己的事', art: '聆聽' },
+    { title: '被問「要不要結婚」，只回「你覺得呢」', practice: '直接說出「我想要」或「我還沒準備好」', art: '選擇' },
+    { title: '對方收行李說「你人永遠不在」', practice: '先聽、複述，具體地道歉', art: '吵架' },
+    { title: '過年被家人催婚', practice: '溫柔又清楚地說出自己的想法', art: '選擇' },
+    { title: '伴侶說「妳的行李箱從來沒收起來過」', practice: '說出自己真正在害怕什麼', art: '冒險' },
+    { title: '「我感覺不到你愛我」「我每天都在做啊」', practice: '看懂對方的愛的語言，再說出具體的請求', art: '靠近' },
   ],
   // 五堂課在這場劇本殺裡變成什麼（不劇透）
   arts: [
