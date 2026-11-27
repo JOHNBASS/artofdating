@@ -1,6 +1,9 @@
 ---
 // 首頁：一進來先選版本（課程版／劇本殺版）
 import Base from '../layouts/Base.astro';
+import NextEvent from '../components/NextEvent.astro';
+import { upcomingEvents, eventStart, eventEnd } from '../data/events.js';
+import { absUrl } from '../data/site.js';
 import { classHours, schedule } from '../data/sessions.js';
 import { mystery, mysteryHours } from '../data/mystery.js';
 import { url } from '../scripts/paths.js';
@@ -8,6 +11,26 @@ import { url } from '../scripts/paths.js';
 const img = (name: string, w: number) => url(`assets/img/${name}-${w}.jpg`);
 const { meal } = schedule;
 const mh = mysteryHours();
+
+// 給 Google 看的活動資料（schema.org Event），有機會出現在 Google 搜尋的活動區塊
+const eventLd = upcomingEvents().map((e) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: e.title,
+  description: e.summary,
+  startDate: eventStart(e),
+  endDate: eventEnd(e),
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  location: {
+    '@type': 'Place',
+    name: e.venue || e.city,
+    address: { '@type': 'PostalAddress', addressLocality: e.city, addressCountry: 'TW' },
+  },
+  image: [absUrl(e.session ? `og/s${e.session}.jpg` : 'share.jpg')],
+  organizer: { '@type': 'Organization', name: '關係練習室', url: absUrl('') },
+  offers: { '@type': 'Offer', url: e.signup, availability: 'https://schema.org/InStock' },
+}));
 
 const versions = [
   {
@@ -34,6 +57,7 @@ const versions = [
 ---
 
 <Base title="選擇版本" description="關係練習室：給單身者的關係課。可以選五堂課的課程版，或一場 2.5 小時的劇本殺版。">
+  {eventLd.length > 0 && <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify(eventLd)} />}
   <section class="wrap-wide choose">
     <p class="eyebrow">關係練習室</p>
     <h1>你想怎麼開始？</h1>
@@ -74,6 +98,37 @@ const versions = [
       }
     </div>
     <p class="muted small note">照片皆為 AI 生成的示意圖。</p>
+  </section>
+
+  <section class="wrap-wide more" id="events">
+    <h2 class="sec">近期場次</h2>
+    <NextEvent heading="報名中" from="home" all />
+  </section>
+
+  <section class="wrap-wide more">
+    <h2 class="sec">免費小工具</h2>
+    <div class="tools">
+      <a class="tool" href={url('quiz/')}>
+        <p class="kind">1 分鐘小測驗</p>
+        <h3>你是哪一種聆聽者？</h3>
+        <p class="muted">修理師、同路人、小太陽、分析師，你是哪一種？測完有一張可以分享的結果卡。</p>
+        <span class="link">開始測驗 <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="tool" href={url('questions/')}>
+        <p class="kind">約會、聊天都用得到</p>
+        <h3>好問題抽卡</h3>
+        <p class="muted">從輕鬆到深入的 30 個好問題，一次抽一張，問完記得追問「然後呢？」</p>
+        <span class="link">抽一張 <span aria-hidden="true">→</span></span>
+      </a>
+    </div>
+  </section>
+
+  <section class="wrap-wide more">
+    <div class="join">
+      <h2 class="sec">一起來做這件事</h2>
+      <p>如果你也希望為這個世代的關係議題做些什麼，想一起辦活動、提供場地，或只是想聊聊，都歡迎留言給我。</p>
+      <a class="btn" href={url('contact/')}>留言給我 <span aria-hidden="true">→</span></a>
+    </div>
   </section>
 </Base>
 
@@ -194,17 +249,67 @@ const versions = [
   .note {
     margin-top: 1.4em;
   }
+  .more {
+    margin-top: 2.6em;
+  }
+  h2.sec {
+    margin: 0 0 0.6em;
+  }
+  .tools {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .tool {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px 20px;
+    color: var(--ink);
+    text-decoration: none;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .tool:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .tool:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .tool h3 {
+    margin: 0.1em 0 0.3em;
+  }
+  .tool .link {
+    margin-top: auto;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .join {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 22px 22px 24px;
+  }
+  .join p {
+    max-width: 36em;
+  }
   @media (max-width: 759px) {
-    .versions {
+    .versions,
+    .tools {
       grid-template-columns: 1fr;
     }
   }
   @media (prefers-reduced-motion: reduce) {
     .version,
+    .tool,
     figure img {
       transition: none;
     }
     .version:hover,
+    .tool:hover,
     .version:hover figure img {
       transform: none;
     }

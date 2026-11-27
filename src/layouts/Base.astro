@@ -2,17 +2,26 @@
 import '../styles/global.css';
 import { url } from '../scripts/paths.js';
 import { schedule } from '../data/sessions.js';
+import { siteConfig, absUrl } from '../data/site.js';
 
 interface Props {
   title?: string;
   description?: string;
+  // 分享到 LINE／FB／Threads 時的預覽圖（站內路徑，例如 'og/quiz.jpg'），沒給就用 share.jpg
+  image?: string;
+  // 帶領者、DM、玩家劇本這類不給外人看的頁面：不讓 Google 收錄，也不載入流量統計
+  private?: boolean;
 }
 
 const {
   title,
   description = `關係練習室：給單身者的五堂關係課。每次${schedule.meal ? `先一起吃${schedule.meal}，再` : '圍著同一張桌子，'}練習聆聽、吵架、選擇、靠近與冒險。`,
+  image = 'share.jpg',
+  private: isPrivate = false,
 } = Astro.props;
 const pageTitle = title ? `${title}｜關係練習室` : '關係練習室';
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const gaId = isPrivate ? '' : siteConfig.gaId;
 const path = Astro.url.pathname;
 const nav = [
   { href: url('course/'), label: '課程', match: (p: string) => p.includes('/course') || p.includes('/sessions/') },
@@ -37,8 +46,30 @@ const nav = [
       rel="stylesheet"
     />
     <title>{pageTitle}</title>
+    {isPrivate && <meta name="robots" content="noindex" />}
+    {!isPrivate && <link rel="canonical" href={pageUrl} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="關係練習室" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:url" content={pageUrl} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
+    <meta property="og:image" content={absUrl(image)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <slot name="head" />
+    {gaId && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>}
+    {
+      gaId && (
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function () {
+            dataLayer.push(arguments);
+          };
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      )
+    }
   </head>
   <body>
     <a class="skip" href="#main">跳到主要內容</a>
@@ -80,6 +111,16 @@ const nav = [
           <br />
           <span class="muted small">你在本站填寫的內容只儲存在你自己的瀏覽器裡，不會上傳到任何地方。</span>
         </p>
+        {
+          !isPrivate && (
+            <ul class="footer-links">
+              <li><a href={url('#events')}>近期場次</a></li>
+              <li><a href={url('quiz/')}>你是哪一種聆聽者？</a></li>
+              <li><a href={url('questions/')}>好問題抽卡</a></li>
+              <li><a href={url('contact/')}>留言給我</a></li>
+            </ul>
+          )
+        }
       </div>
     </footer>
   </body>
@@ -218,6 +259,19 @@ const nav = [
   nav a[aria-current='page'] {
     color: var(--accent);
     background: var(--accent-soft);
+  }
+  .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0.8em 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+  }
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
   }
   .site-footer {
     margin-top: 5em;

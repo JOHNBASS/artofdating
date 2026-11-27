@@ -1,0 +1,204 @@
+---
+// 好問題抽卡：題目和第 1 堂共用 src/data/questions.js
+import Base from '../../layouts/Base.astro';
+import NextEvent from '../../components/NextEvent.astro';
+import { questionDecks } from '../../data/questions.js';
+import { url } from '../../scripts/paths.js';
+import { absUrl } from '../../data/site.js';
+
+const total = questionDecks.reduce((n, d) => n + d.cards.length, 0);
+const pageUrl = absUrl('questions/');
+---
+
+<Base
+  title="好問題抽卡"
+  description={`約會、和朋友聊天、和家人吃飯都用得到的 ${total} 個好問題。從輕鬆到深入，一次抽一張。`}
+  image="og/questions.jpg"
+>
+  <div class="wrap qs" data-qs={JSON.stringify({ decks: questionDecks, pageUrl })}>
+    <p class="eyebrow">免費小工具</p>
+    <h1>好問題抽卡</h1>
+    <p class="lead">
+      約會、和朋友聊天、和家人吃飯都用得到。先從「輕鬆」開始，覺得自在了再往下；不想回答，就換一張。
+    </p>
+
+    <div class="deck-tabs" role="group" aria-label="選擇牌組">
+      {questionDecks.map((d, i) => <button type="button" data-deck={i} aria-pressed={i === 0 ? 'true' : 'false'}>{d.name}</button>)}
+    </div>
+
+    <div class="face" data-face aria-live="polite">
+      <span class="tag" data-tag>{questionDecks[0].name}</span>
+      <p data-text>按下「抽一張」</p>
+    </div>
+
+    <div class="row">
+      <button type="button" class="btn-primary" data-draw>抽一張</button>
+      <button type="button" data-copy hidden>複製這一題</button>
+      <span class="muted small" data-meta role="status"></span>
+    </div>
+
+    <section class="tips">
+      <h2>讓好問題變成好對話</h2>
+      <ul>
+        <li><strong>兩個人輪流抽、輪流回答。</strong>問的人也要回答同一題，才是一來一往。</li>
+        <li><strong>追問，比換下一題重要。</strong>「然後呢？」「那時候你心裡怎麼想？」</li>
+        <li><strong>聽完先複述。</strong>「我聽到的是⋯⋯」，對方會覺得被好好聽見。</li>
+        <li><strong>隨時可以說 pass。</strong>願意分享多少、分享到多深，都由自己決定。</li>
+      </ul>
+      <p class="muted small">
+        心理學家 Arthur Aron 在 1997 年的研究發現，陌生人輪流回答一系列越來越深入的問題，45 分鐘後覺得彼此更親近。關鍵是一來一往、慢慢往下，不是一次挖很深。
+      </p>
+    </section>
+
+    <NextEvent heading="想找人一起練習？" from="questions" />
+
+    <p class="more">
+      <a href={url('quiz/')}>測測看：你是哪一種聆聽者？</a>
+      <span aria-hidden="true">·</span>
+      <a href={url('sessions/1/')}>第 1 堂：聆聽的藝術</a>
+    </p>
+  </div>
+</Base>
+
+<script>
+  import { track } from '../../scripts/track.js';
+  import { copyText } from '../../scripts/share-image.js';
+
+  const root = document.querySelector<HTMLElement>('[data-qs]')!;
+  const { decks, pageUrl } = JSON.parse(root.dataset.qs!);
+  const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-deck]'));
+  const face = root.querySelector<HTMLElement>('[data-face]')!;
+  const tag = root.querySelector<HTMLElement>('[data-tag]')!;
+  const text = root.querySelector<HTMLElement>('[data-text]')!;
+  const meta = root.querySelector<HTMLElement>('[data-meta]')!;
+  const copy = root.querySelector<HTMLButtonElement>('[data-copy]')!;
+  const pools: number[][] = decks.map(() => []);
+  let current = 0;
+  let shown = '';
+
+  const select = (i: number) => {
+    current = i;
+    tabs.forEach((t, j) => t.setAttribute('aria-pressed', String(i === j)));
+    tag.textContent = decks[i].name;
+    face.dataset.deck = String(i);
+  };
+  tabs.forEach((t, i) => t.addEventListener('click', () => select(i)));
+
+  // 同一副牌抽完一輪之前不重複
+  root.querySelector('[data-draw]')!.addEventListener('click', () => {
+    const deck = decks[current];
+    if (!pools[current].length) pools[current] = deck.cards.map((_: string, i: number) => i).sort(() => Math.random() - 0.5);
+    const idx = pools[current].pop()!;
+    shown = deck.cards[idx];
+    face.classList.remove('flip');
+    void face.offsetWidth;
+    text.textContent = shown;
+    face.classList.add('flip');
+    meta.textContent = `這一輪還剩 ${pools[current].length} 張`;
+    copy.hidden = false;
+    track('question_draw', { deck: deck.name });
+  });
+
+  copy.addEventListener('click', async () => {
+    const ok = await copyText(`今天的好問題：${shown}\n\n更多好問題 → ${pageUrl}?utm_source=share&utm_medium=question`);
+    meta.textContent = ok ? '已複製，貼給想聊的人吧' : '複製失敗';
+    track('question_copy');
+  });
+</script>
+
+<style>
+  .qs {
+    padding-top: 2.2em;
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+  h1 {
+    margin: 0.15em 0 0.3em;
+  }
+  .lead {
+    color: var(--ink-soft);
+    font-size: 1.08rem;
+  }
+  .deck-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 1.2em 0 12px;
+  }
+  .deck-tabs button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .face {
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    padding: 28px 26px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--gold-soft));
+    box-shadow: var(--shadow);
+  }
+  .face .tag {
+    align-self: flex-start;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--surface);
+    border-radius: 999px;
+    padding: 0.15em 0.8em;
+  }
+  .face p {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.35rem, 4.6vw, 1.75rem);
+    line-height: 1.6;
+    font-weight: 700;
+  }
+  .face.flip {
+    animation: flip 0.35s ease;
+  }
+  @keyframes flip {
+    from {
+      transform: rotateX(70deg);
+      opacity: 0.2;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .face.flip {
+      animation: none;
+    }
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .tips {
+    margin: 2.4em 0 1.8em;
+  }
+  .tips ul {
+    padding-left: 1.2em;
+  }
+  .tips li {
+    margin-bottom: 0.4em;
+  }
+  .more {
+    margin-top: 1.6em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+</style>

@@ -1,0 +1,487 @@
+---
+// 「你是哪一種聆聽者？」小測驗：題目和結果寫在 src/data/quiz.js
+import Base from '../../layouts/Base.astro';
+import NextEvent from '../../components/NextEvent.astro';
+import { quizMeta, types, typeOrder, questions, nextStep } from '../../data/quiz.js';
+import { upcomingEvents, eventWhen } from '../../data/events.js';
+import { url } from '../../scripts/paths.js';
+import { absUrl } from '../../data/site.js';
+
+const quizUrl = absUrl('quiz/');
+// 圖卡底部那一行：有下一場就寫下一場，沒有就寫課程
+const ev = upcomingEvents()[0];
+const cardLine = ev ? `${eventWhen(ev).replace(/（.）.*/, '')} ${ev.title.split('｜')[0]}` : '五堂關係課，一起練習';
+const data = { questions, types, typeOrder, quizUrl, cardLine, eventEnd: ev ? `${ev.date}T${ev.end}:00+08:00` : '' };
+---
+
+<Base title={quizMeta.title} description={`${quizMeta.subtitle}。修理師、同路人、小太陽、分析師，你是哪一種？`} image="og/quiz.jpg">
+  <div class="wrap quiz" data-quiz={JSON.stringify(data)}>
+    <!-- 開始 -->
+    <section data-step="intro">
+      <p class="eyebrow">1 分鐘小測驗</p>
+      <h1>{quizMeta.title}</h1>
+      <p class="lead">{quizMeta.subtitle}。</p>
+      <ul class="type-chips" aria-label="四種聆聽者">
+        {
+          typeOrder.map((k) => (
+            <li style={`--c:${types[k].color}`}>{types[k].name}</li>
+          ))
+        }
+      </ul>
+      <button type="button" class="btn-primary big" data-start>開始測驗</button>
+      <p class="muted small">{quizMeta.note}沒有標準答案，選最像你「第一個反應」的那一個就好。</p>
+      <noscript><p class="muted">這個測驗需要開啟 JavaScript。</p></noscript>
+    </section>
+
+    <!-- 朋友分享的結果（網址有 #r=） -->
+    <section data-step="friend" hidden>
+      <p class="eyebrow">朋友的測驗結果</p>
+      <h1>你的朋友是<span class="type-name" data-friend-name></span></h1>
+      <p class="lead" data-friend-one></p>
+      <p>你聽別人說話的時候，又是哪一種？</p>
+      <button type="button" class="btn-primary big" data-start>換我測測看</button>
+    </section>
+
+    <!-- 題目 -->
+    <section data-step="question" hidden>
+      <div class="progress" aria-hidden="true"><span data-bar></span></div>
+      <p class="muted small" data-count></p>
+      <h2 tabindex="-1" data-q></h2>
+      <ol class="options" data-options></ol>
+      <button type="button" class="back" data-back>← 上一題</button>
+    </section>
+
+    <!-- 結果 -->
+    <section data-step="result" hidden>
+      <p class="eyebrow">你的聆聽類型</p>
+      <h1 tabindex="-1" data-r-title>你是<span class="type-name" data-r-name></span></h1>
+      <p class="lead" data-r-one></p>
+      <p class="also" data-r-also hidden></p>
+
+      <dl class="r-blocks">
+        <div><dt>你的天賦</dt><dd data-r-gift></dd></div>
+        <div><dt>你的盲點</dt><dd data-r-blind></dd></div>
+        <div><dt>下次試試</dt><dd data-r-try></dd></div>
+      </dl>
+
+      <div class="card-box" data-card-box hidden>
+        <h2>存下你的結果卡</h2>
+        <p class="muted small">限時動態的尺寸。手機上可以按「分享」直接發出去，或長按圖片存到相簿。</p>
+        <img data-img alt="我的聆聽類型結果卡" width="1080" height="1920" hidden />
+        <div class="row">
+          <button type="button" class="btn-primary" data-img-share hidden>分享圖卡</button>
+          <button type="button" data-img-save>下載圖卡</button>
+          <button type="button" data-copy-link>複製測驗連結</button>
+          <span class="muted small" data-copied role="status"></span>
+        </div>
+      </div>
+
+      <section class="next">
+        <h2>{nextStep.title}</h2>
+        <p>{nextStep.text}</p>
+        <ol class="steps">
+          {
+            nextStep.steps.map(([t, d]) => (
+              <li>
+                <strong>{t}</strong>
+                <span>{d}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <p>最後再問一句：「你希望我就這樣聽著，還是想聽聽我的想法？」</p>
+      </section>
+
+      <NextEvent heading="想把這三步練熟？" from="quiz" />
+
+      <details class="all-types">
+        <summary>看四種聆聽者的說明</summary>
+        {
+          typeOrder.map((k) => (
+            <div class="t" style={`--c:${types[k].color}`}>
+              <h3>{types[k].name}</h3>
+              <p>{types[k].one}</p>
+              <p class="muted small">
+                天賦：{types[k].gift}
+                <br />
+                盲點：{types[k].blind}
+              </p>
+            </div>
+          ))
+        }
+      </details>
+
+      <div class="row end">
+        <button type="button" data-restart>重新測一次</button>
+        <a class="btn" href={url('questions/')}>玩玩好問題抽卡</a>
+      </div>
+      <p class="muted small">{quizMeta.note}{nextStep.source}</p>
+    </section>
+  </div>
+</Base>
+
+<script>
+  import { track } from '../../scripts/track.js';
+  import {
+    W, H, C, SERIF, SANS, loadFonts, makeCanvas, drawText, measureText, roundRect, drawFooter, showImage, copyText,
+  } from '../../scripts/share-image.js';
+
+  const root = document.querySelector<HTMLElement>('[data-quiz]')!;
+  const D = JSON.parse(root.dataset.quiz!);
+  const { questions, types, typeOrder } = D;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+  const steps = Array.from(root.querySelectorAll<HTMLElement>('[data-step]'));
+  const show = (name: string) => {
+    steps.forEach((s) => (s.hidden = s.dataset.step !== name));
+    window.scrollTo({ top: 0 });
+  };
+
+  let answers: string[] = [];
+  let i = 0;
+  // 每一題的選項順序打亂一次（同一次測驗裡固定）
+  let orders: number[][] = [];
+
+  function start() {
+    answers = [];
+    i = 0;
+    orders = questions.map(() => [0, 1, 2, 3].sort(() => Math.random() - 0.5));
+    history.replaceState(null, '', location.pathname + location.search);
+    track('quiz_start');
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    show('question');
+    const q = questions[i];
+    $('[data-count]').textContent = `第 ${i + 1} / ${questions.length} 題`;
+    $('[data-bar]').style.width = `${(i / questions.length) * 100}%`;
+    const h = $('[data-q]');
+    h.textContent = q.q;
+    const ol = $('[data-options]');
+    ol.innerHTML = '';
+    orders[i].forEach((k) => {
+      const li = document.createElement('li');
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = q.a[k];
+      if (answers[i] === typeOrder[k]) b.classList.add('picked');
+      b.addEventListener('click', () => {
+        answers[i] = typeOrder[k];
+        if (i < questions.length - 1) {
+          i += 1;
+          renderQuestion();
+        } else {
+          finish();
+        }
+      });
+      li.appendChild(b);
+      ol.appendChild(li);
+    });
+    $('[data-back]').hidden = i === 0;
+    h.focus({ preventScroll: true });
+  }
+
+  function score() {
+    const count: Record<string, number> = Object.fromEntries(typeOrder.map((k: string) => [k, 0]));
+    answers.forEach((a) => (count[a] += 1));
+    // 同分時，看誰比較早在題目裡出現過（第一個反應比較準）
+    const firstSeen = (k: string) => answers.indexOf(k);
+    const ranked = [...typeOrder].sort((a: string, b: string) => count[b] - count[a] || firstSeen(a) - firstSeen(b));
+    const [main, second] = ranked;
+    return { main, second: count[second] >= 2 && count[second] >= count[main] - 1 ? second : null };
+  }
+
+  function fillResult(main: string, second: string | null) {
+    const t = types[main];
+    root.style.setProperty('--type', t.color);
+    $('[data-r-name]').textContent = `「${t.name}」`;
+    $('[data-r-one]').textContent = t.one;
+    $('[data-r-gift]').textContent = t.gift;
+    $('[data-r-blind]').textContent = t.blind;
+    $('[data-r-try]').textContent = t.try;
+    const also = $('[data-r-also]');
+    also.hidden = !second;
+    if (second) also.textContent = `你也有一點「${types[second].name}」：${types[second].one}`;
+  }
+
+  async function finish() {
+    const { main, second } = score();
+    fillResult(main, second);
+    show('result');
+    $('[data-r-title]').focus({ preventScroll: true });
+    history.replaceState(null, '', `${location.pathname}${location.search}#r=${main}`);
+    track('quiz_complete', { listener_type: main });
+    await renderCard(main, second);
+  }
+
+  async function renderCard(main: string, second: string | null) {
+    const t = types[main];
+    const blocks = [
+      ['你的天賦', t.gift],
+      ['你的盲點', t.blind],
+      ['下次試試', t.try],
+    ];
+    const all = ['你是哪一種聆聽者？我是也有一點「」，報名中一起練習好好說、好好聽', t.name, t.one, ...blocks.flat(), '關係練習室', D.cardLine, '掃描測測看你是哪一種', second ? types[second].name : ''].join('');
+    await loadFonts(all);
+
+    const canvas = makeCanvas();
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, W, H);
+    // 右上角的色塊
+    ctx.fillStyle = t.color + '22';
+    ctx.beginPath();
+    ctx.arc(W - 60, 120, 340, 0, Math.PI * 2);
+    ctx.fill();
+
+    const pad = 96;
+    const mw = W - pad * 2;
+    let y = 120;
+    y = drawText(ctx, '你是哪一種聆聽者？', pad, y, { font: `700 38px ${SANS}`, color: C.soft, maxWidth: mw, lineHeight: 52 });
+    y = drawText(ctx, '我是', pad, y + 28, { font: `700 64px ${SERIF}`, color: C.ink, maxWidth: mw, lineHeight: 76 });
+    y = drawText(ctx, t.name, pad, y - 6, { font: `700 170px ${SERIF}`, color: t.color, maxWidth: mw, lineHeight: 196 });
+    y = drawText(ctx, t.one, pad, y + 12, { font: `700 46px ${SERIF}`, color: C.ink, maxWidth: mw, lineHeight: 66 });
+    if (second) {
+      y = drawText(ctx, `也有一點「${types[second].name}」`, pad, y + 8, { font: `400 34px ${SANS}`, color: C.soft, maxWidth: mw, lineHeight: 48 });
+    }
+    y += 36;
+
+    // 三個區塊：字放不下時自動縮小，不會壓到底部的 QR code
+    const inner = mw - 88;
+    const limit = H - 96 - 210 - 90;
+    const sizes = [36, 34, 32, 30, 28];
+    let fs = sizes[sizes.length - 1];
+    const boxHeight = (f: number, text: string) =>
+      40 + Math.round(f * 1.35) + measureText(ctx, text, { font: `400 ${f}px ${SANS}`, maxWidth: inner, lineHeight: Math.round(f * 1.5) }) + 30;
+    for (const f of sizes) {
+      const total = blocks.reduce((sum, [, text]) => sum + boxHeight(f, text) + 18, 0);
+      if (y + total <= limit) {
+        fs = f;
+        break;
+      }
+    }
+    const lh = Math.round(fs * 1.5);
+    // 字少的時候，把三個區塊往下放一點，不要在 QR code 上面留一大片空白
+    const blocksH = blocks.reduce((sum, [, text]) => sum + boxHeight(fs, text) + 18, 0);
+    y += Math.min(Math.max(0, (limit - y - blocksH) / 2), 110);
+    for (const [label, text] of blocks) {
+      const boxH = boxHeight(fs, text);
+      roundRect(ctx, pad, y, mw, boxH, 28, C.surface, C.line);
+      ctx.fillStyle = t.color;
+      ctx.fillRect(pad, y + 26, 8, boxH - 52);
+      drawText(ctx, label, pad + 44, y + 34, { font: `700 ${fs - 2}px ${SANS}`, color: t.color, maxWidth: inner, lineHeight: Math.round(fs * 1.35) });
+      drawText(ctx, text, pad + 44, y + 40 + Math.round(fs * 1.35), { font: `400 ${fs}px ${SANS}`, color: C.ink, maxWidth: inner, lineHeight: lh });
+      y += boxH + 18;
+    }
+
+    // 活動結束後，底部那行改成通用的邀請
+    const eventLive = D.eventEnd && new Date(D.eventEnd).getTime() > Date.now();
+    const qrUrl = `${D.quizUrl}?utm_source=story&utm_medium=quiz_card`;
+    await drawFooter(ctx, { line1: '掃描測測看你是哪一種', line2: eventLive ? `${D.cardLine}，報名中` : '一起練習好好說、好好聽', qrUrl });
+
+    await showImage($('[data-card-box]'), canvas, {
+      filename: `我是${t.name}-關係練習室.png`,
+      shareText: `我是「${t.name}」型的聆聽者，你呢？ ${D.quizUrl}`,
+      event: 'quiz_share_image',
+    });
+  }
+
+  function showFriend(k: string) {
+    const t = types[k];
+    if (!t) return false;
+    root.style.setProperty('--type', t.color);
+    $('[data-friend-name]').textContent = `「${t.name}」`;
+    $('[data-friend-one]').textContent = t.one;
+    show('friend');
+    return true;
+  }
+
+  root.querySelectorAll('[data-start]').forEach((b) => b.addEventListener('click', start));
+  $('[data-restart]').addEventListener('click', start);
+  $('[data-back]').addEventListener('click', () => {
+    if (i > 0) {
+      i -= 1;
+      renderQuestion();
+    }
+  });
+  $('[data-copy-link]').addEventListener('click', async () => {
+    const main = location.hash.match(/r=(\w+)/)?.[1] || '';
+    const link = `${D.quizUrl}?utm_source=share&utm_medium=quiz_link${main ? `#r=${main}` : ''}`;
+    const ok = await copyText(link);
+    $('[data-copied]').textContent = ok ? '已複製，傳給朋友吧' : link;
+    track('quiz_copy_link');
+  });
+
+  // 網址帶著 #r=fixer：這是朋友分享來的結果
+  const shared = location.hash.match(/r=(\w+)/)?.[1];
+  if (!(shared && showFriend(shared))) show('intro');
+</script>
+
+<style>
+  .quiz {
+    --type: var(--accent);
+    padding-top: 2.2em;
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+  h1 {
+    margin: 0.15em 0 0.3em;
+  }
+  .type-name {
+    color: var(--type);
+  }
+  .lead {
+    font-size: 1.12rem;
+    color: var(--ink-soft);
+  }
+  .big {
+    font-size: 1.05rem;
+    padding: 0.7em 1.6em;
+    margin: 0.4em 0 1em;
+  }
+  .type-chips {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 1.2em 0 1.4em;
+  }
+  .type-chips li {
+    border: 2px solid var(--c);
+    color: var(--c);
+    border-radius: 999px;
+    padding: 0.2em 0.9em;
+    font-family: var(--serif);
+    font-weight: 700;
+  }
+  .progress {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--line);
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.25s ease;
+  }
+  [data-q] {
+    margin-top: 0.4em;
+    outline: none;
+  }
+  .options {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  /* 選項是程式產生的，要用 :global 才套得到樣式 */
+  .options :global(button) {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+    border-radius: 14px;
+    padding: 0.8em 1.1em;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  .options :global(button.picked) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .back {
+    margin-top: 14px;
+    background: transparent;
+    border-color: transparent;
+    color: var(--ink-soft);
+    padding-left: 0;
+  }
+  [data-r-title] {
+    outline: none;
+  }
+  .also {
+    color: var(--ink-soft);
+  }
+  .r-blocks {
+    display: grid;
+    gap: 12px;
+    margin: 1.4em 0;
+  }
+  .r-blocks div {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--type);
+    border-radius: 14px;
+    padding: 14px 18px;
+  }
+  .r-blocks dt {
+    font-weight: 700;
+    color: var(--type);
+  }
+  .r-blocks dd {
+    margin: 0.2em 0 0;
+  }
+  .card-box {
+    margin: 2em 0;
+    padding: 18px;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+  }
+  .card-box h2 {
+    margin-top: 0;
+  }
+  .card-box img {
+    display: block;
+    width: min(100%, 340px);
+    height: auto;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    margin: 12px 0;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .row.end {
+    margin: 1.6em 0 1em;
+  }
+  .steps {
+    padding-left: 1.3em;
+  }
+  .steps li {
+    margin-bottom: 0.5em;
+  }
+  .steps strong {
+    display: inline-block;
+    min-width: 5em;
+  }
+  .next {
+    margin: 2em 0 1.6em;
+  }
+  .all-types {
+    margin-top: 2em;
+  }
+  .all-types summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .all-types .t {
+    border-left: 4px solid var(--c);
+    padding-left: 14px;
+    margin: 1em 0;
+  }
+  .all-types h3 {
+    margin: 0;
+    color: var(--c);
+  }
+</style>

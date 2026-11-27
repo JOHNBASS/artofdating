@@ -1,0 +1,95 @@
+---
+// 「下一場活動」報名區塊：首頁、測驗、抽卡、留言頁共用。
+// 場次寫在 src/data/events.js。建置時先放進所有還沒結束的場次，打開網頁時再把已經結束的藏起來，
+// 所以就算網站很久沒重新建置，也不會顯示過期的活動。
+import { upcomingEvents, eventWhen, eventPlace, eventEnd } from '../data/events.js';
+import { url } from '../scripts/paths.js';
+
+interface Props {
+  heading?: string;
+  // 從哪一頁點的報名（送給流量統計用）
+  from?: string;
+  // true：列出所有還沒結束的場次；false：只顯示最近的一場
+  all?: boolean;
+}
+
+const { heading = '下一場活動', from = '', all = false } = Astro.props;
+const list = upcomingEvents();
+---
+
+<div class="next-event" data-next-event data-all={all ? '1' : undefined}>
+  {
+    list.map((e, i) => (
+      <article class="ev" data-end={eventEnd(e)} hidden={!all && i > 0}>
+        <p class="ev-eyebrow">{heading}</p>
+        <h3>{e.title}</h3>
+        <p class="ev-when">
+          {eventWhen(e)} · {eventPlace(e)}
+        </p>
+        <p class="ev-sum">{e.summary}</p>
+        <a class="btn btn-primary" href={e.signup} target="_blank" rel="noopener" data-signup={from}>
+          報名這一場 <span aria-hidden="true">→</span>
+        </a>
+      </article>
+    ))
+  }
+  <div class="ev ev-none" data-ev-none hidden={list.length > 0}>
+    <p class="ev-eyebrow">{heading}</p>
+    <p>下一場還在準備中。想第一個知道，歡迎<a href={url('contact/')}>留言給我</a>。</p>
+  </div>
+</div>
+
+<script>
+  import { track } from '../scripts/track.js';
+
+  const now = Date.now();
+  document.querySelectorAll<HTMLElement>('[data-next-event]').forEach((box) => {
+    const items = Array.from(box.querySelectorAll<HTMLElement>('[data-end]'));
+    const live = items.filter((el) => new Date(el.dataset.end!).getTime() > now);
+    const show = box.dataset.all ? live : live.slice(0, 1);
+    items.forEach((el) => (el.hidden = !show.includes(el)));
+    box.querySelector<HTMLElement>('[data-ev-none]')!.hidden = live.length > 0;
+  });
+  document.querySelectorAll<HTMLAnchorElement>('[data-signup]').forEach((a) =>
+    a.addEventListener('click', () => track('signup_click', { from: a.dataset.signup, link_url: a.href })),
+  );
+</script>
+
+<style>
+  .next-event {
+    display: grid;
+    gap: 14px;
+  }
+  .ev {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 18px 20px 20px;
+    box-shadow: var(--shadow);
+  }
+  .ev[hidden] {
+    display: none;
+  }
+  .ev-eyebrow {
+    margin: 0 0 0.2em;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+  }
+  .ev h3 {
+    margin: 0 0 0.2em;
+  }
+  .ev-when {
+    margin: 0 0 0.5em;
+    font-weight: 500;
+  }
+  .ev-sum {
+    color: var(--ink-soft);
+    margin-bottom: 0.9em;
+  }
+  .ev-none p:last-child {
+    margin: 0;
+  }
+</style>

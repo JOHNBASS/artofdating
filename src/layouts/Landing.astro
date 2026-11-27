@@ -1,6 +1,7 @@
 ---
 // 首頁專用的外框：使用 tasteskill 的版型系統（public/assets），課程頁仍用 Base.astro
 import { url } from '../scripts/paths.js';
+import { siteConfig, absUrl } from '../data/site.js';
 
 interface Props {
   title: string;
@@ -10,6 +11,8 @@ interface Props {
 
 const { title, description, moments = [] } = Astro.props;
 const a = (p: string) => url(`assets/${p}`);
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const { gaId } = siteConfig;
 ---
 
 <!doctype html>
@@ -22,11 +25,27 @@ const a = (p: string) => url(`assets/${p}`);
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={url('share.jpg')} />
+    <meta property="og:site_name" content="關係練習室" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:image" content={absUrl('share.jpg')} />
     <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href={pageUrl} />
+    {gaId && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>}
+    {
+      gaId && (
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function () {
+            dataLayer.push(arguments);
+          };
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      )
+    }
     <link rel="icon" href={url('favicon.svg')} type="image/svg+xml" />
     <meta name="theme-color" content="#fbf7f2" />
-    <!-- <link rel="canonical" href="https://[自訂網域]/"> 有自己的網域後再加 -->
     <meta name="site-kind" content="other" />
     <meta name="page-type" content="service" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

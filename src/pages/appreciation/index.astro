@@ -1,0 +1,303 @@
+---
+// 欣賞卡：活動結束後，帶領者把大家寫給某個人的欣賞的話打進來，產生一張限時動態圖卡和一條專屬連結。
+// 內容只存在連結的 # 後面，不會上傳到任何地方。這一頁不讓 Google 收錄。
+import Base from '../../layouts/Base.astro';
+import NextEvent from '../../components/NextEvent.astro';
+import { absUrl } from '../../data/site.js';
+
+const pageUrl = absUrl('appreciation/');
+const siteUrl = absUrl('');
+---
+
+<Base title="欣賞卡" description="活動結束後，大家寫給你的欣賞的話。" private>
+  <div class="wrap ap" data-ap={JSON.stringify({ pageUrl, siteUrl })}>
+    <!-- 帶領者：做卡片 -->
+    <section data-mode="make" hidden>
+      <p class="eyebrow">給帶領者</p>
+      <h1>欣賞卡產生器</h1>
+      <p class="lead">
+        活動最後，大家互相寫下欣賞的話。結束後把寫給某個人的話打進來，就會產生一張限時動態尺寸的圖卡和一條專屬連結，傳給他。
+      </p>
+      <form class="form" data-make>
+        <label>
+          <span>名字（卡片上顯示的稱呼）</span>
+          <input type="text" name="n" required maxlength="20" />
+        </label>
+        <div class="two">
+          <label>
+            <span>活動名稱</span>
+            <input type="text" name="e" maxlength="30" value="關係練習室" />
+          </label>
+          <label>
+            <span>日期</span>
+            <input type="text" name="d" maxlength="20" data-today />
+          </label>
+        </div>
+        <label>
+          <span>大家寫的欣賞的話（一行一句，最多 12 句）</span>
+          <textarea name="l" rows="8" required placeholder="你聽人說話的時候，眼睛會一直看著對方&#10;你的笑聲讓整桌放鬆下來&#10;謝謝你先分享，我才敢說"></textarea>
+        </label>
+        <div class="row">
+          <button type="submit" class="btn-primary">產生圖卡</button>
+          <span class="muted small" data-make-msg role="status"></span>
+        </div>
+      </form>
+    </section>
+
+    <!-- 參加者：看自己的卡片（網址有 #c=） -->
+    <section data-mode="view" hidden>
+      <p class="eyebrow" data-v-event></p>
+      <h1>大家眼中的<span class="name" data-v-name></span></h1>
+      <ul class="notes" data-v-list></ul>
+    </section>
+
+    <div class="card-box" data-card-box hidden>
+      <h2 data-box-title>你的欣賞卡</h2>
+      <p class="muted small">限時動態的尺寸。手機上可以按「分享」直接發出去，或長按圖片存到相簿。</p>
+      <img data-img alt="欣賞卡圖卡" width="1080" height="1920" hidden />
+      <div class="row">
+        <button type="button" class="btn-primary" data-img-share hidden>分享圖卡</button>
+        <button type="button" data-img-save>下載圖卡</button>
+        <button type="button" data-copy-link hidden>複製專屬連結</button>
+        <span class="muted small" data-copied role="status"></span>
+      </div>
+      <p class="muted small" data-link-note hidden>
+        把專屬連結傳給他，他打開就能看到這張卡、自己存下來。卡片內容只在這條連結裡，沒有上傳到任何地方。
+      </p>
+    </div>
+
+    <section data-mode="view-cta" hidden>
+      <p class="muted small">這張卡的內容只存在這條連結裡，沒有上傳到任何地方。</p>
+      <NextEvent heading="下一場，一起來" from="appreciation" />
+    </section>
+  </div>
+</Base>
+
+<script>
+  import { track } from '../../scripts/track.js';
+  import {
+    W, H, C, SERIF, SANS, loadFonts, makeCanvas, drawText, measureText, roundRect, drawFooter, showImage, copyText,
+  } from '../../scripts/share-image.js';
+
+  type Card = { n: string; e: string; d: string; l: string[] };
+
+  const root = document.querySelector<HTMLElement>('[data-ap]')!;
+  const { pageUrl, siteUrl } = JSON.parse(root.dataset.ap!);
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+  const modes = Array.from(root.querySelectorAll<HTMLElement>('[data-mode]'));
+  const show = (...names: string[]) => modes.forEach((m) => (m.hidden = !names.includes(m.dataset.mode!)));
+
+  // UTF-8 ⇄ base64url：卡片內容放在網址 # 後面
+  const encode = (o: Card) => {
+    const bytes = new TextEncoder().encode(JSON.stringify(o));
+    let bin = '';
+    bytes.forEach((b) => (bin += String.fromCharCode(b)));
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  };
+  const decode = (s: string): Card | null => {
+    try {
+      const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/'));
+      const o = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))));
+      if (!o.n || !Array.isArray(o.l)) return null;
+      return { n: String(o.n).slice(0, 20), e: String(o.e || '').slice(0, 30), d: String(o.d || '').slice(0, 20), l: o.l.map(String).slice(0, 12) };
+    } catch {
+      return null;
+    }
+  };
+
+  async function draw(card: Card) {
+    await loadFonts(['大家眼中的', card.n, card.e, card.d, ...card.l, '關係練習室一起練習好好說、好好聽「」'].join(''));
+    const canvas = makeCanvas();
+    const ctx = canvas.getContext('2d')!;
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, C.accentSoft);
+    g.addColorStop(1, C.goldSoft);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    const pad = 96;
+    const mw = W - pad * 2;
+    let y = 130;
+    const eyebrow = [card.e, card.d].filter(Boolean).join(' · ');
+    if (eyebrow) y = drawText(ctx, eyebrow, pad, y, { font: `700 34px ${SANS}`, color: C.accent, maxWidth: mw, lineHeight: 50 });
+    y = drawText(ctx, '大家眼中的', pad, y + 30, { font: `700 64px ${SERIF}`, color: C.ink, maxWidth: mw, lineHeight: 84 });
+    y = drawText(ctx, card.n, pad, y, { font: `700 140px ${SERIF}`, color: C.accent, maxWidth: mw, lineHeight: 168 });
+    y += 40;
+
+    // 每一句放在一張小紙條上；放不下就把字縮小
+    const limit = H - 96 - 210 - 90;
+    const inner = mw - 80;
+    const lines = card.l.map((s) => `「${s}」`);
+    const boxH = (f: number, s: string) => measureText(ctx, s, { font: `400 ${f}px ${SANS}`, maxWidth: inner, lineHeight: Math.round(f * 1.5) }) + 52;
+    let fs = 26;
+    for (const f of [42, 38, 34, 30, 28, 26]) {
+      const total = lines.reduce((sum, s) => sum + boxH(f, s) + 16, 0);
+      if (y + total <= limit) {
+        fs = f;
+        break;
+      }
+    }
+    // 句子少的時候，把紙條放在中間，不要在 QR code 上面留一大片空白
+    const notesH = lines.reduce((sum, s) => sum + boxH(fs, s) + 16, 0);
+    y += Math.min(Math.max(0, (limit - y - notesH) / 2), 160);
+    for (const s of lines) {
+      const h = boxH(fs, s);
+      if (y + h > limit) break;
+      roundRect(ctx, pad, y, mw, h, 22, 'rgba(255,255,255,0.9)', null);
+      drawText(ctx, s, pad + 40, y + 26, { font: `400 ${fs}px ${SANS}`, color: C.ink, maxWidth: inner, lineHeight: Math.round(fs * 1.5) });
+      y += h + 16;
+    }
+
+    await drawFooter(ctx, {
+      line1: '一起練習好好說、好好聽',
+      line2: '',
+      qrUrl: `${siteUrl}?utm_source=story&utm_medium=appreciation_card`,
+    });
+    return canvas;
+  }
+
+  async function render(card: Card, forViewer: boolean) {
+    const canvas = await draw(card);
+    $('[data-box-title]').textContent = forViewer ? '存下你的欣賞卡' : `${card.n} 的欣賞卡`;
+    await showImage($('[data-card-box]'), canvas, {
+      filename: `${card.n}的欣賞卡-關係練習室.png`,
+      shareText: '大家眼中的我 ✦ 關係練習室',
+      event: 'appreciation_share_image',
+    });
+  }
+
+  // 參加者打開專屬連結
+  const fromHash = location.hash.match(/c=([\w-]+)/)?.[1];
+  const shared = fromHash ? decode(fromHash) : null;
+  if (shared) {
+    show('view', 'view-cta');
+    $('[data-v-event]').textContent = [shared.e, shared.d].filter(Boolean).join(' · ');
+    $('[data-v-name]').textContent = shared.n;
+    const ul = $('[data-v-list]');
+    shared.l.forEach((s) => {
+      const li = document.createElement('li');
+      li.textContent = s;
+      ul.appendChild(li);
+    });
+    render(shared, true);
+    track('appreciation_view');
+  } else {
+    // 帶領者做卡片
+    show('make');
+    const now = new Date();
+    $<HTMLInputElement>('[data-today]').value = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+    let link = '';
+    const copyBtn = $<HTMLButtonElement>('[data-copy-link]');
+    copyBtn.addEventListener('click', async () => {
+      $('[data-copied]').textContent = (await copyText(link)) ? '已複製，傳給他吧' : link;
+    });
+    $<HTMLFormElement>('[data-make]').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target as HTMLFormElement);
+      const card: Card = {
+        n: String(fd.get('n') || '').trim(),
+        e: String(fd.get('e') || '').trim(),
+        d: String(fd.get('d') || '').trim(),
+        l: String(fd.get('l') || '')
+          .split('\n')
+          .map((s) => s.trim().replace(/^[「『"]|[」』"]$/g, ''))
+          .filter(Boolean)
+          .slice(0, 12),
+      };
+      if (!card.n || !card.l.length) {
+        $('[data-make-msg]').textContent = '請填名字，和至少一句欣賞的話。';
+        return;
+      }
+      $('[data-make-msg]').textContent = '';
+      link = `${pageUrl}#c=${encode(card)}`;
+      copyBtn.hidden = false;
+      $('[data-link-note]').hidden = false;
+      $('[data-copied]').textContent = '';
+      await render(card, false);
+      $('[data-card-box]').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+</script>
+
+<style>
+  .ap {
+    padding-top: 2.2em;
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+  h1 {
+    margin: 0.15em 0 0.4em;
+  }
+  .name {
+    color: var(--accent);
+  }
+  .lead {
+    color: var(--ink-soft);
+  }
+  .form {
+    display: grid;
+    gap: 14px;
+    margin: 1.4em 0;
+  }
+  .form label > span {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 480px) {
+    .two {
+      grid-template-columns: 1fr;
+    }
+  }
+  .notes {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  /* 清單是程式產生的，要用 :global 才套得到樣式 */
+  .notes :global(li) {
+    background: linear-gradient(135deg, var(--accent-soft), var(--gold-soft));
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-size: 1.05rem;
+  }
+  .notes :global(li)::before {
+    content: '「';
+  }
+  .notes :global(li)::after {
+    content: '」';
+  }
+  .card-box {
+    margin: 2em 0;
+    padding: 18px;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+  }
+  .card-box h2 {
+    margin-top: 0;
+  }
+  .card-box img {
+    display: block;
+    width: min(100%, 340px);
+    height: auto;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    margin: 12px 0;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+</style>

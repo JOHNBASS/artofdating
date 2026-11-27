@@ -11,7 +11,7 @@ const prev = sessions.find((x) => x.num === num - 1);
 const next = sessions.find((x) => x.num === num + 1);
 ---
 
-<Base title={`第 ${num} 堂・${s.title}`} description={s.summary}>
+<Base title={`第 ${num} 堂・${s.title}`} description={s.summary} image={`og/s${num}.jpg`}>
   <div data-notes-page={`s${num}`}>
     <section class="hero">
       <div class="wrap">

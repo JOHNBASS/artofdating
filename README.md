@@ -32,6 +32,11 @@ npm run dev
 | 課程介紹頁的顏色與字體 | `src/layouts/Landing.astro` 裡的 `:root` |
 | 劇本殺版的介紹、角色簡介、流程、規則（不會劇透的部分） | `src/data/mystery.js` |
 | 劇本殺版的劇本、線索、結局、密碼 | `private/沒寄出的信/`（不進 git，見下方「劇本殺版」） |
+| 近期場次（首頁、測驗、抽卡、留言頁的報名區塊） | `src/data/events.js` |
+| 流量統計、留言收信的信箱 | `src/data/site.js` |
+| 「你是哪一種聆聽者？」測驗的題目和結果 | `src/data/quiz.js` |
+| 好問題抽卡的題目（第 1 堂的問題卡也用這份） | `src/data/questions.js` |
+| 分享到 LINE／FB／Threads 的預覽圖 | `public/og/`，用 `python3 scripts/make-og.py` 重新產生 |
 
 課程頁是 MDX：一般文字用 Markdown 寫，練習用元件插入，例如：
 
@@ -159,6 +164,79 @@ DM 全程扮演咖啡館老闆，戲份很少（開場、叫小劇場、唸密�
 2. 當天用平板或手機打開 DM 控制台，照「流程」分頁一段一段帶：破冰遊戲、重逢小劇場、兩輪下午茶與小劇場、還原、結局小劇場、出戲。每段有要做的事、要說的話和倒數。小劇場的台詞都在玩家自己的劇本裡，DM 只要叫場。
 3. 不投票。還原時大家一起把故事拼起來，有人說出一件真相，就在「還原與結局」分頁打勾；最後老闆的一句話會依打勾的數量自動選好。結局由每個玩家在手機上選、自己演。
 4. 時間從課程的上課時間（`src/data/sessions.js` 的 `schedule.start`）往下算，總長 2.5 小時。
+
+## 增加曝光的工具
+
+| 網址 | 做什麼 |
+|---|---|
+| `/quiz/` | 「你是哪一種聆聽者？」1 分鐘測驗。測完產生一張限時動態尺寸的結果卡（有 QR code 和下一場活動），也可以複製連結給朋友；朋友打開會先看到「你的朋友是〇〇」，再換他測 |
+| `/questions/` | 好問題抽卡。約會、聊天都用得到，可以複製題目傳給別人 |
+| `/appreciation/` | 欣賞卡產生器（給帶領者用，不會被 Google 收錄）。見下方「欣賞卡怎麼用」 |
+| `/contact/` | 留言給我、一起來做這件事 |
+| `/sitemap.xml` | 給 Google 的頁面清單 |
+
+首頁下方有「近期場次」「免費小工具」「一起來做這件事」，每一頁頁尾也有這幾個連結。
+
+### 新增場次
+
+在 `src/data/events.js` 的 `events` 裡多加一筆（標題、日期、時間、地點、ACCUPASS 報名網址），push 之後首頁、測驗、抽卡、留言頁的報名區塊都會出現，首頁也會附上給 Google 看的活動資料。場次結束後會自動從網頁上消失。**場地確定後記得填 `venue`。**
+
+### 流量統計（Google Analytics 4）
+
+1. 到 [analytics.google.com](https://analytics.google.com) 建立一個資源，新增「網站」資料串流，網址填 `https://johnbass.github.io/artofdating/`。
+2. 複製「評估 ID」（`G-` 開頭），填進 `src/data/site.js` 的 `gaId`，push。
+3. 「加強型評估」預設是開的，會自動記錄點了哪些外部連結（包括 ACCUPASS 報名按鈕）。網站另外會送這些事件：
+
+| 事件 | 什麼時候 |
+|---|---|
+| `signup_click` | 點了報名按鈕（`from` 是從哪一頁點的） |
+| `quiz_start`、`quiz_complete` | 開始、做完測驗（`listener_type` 是結果） |
+| `quiz_share_image`、`quiz_copy_link` | 分享或下載結果卡、複製測驗連結 |
+| `question_draw`、`question_copy` | 抽卡、複製題目 |
+| `contact_submit` | 送出留言 |
+
+帶領者、DM、玩家劇本、列印包、計時器、欣賞卡這些頁面不會載入統計。
+
+### 來源標記：知道人是從哪裡來的
+
+在不同地方貼連結時，網址後面加上 `utm_source`，Google Analytics 就分得出來是哪個管道帶來的人：
+
+| 貼在哪裡 | 連結 |
+|---|---|
+| Threads | `https://johnbass.github.io/artofdating/quiz/?utm_source=threads` |
+| Instagram 個人檔案 | `https://johnbass.github.io/artofdating/?utm_source=instagram` |
+| LINE | `https://johnbass.github.io/artofdating/?openExternalBrowser=1&utm_source=line` |
+| ACCUPASS 活動頁的「相關連結」 | `https://johnbass.github.io/artofdating/?utm_source=accupass` |
+
+結果卡上的 QR code 已經帶著 `utm_source=story`，複製的測驗連結帶著 `utm_source=share`。
+
+### 留言給我：收信設定
+
+信箱寫在 `src/data/site.js` 的 `contact`（拆成兩半，網頁原始碼裡不會出現完整的信箱）。
+
+- **還沒設定時**：訪客按「送出」會打開他自己的 Email App，內容已經填好，再由他按寄出。
+- **想讓留言直接寄到信箱**：到 [web3forms.com](https://web3forms.com) 輸入收信的 Email，Access Key 會寄到那個信箱；把它填進 `contact.web3formsKey`，push。免費方案一個月 250 則。這組金鑰本來就是放在網頁上用的，公開沒關係。
+
+### 讓 Google 找到網站
+
+1. 到 [Google Search Console](https://search.google.com/search-console) 新增資源，選「網址前置字元」，填 `https://johnbass.github.io/artofdating/`。如果已經設定好 Google Analytics，可以直接用它來驗證。
+2. 在左邊「Sitemap」提交 `sitemap.xml`。
+
+GitHub Pages 的子路徑沒辦法在網域根目錄放 `robots.txt`，所以 sitemap 要像上面這樣手動提交一次。以後換成自己的網域，改 `astro.config.mjs` 的 `site` 和 `base` 就好，分享預覽圖、sitemap、活動資料的網址都會跟著變。
+
+### 分享預覽圖
+
+每一頁分享出去時顯示的圖：首頁和課程頁用 `public/share.jpg`，五堂課、劇本殺、測驗、抽卡、留言頁用 `public/og/` 裡的圖。改了課程標題、劇本殺標題或測驗類型之後，執行 `python3 scripts/make-og.py` 重新產生（需要 Pillow：`pip3 install pillow`）。
+
+LINE 和 Facebook 會把預覽圖存起來一段時間。換了圖卻沒更新時，可以到 [Facebook 分享偵錯工具](https://developers.facebook.com/tools/debug/) 按「再次抓取」。
+
+### 欣賞卡怎麼用
+
+1. 活動最後，大家在紙卡上寫下對每個人的欣賞。
+2. 結束後打開 `/appreciation/`，輸入名字和寫給他的話（一行一句，最多 12 句），按「產生圖卡」。
+3. 按「複製專屬連結」，用 LINE 傳給他。他打開就看得到自己的卡片，可以存下來或直接分享到限時動態；卡片底部有網站的 QR code。
+
+卡片內容只放在連結 `#` 後面，不會上傳到任何地方，這一頁也不會被 Google 收錄。
 
 ## 部署到 GitHub Pages
 
