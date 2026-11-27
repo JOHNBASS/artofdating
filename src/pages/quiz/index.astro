@@ -3,7 +3,7 @@
 import Base from '../../layouts/Base.astro';
 import NextEvent from '../../components/NextEvent.astro';
 import { quizMeta, types, typeOrder, questions, nextStep } from '../../data/quiz.js';
-import { upcomingEvents, eventWhen } from '../../data/events.js';
+import { upcomingEvents, eventWhen, eventDeadline } from '../../data/events.js';
 import { url } from '../../scripts/paths.js';
 import { absUrl } from '../../data/site.js';
 
@@ -11,7 +11,7 @@ const quizUrl = absUrl('quiz/');
 // 圖卡底部那一行：有下一場就寫下一場，沒有就寫課程
 const ev = upcomingEvents()[0];
 const cardLine = ev ? `${eventWhen(ev).replace(/（.）.*/, '')} ${ev.title.split('｜')[0]}` : '五堂關係課，一起練習';
-const data = { questions, types, typeOrder, quizUrl, cardLine, eventEnd: ev ? `${ev.date}T${ev.end}:00+08:00` : '' };
+const data = { questions, types, typeOrder, quizUrl, cardLine, until: ev ? eventDeadline(ev) : '' };
 ---
 
 <Base title={quizMeta.title} description={`${quizMeta.subtitle}。修理師、同路人、小太陽、分析師，你是哪一種？`} image="og/quiz.jpg">
@@ -274,8 +274,8 @@ const data = { questions, types, typeOrder, quizUrl, cardLine, eventEnd: ev ? `$
       y += boxH + 18;
     }
 
-    // 活動結束後，底部那行改成通用的邀請
-    const eventLive = D.eventEnd && new Date(D.eventEnd).getTime() > Date.now();
+    // 過了報名截止時間（沒寫就是活動開始時），底部那行改成通用的邀請
+    const eventLive = D.until && new Date(D.until).getTime() > Date.now();
     const qrUrl = `${D.quizUrl}?utm_source=story&utm_medium=quiz_card`;
     await drawFooter(ctx, { line1: '掃描測測看你是哪一種', line2: eventLive ? `${D.cardLine}，報名中` : '一起練習好好說、好好聽', qrUrl });
 

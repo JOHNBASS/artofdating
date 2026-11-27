@@ -1,15 +1,15 @@
 ---
 // 「下一場活動」報名區塊：首頁、測驗、抽卡、留言頁共用。
-// 場次寫在 src/data/events.js。建置時先放進所有還沒結束的場次，打開網頁時再把已經結束的藏起來，
-// 所以就算網站很久沒重新建置，也不會顯示過期的活動。
-import { upcomingEvents, eventWhen, eventPlace, eventEnd } from '../data/events.js';
+// 場次寫在 src/data/events.js。建置時先放進所有還能報名的場次，打開網頁時再把過了報名截止時間
+// （沒寫就是活動開始時間）的藏起來，所以就算網站很久沒重新建置，也不會顯示已經不能報名的活動。
+import { upcomingEvents, eventWhen, eventPlace, eventDeadline, eventDeadlineLabel } from '../data/events.js';
 import { url } from '../scripts/paths.js';
 
 interface Props {
   heading?: string;
   // 從哪一頁點的報名（送給流量統計用）
   from?: string;
-  // true：列出所有還沒結束的場次；false：只顯示最近的一場
+  // true：列出所有還能報名的場次；false：只顯示最近的一場
   all?: boolean;
 }
 
@@ -20,12 +20,13 @@ const list = upcomingEvents();
 <div class="next-event" data-next-event data-all={all ? '1' : undefined}>
   {
     list.map((e, i) => (
-      <article class="ev" data-end={eventEnd(e)} hidden={!all && i > 0}>
+      <article class="ev" data-until={eventDeadline(e)} hidden={!all && i > 0}>
         <p class="ev-eyebrow">{heading}</p>
         <h3>{e.title}</h3>
         <p class="ev-when">
           {eventWhen(e)} · {eventPlace(e)}
         </p>
+        {eventDeadlineLabel(e) && <p class="ev-deadline">{eventDeadlineLabel(e)}</p>}
         <p class="ev-sum">{e.summary}</p>
         <a class="btn btn-primary" href={e.signup} target="_blank" rel="noopener" data-signup={from}>
           報名這一場 <span aria-hidden="true">→</span>
@@ -44,8 +45,8 @@ const list = upcomingEvents();
 
   const now = Date.now();
   document.querySelectorAll<HTMLElement>('[data-next-event]').forEach((box) => {
-    const items = Array.from(box.querySelectorAll<HTMLElement>('[data-end]'));
-    const live = items.filter((el) => new Date(el.dataset.end!).getTime() > now);
+    const items = Array.from(box.querySelectorAll<HTMLElement>('[data-until]'));
+    const live = items.filter((el) => new Date(el.dataset.until!).getTime() > now);
     const show = box.dataset.all ? live : live.slice(0, 1);
     items.forEach((el) => (el.hidden = !show.includes(el)));
     box.querySelector<HTMLElement>('[data-ev-none]')!.hidden = live.length > 0;
@@ -83,6 +84,12 @@ const list = upcomingEvents();
   }
   .ev-when {
     margin: 0 0 0.5em;
+    font-weight: 500;
+  }
+  .ev-deadline {
+    margin: -0.3em 0 0.5em;
+    color: var(--accent);
+    font-size: 0.92rem;
     font-weight: 500;
   }
   .ev-sum {
