@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>線下活動點子</title>
+<meta name="description" content="課程版、劇本殺版之外，關係練習室還可以辦的 2.5 小時線下活動：市場觀察、十個點子、推薦與要決定的事。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fbf7f2;
+  --surface: #ffffff;
+  --surface-2: #f6eee8;
+  --ink: #2b2024;
+  --ink-soft: #6b5a5f;
+  --line: #eadfd8;
+  --accent: #8e3b46;
+  --accent-soft: #f4e2e1;
+  --gold: #b9832f;
+  --gold-soft: #f7ecd9;
+  --blue: #5b6fa8;
+  --blue-soft: #e6eaf6;
+  --green: #3f7d64;
+  --green-soft: #e1f0e9;
+  --shadow: 0 1px 2px rgba(43, 32, 36, 0.06), 0 6px 24px rgba(43, 32, 36, 0.06);
+  --radius: 14px;
+  --serif: "Noto Serif TC", "Songti TC", serif;
+  --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1416;
+    --surface: #251c1f;
+    --surface-2: #2e2327;
+    --ink: #f3eae4;
+    --ink-soft: #bfaeb2;
+    --line: #3d3034;
+    --accent: #e48a95;
+    --accent-soft: #3d2629;
+    --gold: #e2b46a;
+    --gold-soft: #3a2f20;
+    --blue: #9cb0ea;
+    --blue-soft: #262c40;
+    --green: #7cc4a5;
+    --green-soft: #1f3329;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 24px rgba(0, 0, 0, 0.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1b1416;
+  --surface: #251c1f;
+  --surface-2: #2e2327;
+  --ink: #f3eae4;
+  --ink-soft: #bfaeb2;
+  --line: #3d3034;
+  --accent: #e48a95;
+  --accent-soft: #3d2629;
+  --gold: #e2b46a;
+  --gold-soft: #3a2f20;
+  --blue: #9cb0ea;
+  --blue-soft: #262c40;
+  --green: #7cc4a5;
+  --green-soft: #1f3329;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 24px rgba(0, 0, 0, 0.25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16.5px;
+  line-height: 1.8;
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+
+header.top {
+  padding: 56px 0 32px;
+  border-bottom: 1px solid var(--line);
+}
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: .12em;
+  color: var(--accent);
+  font-weight: 700;
+}
+h1, h2, h3 { font-family: var(--serif); line-height: 1.35; letter-spacing: .01em; }
+h1 { font-size: clamp(30px, 6vw, 42px); margin: 10px 0 14px; }
+.lede { color: var(--ink-soft); font-size: 17.5px; margin: 0; max-width: 40em; }
+.meta { margin-top: 18px; font-size: 14px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+nav.toc {
+  margin: 28px 0 0;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+nav.toc ol { margin: 0; padding-left: 1.4em; columns: 2; column-gap: 28px; }
+nav.toc li { break-inside: avoid; }
+@media (max-width: 560px) { nav.toc ol { columns: 1; } }
+
+section { padding: 44px 0 8px; }
+h2 { font-size: clamp(23px, 4.4vw, 28px); margin: 0 0 6px; }
+h2 .num { color: var(--accent); margin-right: .35em; }
+.section-lede { color: var(--ink-soft); margin: 0 0 22px; }
+h3 { font-size: 20px; margin: 0; }
+
+ul.findings { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+ul.findings li {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+ul.findings strong { display: block; margin-bottom: 2px; }
+.note { font-size: 14px; color: var(--ink-soft); }
+
+.table-wrap { overflow-x: auto; margin: 18px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--surface-2); font-weight: 700; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.t { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+td.m { white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
+
+.group-title {
+  margin: 30px 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.group-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+.idea {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px 22px 18px;
+  margin-bottom: 16px;
+}
+.idea-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.idea-no {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  width: 30px; height: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: none;
+}
+.pick {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--gold-soft);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.idea p { margin: 10px 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; padding: 0; list-style: none; }
+.tags li { font-size: 13px; padding: 2px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); }
+.tags li.who { background: var(--blue-soft); color: var(--blue); }
+.tags li.art { background: var(--green-soft); color: var(--green); }
+dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 12px 0 0; font-size: 15px; }
+dl.facts dt { color: var(--ink-soft); }
+dl.facts dd { margin: 0; }
+@media (max-width: 560px) {
+  dl.facts { grid-template-columns: 1fr; }
+  dl.facts dt { margin-top: 6px; }
+}
+details.flow { margin-top: 12px; border-top: 1px dashed var(--line); padding-top: 10px; }
+details.flow summary { cursor: pointer; font-weight: 500; color: var(--accent); font-size: 15px; }
+details.flow ol { margin: 8px 0 0; padding-left: 1.3em; font-size: 15px; }
+details.flow ol li span { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+.picks { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); margin-bottom: 8px; }
+@media (max-width: 760px) { .picks { grid-template-columns: 1fr; } }
+.pick-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.pick-card .rank { font-family: var(--serif); font-size: 28px; color: var(--gold); line-height: 1; }
+.pick-card h3 { font-size: 18px; margin: 8px 0 6px; }
+.pick-card p { margin: 0; font-size: 15px; color: var(--ink-soft); }
+
+ol.decisions { padding: 0; margin: 0; list-style: none; counter-reset: d; display: grid; gap: 14px; }
+ol.decisions li {
+  counter-increment: d;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px 16px 58px;
+  position: relative;
+}
+ol.decisions li::before {
+  content: counter(d);
+  position: absolute; left: 18px; top: 16px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: var(--bg);
+  font-weight: 700; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+ol.decisions strong { display: block; }
+ol.decisions p { margin: 4px 0 0; color: var(--ink-soft); font-size: 15px; }
+
+.funnel { display: grid; gap: 8px; margin: 6px 0 0; }
+.step {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 14px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+.step b { font-family: var(--serif); color: var(--accent); }
+.step span { font-size: 15px; }
+.step:nth-child(1) { margin-right: 0; }
+.step:nth-child(2) { margin-left: 4%; }
+.step:nth-child(3) { margin-left: 8%; }
+@media (max-width: 560px) {
+  .step { grid-template-columns: 1fr; gap: 2px; }
+  .step:nth-child(n) { margin-left: 0; }
+}
+
+ol.sources { font-size: 14px; padding-left: 1.4em; color: var(--ink-soft); }
+ol.sources li { margin-bottom: 4px; word-break: break-word; }
+
+footer { padding: 36px 0 56px; color: var(--ink-soft); font-size: 14px; border-top: 1px solid var(--line); margin-top: 40px; }
+
+@media print {
+  body { font-size: 12pt; }
+  nav.toc { display: none; }
+  .idea, .pick-card, ol.decisions li, ul.findings li { box-shadow: none; break-inside: avoid; }
+  details.flow { display: block; }
+  details.flow > *:not(summary) { display: block; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">關係練習室 · 線下活動企劃</div>
+    <h1>課程版、劇本殺版之外，還可以辦什麼？</h1>
+    <p class="lede">一場 2.5 小時的線下活動可以有哪些樣子：先看市場，再列十個點子，然後是已經決定的方向、照方向挑出的三個，和還沒決定的事。</p>
+    <div class="meta">
+      <span>整理日期：2026 年 11 月 25 日</span>
+      <span>每場長度：2.5 小時</span>
+      <span>先服務單身，一場 6–12 人</span>
+      <span>流程範例都從 14:00 入場往下排</span>
+    </div>
+    <nav class="toc" aria-label="目錄">
+      <ol>
+        <li><a href="#market">市場觀察</a></li>
+        <li><a href="#ideas">十個點子</a></li>
+        <li><a href="#decided">已經決定的方向</a></li>
+        <li><a href="#picks">最推的三個</a></li>
+        <li><a href="#theatre">「重來一次」劇場的流程</a></li>
+        <li><a href="#path">接下來三個月</a></li>
+        <li><a href="#decide">還沒決定的事</a></li>
+        <li><a href="#sources">資料來源</a></li>
+      </ol>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="market">
+    <h2><span class="num">一</span>市場觀察</h2>
+    <p class="section-lede">看國內外最近的線下活動，有五件事值得注意。</p>
+    <ul class="findings">
+      <li>
+        <strong>國外約會正往線下走，而且是「有活動當藉口」的那種。</strong>
+        Eventbrite 統計標明「想認識人」的活動，猜謎之夜一年多了 403%，麻將聚會多了 235%，賞鳥多了 131%；跑團、晚餐俱樂部、帶朋友來介紹（Pitch a friend）也都在流行。
+        <div class="note">這是平台自己定義、自己算的數字，看得出方向，看不出市場大小。</div>
+      </li>
+      <li>
+        <strong>台灣的聯誼很擠，價格大概在一千多到兩千多元。</strong>
+        桌遊、料理、下午茶都有人做，3 男 3 女的「六人約會」也已經有業者在辦。詳細價格見下表。
+      </li>
+      <li>
+        <strong>很多場都靠「女生免費／女生便宜」招生，可見男女人數很難湊齊。</strong>
+        劇本殺版要 3 男 3 女，也會遇到一樣的招生問題。<b>不分男女的形式會好招很多。</b>
+      </li>
+      <li>
+        <strong>戀愛主題的沉浸式體驗有人買單，但現在剛好空著。</strong>
+        驚喜製造的《愛情城市》在 2025 年 12 月 27 日結束；Halfway Studio 和五家酒吧合作的「微醺老派約會」是 2024 年辦的，沒看到 2026 年再辦。
+      </li>
+      <li>
+        <strong>給情侶的活動，台灣幾乎只有政府和學校在辦。</strong>
+        查到的伴侶工作坊多是家庭教育中心、學校的計畫，商業場次很少。國外 Gottman 系列的伴侶工作坊有 2、3、4 小時的版本，新加坡一場 3 小時、每對 80 元。
+      </li>
+    </ul>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>類型</th><th>價格（每人）</th><th>例子</th></tr></thead>
+        <tbody>
+          <tr><td>區公所聯誼</td><td>免費，押 1,000 元保證金</td><td>信義區公所午茶桌遊（當天退押金）</td></tr>
+          <tr><td>桌遊聯誼</td><td>1,400–1,800 元</td><td>戀愛大學一般票 1,800 元、三場 4,200 元</td></tr>
+          <tr><td>桌遊聯誼（分性別）</td><td>女 300 元／男 1,050 元</td><td>台中場；高雄有女生首次參加免費</td></tr>
+          <tr><td>料理聯誼</td><td>2,000–2,500 元</td><td>共煮生活實驗室，含食材、廚房和主持</td></tr>
+          <tr><td>陌生人晚餐</td><td>早期一場 330 元，不含餐費</td><td>Timeleft 台北，6 個陌生人一起吃晚餐</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="findings">
+      <li style="border-left-color: var(--gold);">
+        <strong>你的差異化是「練習」。</strong>
+        別人的聯誼把遊戲當藉口，目的是配對；你的活動讓人帶走一個能用的能力。所以下面的點子都照這個方向篩過，也盡量用得到網站已經做好的東西（手機劇本、練習元件、列印包、投影片和計時器）。
+      </li>
+    </ul>
+  </section>
+
+  <section id="ideas">
+    <h2><span class="num">二</span>十個點子</h2>
+    <p class="section-lede">都可以做成 2.5 小時。每個點子下面可以展開，看流程範例。標著<span class="pick" style="margin:0 4px">最推</span>的三個，是照<a href="#decided">已經決定的方向</a>（單身、6–12 人）挑出來的。</p>
+
+    <div class="group-title">不用湊男女比例，單身和情侶都能來</div>
+
+    <article class="idea" id="idea-1">
+      <div class="idea-head"><span class="idea-no">1</span><h3>「重來一次」約會劇場</h3><span class="pick">最推</span></div>
+      <p>用論壇劇場的做法：大家演一段卡住的情境，例如第一次約會冷場、已讀不回之後再見面、拒絕第二次約會、提分手。觀眾隨時可以喊「停」，上台換掉主角，換一種說法重演。</p>
+      <p>「演一次，再重來一次」的機制，你在劇本殺裡已經做出來了，這裡只是換成真實的情境。</p>
+      <ul class="tags"><li class="who">單身、情侶都可以</li><li>8–12 人</li><li class="art">吵架、選擇</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd>情境卡放進列印包、台詞放在手機上、用 DM 控制台叫場和倒數</dd>
+        <dt>要注意</dt><dd>很吃主持功力；要先說好「演的是情境，不是在評論誰」，也一樣可以隨時 pass</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary><p class="note" style="margin:8px 0 0">完整流程見下面的「<a href="#theatre">「重來一次」劇場的流程</a>」。</p></details>
+    </article>
+
+    <article class="idea" id="idea-2">
+      <div class="idea-head"><span class="idea-no">2</span><h3>愛情說書夜</h3></div>
+      <p>每場 5–6 個人上台，各說 7 分鐘的真實故事，主題像「我最後悔沒說的那句話」。你在段落之間補一點研究的觀點。</p>
+      <p>一場可以容納 30–50 人、成本低，錄下來就是 Podcast 和 IG 的素材，很適合當入門款。</p>
+      <ul class="tags"><li class="who">單身、情侶都可以</li><li>30–50 人</li><li class="art">聆聽</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd>投影片和計時器（每則 7 分鐘倒數）</dd>
+        <dt>要注意</dt><dd>說故事的人要事先找、事先陪練；錄影或錄音要先取得同意</dd>
+        <dt>跟方向的關係</dt><dd>人數比 6–12 人多，先放著；之後想擴大、需要入門場時再考慮</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary>
+        <ol>
+          <li><span>20 分</span>　入場、茶點</li>
+          <li><span>10 分</span>　開場：今天的主題和規則</li>
+          <li><span>30 分</span>　上半場：三則故事，主持人串場</li>
+          <li><span>25 分</span>　中場：桌邊聊「你的版本」</li>
+          <li><span>30 分</span>　下半場：三則故事</li>
+          <li><span>20 分</span>　研究觀點，每個人留一句話</li>
+          <li><span>15 分</span>　收尾，公布下次的主題</li>
+        </ol>
+      </details>
+    </article>
+
+    <article class="idea" id="idea-3">
+      <div class="idea-head"><span class="idea-no">3</span><h3>戀愛迷思法庭</h3></div>
+      <p>把「婚姻是愛情的墳墓」「每兩對就有一對離婚」這類說法送上法庭，參加的人分成檢方、辯方和陪審團。證物用課程介紹頁「關於愛情的四個擔心」的數據：滿意度在第 10 年最低、之後回升；2025 年粗離婚率 2.23‰。</p>
+      <ul class="tags"><li class="who">單身、情侶都可以</li><li>16–40 人</li><li class="art">選擇</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd><code>src/data/worries.js</code> 裡查核過的數字和出處</dd>
+        <dt>要注意</dt><dd>要控制辯論的火氣，別讓它變成男女對立</dd>
+        <dt>跟方向的關係</dt><dd>分成三方至少要 16 人，先放著；也可以縮小成 12 人、只審一案</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary>
+        <ol>
+          <li><span>15 分</span>　入場，分成檢方、辯方、陪審團</li>
+          <li><span>10 分</span>　開庭說明</li>
+          <li><span>35 分</span>　第一案：雙方準備、辯論，最後公布證物</li>
+          <li><span>25 分</span>　下午茶</li>
+          <li><span>35 分</span>　第二案</li>
+          <li><span>20 分</span>　陪審團判決，每個人寫自己的判決書</li>
+          <li><span>10 分</span>　收尾</li>
+        </ol>
+      </details>
+    </article>
+
+    <article class="idea" id="idea-4">
+      <div class="idea-head"><span class="idea-no">4</span><h3>失戀博物館／沒寄出的信 寫作工作坊</h3></div>
+      <p>參考克羅埃西亞的「失戀博物館」：每個人帶一件和過去感情有關的物品，寫一張展品說明，再寫一封不寄出的信，給前任、給未來的伴侶，或給自己。</p>
+      <p>適合剛分手的人，名字也跟劇本殺《沒寄出的信》接得上。</p>
+      <ul class="tags"><li class="who">單身為主</li><li>6–12 人</li><li class="art">冒險</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd>網站的書寫練習元件、劇本殺的出戲流程</dd>
+        <dt>要注意</dt><dd>情緒比較重，要先講清楚「這不是心理治療」，也要準備好轉介資源</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary>
+        <ol>
+          <li><span>20 分</span>　入場、布展：把物品擺上桌</li>
+          <li><span>10 分</span>　開場、安全說明：這不是治療，隨時可以 pass</li>
+          <li><span>30 分</span>　逛展：幫自己的物品寫展品說明，互相看</li>
+          <li><span>30 分</span>　下午茶，小組分享物品的故事</li>
+          <li><span>25 分</span>　寫沒寄出的信</li>
+          <li><span>20 分</span>　儀式：信放進信封，帶走或交給你保管；每人說一句話</li>
+          <li><span>15 分</span>　出戲、提供資源</li>
+        </ol>
+      </details>
+    </article>
+
+    <div class="group-title">單身向</div>
+
+    <article class="idea" id="idea-5">
+      <div class="idea-head"><span class="idea-no">5</span><h3>好問題之夜</h3><span class="pick">最推</span></div>
+      <p>用 Arthur Aron 的「36 個問題」研究：大家輪桌換夥伴，問題一輪比一輪深，最後的 4 分鐘對看可以選擇不做。準備起來最輕鬆。</p>
+      <p>一對一聊得很深，結束時接交換卡最自然。</p>
+      <ul class="tags"><li class="who">單身</li><li>8–12 人</li><li class="art">聆聽</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd>劇本殺的問題卡、第 1 堂「好問題」的練習</dd>
+        <dt>要注意</dt><dd>問題變深之後容易太親密，要提醒「pass 是正常的」</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary>
+        <ol>
+          <li><span>15 分</span>　入場、破冰</li>
+          <li><span>10 分</span>　說明研究和規則</li>
+          <li><span>40 分</span>　第一組問題：輪三位夥伴，每位 12 分鐘</li>
+          <li><span>25 分</span>　下午茶</li>
+          <li><span>40 分</span>　第二、三組問題：固定一位夥伴</li>
+          <li><span>10 分</span>　4 分鐘對看（可以不做），接著書寫</li>
+          <li><span>10 分</span>　分享、填交換卡、收尾</li>
+        </ol>
+      </details>
+    </article>
+
+    <article class="idea" id="idea-6">
+      <div class="idea-head"><span class="idea-no">6</span><h3>幫朋友上台（Pitch a friend）</h3></div>
+      <p>每位單身的人帶一位朋友來，朋友上台用 5 分鐘介紹他，國外最近很流行。效果很好、很容易被分享。</p>
+      <ul class="tags"><li class="who">單身＋朋友</li><li>每場 8–10 組</li><li class="art">冒險（欣賞的眼光）</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd>第 5 堂的欣賞卡</dd>
+        <dt>要注意</dt><dd>本質上就是聯誼，跟「不配對」的定位會衝突；也要規定只說欣賞、不揭短</dd>
+        <dt>跟方向的關係</dt><dd>一組兩個人，8–10 組就是 16–20 人，超過 6–12 人；先放著</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary>
+        <ol>
+          <li><span>20 分</span>　入場，每組一位單身的人和一位朋友</li>
+          <li><span>10 分</span>　開場規則：只說欣賞、不揭短</li>
+          <li><span>35 分</span>　上半場：五組上台，每組 5 分鐘加問答</li>
+          <li><span>30 分</span>　下午茶、自由交流</li>
+          <li><span>35 分</span>　下半場：五組上台</li>
+          <li><span>15 分</span>　互相留字卡；雙方都同意才交換聯絡方式</li>
+          <li><span>5 分</span>　收尾</li>
+        </ol>
+      </details>
+    </article>
+
+    <article class="idea" id="idea-7">
+      <div class="idea-head"><span class="idea-no">7</span><h3>交友檔案診所</h3></div>
+      <p>當場改交友軟體的自介、挑照片、練開場白，大家互相回饋。很實用、願意付費的人多。可以接上第 3 堂的「我真正在找什麼」，包裝成「誠實的自介」，就不會淪為包裝自己的技巧課。</p>
+      <ul class="tags"><li class="who">單身</li><li>6–12 人</li><li class="art">選擇</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd>第 3 堂「我的清單」、網站的改寫練習元件</dd>
+        <dt>要注意</dt><dd>互評照片時要很小心，只評照片，不評長相</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary>
+        <ol>
+          <li><span>10 分</span>　入場</li>
+          <li><span>25 分</span>　「我真正在找什麼」清單</li>
+          <li><span>30 分</span>　改寫自介：從舊版改成誠實版</li>
+          <li><span>30 分</span>　下午茶、照片互評</li>
+          <li><span>30 分</span>　練開場白和前三則訊息</li>
+          <li><span>20 分</span>　小組回饋，每個人帶走一份新的檔案</li>
+          <li><span>5 分</span>　收尾</li>
+        </ol>
+      </details>
+    </article>
+
+    <div class="group-title">情侶向（市場空缺）</div>
+
+    <article class="idea" id="idea-8">
+      <div class="idea-head"><span class="idea-no">8</span><h3>兩個人的練習夜（情侶場）</h3></div>
+      <p>用「你有多了解另一半」的問答遊戲開場（Gottman 的 Love Maps），接著練桌上法、約好暫停暗號，最後寫欣賞卡。按「每對」收費，客單價比較高。</p>
+      <ul class="tags"><li class="who">情侶、夫妻</li><li>5–10 對</li><li class="art">吵架、靠近</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd>網站的 Reflect、Spectrum、Rank 練習元件；第 2、4 堂的內容和投影片</dd>
+        <dt>要注意</dt><dd>不適合正在嚴重衝突的情侶，報名頁要寫清楚，也準備好轉介伴侶諮商的資源</dd>
+        <dt>跟方向的關係</dt><dd>先服務單身，所以情侶場往後放；市場空缺還在，單身場穩定之後再開</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary>
+        <ol>
+          <li><span>15 分</span>　入場、情侶破冰</li>
+          <li><span>25 分</span>　你有多了解我（Love Maps 問答遊戲）</li>
+          <li><span>15 分</span>　小講：吵架的警訊，和怎麼修復</li>
+          <li><span>30 分</span>　桌上法練習：選一件小事</li>
+          <li><span>25 分</span>　下午茶，約好兩人的暫停暗號</li>
+          <li><span>20 分</span>　每天的小小邀請、愛的語言</li>
+          <li><span>20 分</span>　寫欣賞卡，帶回家的約會實驗</li>
+        </ol>
+      </details>
+    </article>
+
+    <article class="idea" id="idea-9">
+      <div class="idea-head"><span class="idea-no">9</span><h3>三對情侶的劇本殺</h3></div>
+      <p>把現有的劇本殺系統改給 3 對情侶玩，大家演「另一對伴侶」。玩完再出戲，聊自己的關係。</p>
+      <ul class="tags"><li class="who">情侶</li><li>3 對（6 人）</li><li class="art">五堂都有</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd>整套劇本殺系統：手機劇本、幕密碼、DM 控制台、列印包</dd>
+        <dt>要注意</dt><dd>技術上幾乎不用改，但要重寫一個劇本；情侶一起來，也就沒有男女比例的問題</dd>
+        <dt>跟方向的關係</dt><dd>跟情侶場一樣，往後放</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary><p class="note" style="margin:8px 0 0">沿用《沒寄出的信》的十段流程：開場、讀第一幕、破冰、兩輪小劇場、還原、結局、出戲。</p></details>
+    </article>
+
+    <div class="group-title">季節限定</div>
+
+    <article class="idea" id="idea-10">
+      <div class="idea-head"><span class="idea-no">10</span><h3>過年催婚生存練習</h3><span class="pick">最推</span></div>
+      <p>在 2027 年 1 月辦（春節是 2 月 6 日）。大家用角色扮演練習怎麼回親戚的「怎麼還不結婚」「有沒有對象」。有時效性，又好傳播。</p>
+      <p>最常被催婚的就是單身的人，剛好對上「先服務單身」。</p>
+      <ul class="tags"><li class="who">單身為主</li><li>6–12 人</li><li class="art">選擇（錢，和家人的期待）</li></ul>
+      <dl class="facts">
+        <dt>現成可以用的</dt><dd>第 3 堂的內容、「重來一次」劇場的機制</dd>
+        <dt>要注意</dt><dd>有人的家庭壓力很真實，扮演長輩時要點到為止</dd>
+      </dl>
+      <details class="flow"><summary>流程範例</summary>
+        <ol>
+          <li><span>15 分</span>　入場、暖身：說出你最怕被問的一句話</li>
+          <li><span>15 分</span>　小講：長輩為什麼會問，我想守住什麼</li>
+          <li><span>35 分</span>　圓桌模擬第一輪：輪流扮演親戚、自己和旁觀者</li>
+          <li><span>25 分</span>　下午茶</li>
+          <li><span>35 分</span>　第二輪：換一種回法，重來一次</li>
+          <li><span>15 分</span>　寫一張自己的回話小抄</li>
+          <li><span>10 分</span>　填交換卡、收尾</li>
+        </ol>
+      </details>
+    </article>
+  </section>
+
+  <section id="decided">
+    <h2><span class="num">三</span>已經決定的方向</h2>
+    <p class="section-lede">2026 年 11 月 25 日討論後決定的三件事。</p>
+    <ol class="decisions">
+      <li>
+        <strong>不配對，但結束時發一張交換卡</strong>
+        <p>活動本身不配對、不排約會時間。結束時每個人拿到一張交換卡，雙方都勾了「願意交換聯絡方式」，才幫忙交換。</p>
+      </li>
+      <li>
+        <strong>先服務單身</strong>
+        <p>情侶場（點子 8、9）往後放，等單身場穩定之後再開。</p>
+      </li>
+      <li>
+        <strong>一場 6–12 人</strong>
+        <p>小而深的場：一個主持人顧得到每個人，一張長桌或兩張桌就坐得下，咖啡館包場或工作室都可以。大場的點子（說書夜、迷思法庭、幫朋友上台）先放著。</p>
+      </li>
+    </ol>
+
+    <h3 style="margin:30px 0 10px">交換卡怎麼做</h3>
+    <div class="table-wrap">
+      <table>
+        <tbody>
+          <tr><th>卡上有什麼</th><td>今天所有人的名牌名字或號碼，每個名字旁邊一個格子：「想交換聯絡方式」。只有一個格子，意思包括想當朋友，壓力比較小。</td></tr>
+          <tr><th>怎麼填</th><td>各自私下勾，不勾也可以，摺起來交給主持人。不分性別，誰都可以勾誰。</td></tr>
+          <tr><th>怎麼交換</th><td>只有<b>互相勾選</b>的兩個人，主持人才在活動後 24 小時內，用 LINE 或 Email 把雙方的聯絡方式傳給彼此。單方面勾的，對方永遠不會知道。</td></tr>
+          <tr><th>為什麼用紙卡</th><td>網站是放在 GitHub Pages 的靜態網站，沒有後端，填的東西只存在自己的手機裡；要做成線上版，得另外加資料庫。6–12 人用紙卡最簡單。</td></tr>
+          <tr><th>報名頁可以這樣寫</th><td>「這不是聯誼，我們不配對。結束時有一張交換卡，你們都勾了，我們才會幫你們交換聯絡方式。」</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="findings">
+      <li style="border-left-color: var(--gold);">
+        <strong>有了交換卡，報名的人會開始在意男女比例。</strong>
+        建議報名頁寫「男女人數盡量平衡，但不保證」，不用性別差別定價，也不要卡死 3 男 3 女，才不會跟著聯誼陷入湊人數的問題。
+      </li>
+      <li style="border-left-color: var(--gold);">
+        <strong>劇本殺介紹頁現在寫「這不是聯誼」。</strong>
+        如果劇本殺也要發交換卡，介紹頁的文案要一起改（還沒改）。
+      </li>
+    </ul>
+  </section>
+
+  <section id="picks">
+    <h2><span class="num">四</span>最推的三個</h2>
+    <p class="section-lede">照上面的方向重新挑過：給單身、6–12 人、符合「練習、不催婚」，而且用得到現成的系統。</p>
+    <div class="picks">
+      <div class="pick-card">
+        <div class="rank">1</div>
+        <h3>「重來一次」約會劇場</h3>
+        <p>最有辨識度，又直接用到你已經做好的機制和系統，而且不用湊男女。8–12 人剛好。</p>
+      </div>
+      <div class="pick-card">
+        <div class="rank">2</div>
+        <h3>過年催婚生存練習</h3>
+        <p>最常被催婚的就是單身的人，時間點又剛好，適合拿來試水溫、累積名單。</p>
+      </div>
+      <div class="pick-card">
+        <div class="rank">3</div>
+        <h3>好問題之夜</h3>
+        <p>準備最輕鬆，一對一聊得深，結束時接交換卡最自然。情人節前後辦正好。</p>
+      </div>
+    </div>
+    <p class="note">備選：失戀博物館（點子 4）適合剛分手的人，但情緒比較重；交友檔案診所（點子 7）最實用，但要小心變成包裝自己的技巧課。</p>
+  </section>
+
+  <section id="theatre">
+    <h2><span class="num">五</span>「重來一次」劇場的流程</h2>
+    <p class="section-lede">14:00 入場，16:30 結束。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>時間</th><th style="text-align:right">分鐘</th><th>內容</th></tr></thead>
+        <tbody>
+          <tr><td class="t">14:00</td><td class="m">15</td><td>入場、名牌、即興暖身：三秒定格、「對，而且……」接龍</td></tr>
+          <tr><td class="t">14:15</td><td class="m">10</td><td>主持人示範：演一場第一次約會冷場，再喊停重來</td></tr>
+          <tr><td class="t">14:25</td><td class="m">40</td><td>第一輪：分組抽情境卡，演一次，觀眾喊停上台換人重演</td></tr>
+          <tr><td class="t">15:05</td><td class="m">25</td><td>下午茶，搭配問題卡</td></tr>
+          <tr><td class="t">15:30</td><td class="m">40</td><td>第二輪：大家匿名寫下自己真實卡住的對話，挑 2–3 則來演</td></tr>
+          <tr><td class="t">16:10</td><td class="m">15</td><td>寫下「下次我想這樣說」，願意的人分享</td></tr>
+          <tr><td class="t">16:25</td><td class="m">5</td><td>填交換卡、收尾</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">情境卡的候選：第一次約會冷場、已讀不回之後再見面、拒絕第二次約會、被問「你為什麼還單身」、要求對方不要再遲到、提分手、說出「我喜歡你」。</p>
+  </section>
+
+  <section id="path">
+    <h2><span class="num">六</span>接下來三個月</h2>
+    <p class="section-lede">三個推薦剛好可以排進接下來的檔期。這是建議的排法，日期還沒定。</p>
+    <div class="funnel">
+      <div class="step"><b>12 月</b><span>試辦一場「重來一次」劇場：找 8–10 位朋友或朋友的朋友，便宜或免費，換回饋，順便試用交換卡</span></div>
+      <div class="step"><b>2027 年 1 月</b><span>過年催婚生存練習 1–2 場，排在春節（2 月 6 日）前的週末</span></div>
+      <div class="step"><b>2 月</b><span>春節後、情人節前後辦好問題之夜</span></div>
+    </div>
+    <p class="note">三場辦完，看哪一種報名最快、回饋最好，再固定成每個月一場。長遠來看，可以再加大場的入門活動（說書夜、迷思法庭）把人帶進來，最後接五堂課；情侶場等單身場穩定之後再開。</p>
+  </section>
+
+  <section id="decide">
+    <h2><span class="num">七</span>還沒決定的事</h2>
+    <ol class="decisions">
+      <li>
+        <strong>你自己最享受哪種角色？</strong>
+        <p>現在還沒有想法，那就先辦一場再看。建議試辦時你先當主持人（論壇劇場裡叫「丑客」）：負責叫場、喊停、問觀眾「還可以怎麼說」，自己不用演。示範那一場，找一位有戲劇或即興背景的朋友來演。辦完記下最開心和最累的時刻，就知道答案了。</p>
+      </li>
+      <li>
+        <strong>票價</strong>
+        <p>市場上含餐點的場次在 1,400–2,500 元之間，可以從這個區間開始試。試辦場可以更便宜，換回饋和照片。</p>
+      </li>
+      <li>
+        <strong>劇本殺要不要也發交換卡</strong>
+        <p>要的話，劇本殺介紹頁「這不是聯誼」的文案要一起改。</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="sources">
+    <h2><span class="num">八</span>資料來源</h2>
+    <p class="section-lede">查詢日期：2026 年 11 月 25 日。活動價格和場次以各主辦方的報名頁為準，部分場次已經結束或售完。</p>
+    <ol class="sources">
+      <li><a href="https://www.waytoosocial.com/dating-moving-offline-singles-events-up/">Way Too Social：Singles events up 403%（Eventbrite 數據）</a></li>
+      <li><a href="https://www.globaldatinginsights.com/featured/hobby-events-see-massive-spike-as-a-dating-meetup-option/">Global Dating Insights：Hobby events as a dating meetup option</a></li>
+      <li><a href="https://www.single-to-couple.com/dating-events-find-love">Single to Couple：Do dating events work?</a></li>
+      <li><a href="https://www.accupass.com/event/2603230559482062138377">ACCUPASS：信義區公所午茶桌遊單身聯誼</a></li>
+      <li><a href="https://www.accupass.com/event/2608020639171555942151">ACCUPASS：台中桌遊聯誼</a></li>
+      <li><a href="https://www.accupass.com/event/2603280213439869777120">ACCUPASS：高雄桌遊（女生首次參加免費）</a></li>
+      <li><a href="https://weekielife.com/blog/taipei-single-board-game-club-2026">Weekie 週週趣：2026 台北單身桌遊俱樂部</a></li>
+      <li><a href="https://www.justsayhi.tw/Sixdate">Just Say Hi：六人約會聯誼</a></li>
+      <li><a href="https://cocookingstudio.com/product-category/dating">共煮生活實驗室：料理聯誼</a></li>
+      <li><a href="https://www.taipeitimes.com/News/feat/archives/2025/09/07/2003843356">Taipei Times：Safety in numbers（Timeleft 陌生人晚餐）</a></li>
+      <li><a href="https://topics.amcham.com.tw/2025/01/making-friends-through-food/">Taiwan Business TOPICS：Making Friends Through Food</a></li>
+      <li><a href="https://nexspark.org/journal/timeleft-review">Timeleft Review（2026）</a></li>
+      <li><a href="https://www.tatlerasia.com/lifestyle/entertainment/surpriselab-love-and-the-city-belle-s-in-taipei-zh-hant-zh-hant">Tatler：驚喜製造《愛情城市》</a></li>
+      <li><a href="https://n.yam.com/Article/20241127610806">蕃薯藤：Halfway Studio「微醺老派約會」</a></li>
+      <li><a href="https://psychologytoday.com/us/therapists/kristine-san-mateo-virgen-palmdale-ca/781280?gid=220538">Psychology Today：Seven Principles Couples Workshop 各時長版本</a></li>
+      <li><a href="https://fathers.com.sg/?p=97">Fathers.com.sg：3 小時伴侶工作坊</a></li>
+      <li><a href="https://www.meetup.com/authentic-relating-games-ottawa">Meetup：Authentic Relating Games</a></li>
+      <li><a href="https://ggie.berkeley.edu/wp-content/uploads/2021/08/GGIE_36_Questions.pdf">Berkeley GGIE：36 Questions</a></li>
+      <li><a href="https://business.hollywoodchamber.net/events/details/mobr-x-ucla-arts-healing-event-1465">MoBR x UCLA Arts &amp; Healing（失戀博物館寫作導覽）</a></li>
+    </ol>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">關係練習室 · 線下活動企劃草稿 · 2026 年 11 月 25 日</div>
+</footer>
+
+</body>
+</html>
